@@ -12,6 +12,7 @@ const LIMITS = {
   maxAudioUploadBytes: 12 * 1024 * 1024,
   radioLockMs: 10 * 60 * 1000,
   maxChatLength: 240,
+  maxChatHistory: 120,
   downvotesBeforeClear: 3,
   banDurationMs: 24 * 60 * 60 * 1000
 };

@@ -65,6 +65,7 @@ function attachGameSocket(server) {
       room: roomName,
       strokes: room.strokes,
       items: room.items,
+      messages: room.messages,
       ranking: buildRanking(room),
       players: Array.from(room.players.values())
     });
@@ -213,17 +214,19 @@ function handleChat(ws, room, message) {
   const player = room.players.get(ws.id);
   const text = safeText(message.text, LIMITS.maxChatLength);
   if (!player || !text) return;
-  broadcast(room, {
-    type: "chat",
-    message: {
-      id: crypto.randomUUID(),
-      author: ws.id,
-      name: player.name,
-      color: player.color,
-      text,
-      at: Date.now()
-    }
-  }, undefined);
+  const chatMessage = {
+    id: crypto.randomUUID(),
+    author: ws.id,
+    name: player.name,
+    color: player.color,
+    text,
+    at: Date.now()
+  };
+  room.messages.push(chatMessage);
+  if (room.messages.length > LIMITS.maxChatHistory) {
+    room.messages.splice(0, room.messages.length - LIMITS.maxChatHistory);
+  }
+  broadcast(room, { type: "chat", message: chatMessage }, undefined);
 }
 
 module.exports = {

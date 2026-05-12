@@ -1,6 +1,6 @@
 import { player, replaceItems, replaceStrokes, setSocketId, state } from "./state.js";
 import { saveLocalStrokes } from "./storage.js";
-import { addSystemMessage } from "./ui/chat.js";
+import { addSystemMessage, replaceChatMessages } from "./ui/chat.js";
 import { renderRanking } from "./ui/ranking.js";
 
 export function handleWelcome(message, send) {
@@ -8,6 +8,7 @@ export function handleWelcome(message, send) {
 
   const serverStrokes = Array.isArray(message.strokes) ? message.strokes : [];
   replaceItems(message.items);
+  replaceChatMessages(message.messages);
   renderRanking(message.ranking);
   if (serverStrokes.length > 0) {
     replaceStrokes(serverStrokes);

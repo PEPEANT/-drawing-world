@@ -3,6 +3,18 @@ import { ui } from "./dom.js";
 const BUBBLE_LIFETIME = 5200;
 
 export function addChatMessage(message) {
+  appendChatMessage(message, true);
+}
+
+export function replaceChatMessages(messages) {
+  ui.chatLog.replaceChildren();
+  for (const message of Array.isArray(messages) ? messages : []) {
+    appendChatMessage(message, false);
+  }
+  ui.chatLog.scrollTop = ui.chatLog.scrollHeight;
+}
+
+function appendChatMessage(message, shouldScroll) {
   const row = document.createElement("div");
   row.className = "chat-message";
 
@@ -17,7 +29,9 @@ export function addChatMessage(message) {
 
   row.append(name, text);
   ui.chatLog.append(row);
-  ui.chatLog.scrollTop = ui.chatLog.scrollHeight;
+  if (shouldScroll) {
+    ui.chatLog.scrollTop = ui.chatLog.scrollHeight;
+  }
 }
 
 export function addChatBubble(message) {
