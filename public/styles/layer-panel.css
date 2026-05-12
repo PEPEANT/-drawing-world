@@ -1,0 +1,140 @@
+.layer-panel {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: min(300px, calc(100vw - 28px));
+  border: 1px solid rgba(220, 226, 234, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.layer-panel.hidden {
+  display: none;
+}
+
+.spectator-mode .layer-panel {
+  display: none;
+}
+
+.layer-head,
+.layer-settings label,
+.layer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.layer-head {
+  justify-content: space-between;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 750;
+}
+
+.layer-head button {
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.layer-list {
+  display: grid;
+  gap: 8px;
+  max-height: 210px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.layer-item {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.layer-item.active {
+  border-color: #111827;
+  color: var(--ink);
+  background: #ffffff;
+}
+
+.layer-preview {
+  width: 54px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, #d7dde7 25%, transparent 25%),
+    linear-gradient(-45deg, #d7dde7 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d7dde7 75%),
+    linear-gradient(-45deg, transparent 75%, #d7dde7 75%);
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+  background-size: 10px 10px;
+}
+
+.layer-name-input {
+  min-width: 0;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 7px;
+  background: transparent;
+  color: inherit;
+}
+
+.layer-name-input:focus {
+  border-color: var(--line);
+  background: #ffffff;
+}
+
+.layer-item button {
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.layer-item button.muted {
+  color: var(--muted);
+  background: #eef2f7;
+}
+
+.layer-settings {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.layer-settings label {
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.layer-settings input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.layer-settings output {
+  width: 42px;
+  color: var(--ink);
+  text-align: right;
+}
+
+.layer-actions button {
+  flex: 1;
+}

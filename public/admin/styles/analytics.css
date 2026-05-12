@@ -1,0 +1,98 @@
+.analytics-panel {
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.analytics-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.analytics-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.analytics-head span,
+.analytics-summary span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.analytics-tabs {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.analytics-tabs button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 0;
+  padding: 0 12px;
+}
+
+.analytics-tabs button.active {
+  background: #111827;
+  color: #ffffff;
+}
+
+.analytics-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 12px 14px 0;
+}
+
+.analytics-summary div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.analytics-summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+}
+
+.analytics-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22px, 1fr));
+  align-items: end;
+  gap: 7px;
+  min-height: 190px;
+  padding: 14px;
+}
+
+.analytics-bar {
+  display: grid;
+  grid-template-rows: 24px 120px 18px;
+  gap: 5px;
+  min-width: 0;
+  text-align: center;
+}
+
+.bar-value,
+.bar-label {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-fill {
+  align-self: end;
+  height: var(--bar-height);
+  min-height: 4px;
+  border-radius: 5px 5px 0 0;
+  background: #2563eb;
+}

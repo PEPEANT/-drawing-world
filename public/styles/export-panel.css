@@ -1,0 +1,72 @@
+.export-panel {
+  position: absolute;
+  left: min(368px, calc(100vw - 294px));
+  top: 126px;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.export-toggle {
+  pointer-events: auto;
+}
+
+.export-panel {
+  width: min(280px, calc(100vw - 28px));
+  border: 1px solid rgba(220, 226, 234, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.export-panel.hidden,
+.spectator-mode .export-toggle,
+.spectator-mode .export-panel {
+  display: none;
+}
+
+.export-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.export-panel header button {
+  min-height: 28px;
+  padding: 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.export-format,
+.export-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+}
+
+.export-format {
+  padding-bottom: 0;
+}
+
+.export-format button.active {
+  background: #111827;
+  color: #ffffff;
+}
+
+.export-actions button {
+  min-height: 38px;
+  font-weight: 750;
+}
+
+.export-status {
+  min-height: 18px;
+  margin: 0;
+  padding: 0 10px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}

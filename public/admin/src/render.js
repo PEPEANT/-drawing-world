@@ -1,0 +1,140 @@
+import { dom } from "./dom.js";
+
+export function renderState(state) {
+  dom.clientCount.textContent = state.clientCount;
+  dom.playerCount.textContent = state.playerCount;
+  dom.roomCount.textContent = state.roomCount;
+  dom.adminCount.textContent = state.adminCount;
+  dom.updatedAt.textContent = `마지막 갱신: ${formatTime(state.at)}`;
+  dom.rooms.replaceChildren();
+
+  if (!state.rooms.length) {
+    dom.rooms.append(dom.emptyTemplate.content.cloneNode(true));
+    return;
+  }
+
+  for (const room of state.rooms) {
+    dom.rooms.append(renderRoom(room));
+  }
+}
+
+function renderRoom(room) {
+  const section = document.createElement("section");
+  section.className = "room";
+
+  const header = document.createElement("div");
+  header.className = "room-header";
+  header.append(renderRoomTitle(room), renderRoomActions(room));
+  section.append(header);
+
+  if (!room.players.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "아직 닉네임을 등록한 플레이어가 없어.";
+    section.append(empty);
+    return section;
+  }
+
+  section.append(renderPlayerTable(room));
+  return section;
+}
+
+function renderRoomTitle(room) {
+  const title = document.createElement("div");
+  title.className = "room-title";
+  title.innerHTML = `
+    <h2>${escapeHtml(room.name)}</h2>
+    <span>접속 ${room.clients} · 관전 ${room.viewers || 0} · 플레이어 ${room.playerCount} · 선 ${room.strokes} · 아이템 ${room.items || 0}</span>
+  `;
+  return title;
+}
+
+function renderRoomActions(room) {
+  const actions = document.createElement("div");
+  actions.className = "room-actions";
+  actions.append(
+    createRoomButton("view", room.name, "보기"),
+    createRoomButton("join", room.name, "플레이어로 접속"),
+    createRoomButton("clear", room.name, "그림 초기화")
+  );
+  return actions;
+}
+
+function renderPlayerTable(room) {
+  const table = document.createElement("table");
+  table.className = "player-table";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>닉네임</th>
+        <th>위치</th>
+        <th>접속 시간</th>
+        <th>최근 갱신</th>
+        <th></th>
+      </tr>
+    </thead>
+  `;
+
+  const body = document.createElement("tbody");
+  for (const player of room.players) {
+    body.append(renderPlayerRow(room.name, player));
+  }
+
+  table.append(body);
+  return table;
+}
+
+function renderPlayerRow(roomName, player) {
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>
+      <span class="player-name">
+        <span class="swatch" style="background:${escapeAttribute(player.color)}"></span>
+        ${escapeHtml(player.name)}
+      </span>
+    </td>
+    <td>${Math.round(player.x)}, ${Math.round(player.y)}</td>
+    <td>${formatTime(player.connectedAt)}</td>
+    <td>${formatTime(player.updatedAt)}</td>
+    <td></td>
+  `;
+
+  const kickButton = createRoomButton("kick", roomName, "강퇴");
+  kickButton.className = "kick-button";
+  kickButton.dataset.id = player.id;
+  kickButton.dataset.name = player.name;
+  row.lastElementChild.append(kickButton);
+  return row;
+}
+
+function createRoomButton(action, room, text) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.dataset.action = action;
+  button.dataset.room = room;
+  button.textContent = text;
+  return button;
+}
+
+function formatTime(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(new Date(value));
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function escapeAttribute(value) {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : "#2563eb";
+}

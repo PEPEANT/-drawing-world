@@ -1,0 +1,81 @@
+@media (max-width: 840px) {
+  .topbar {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    width: 100%;
+    min-height: 30px;
+  }
+
+  .field input[type="text"] {
+    width: 116px;
+  }
+
+  .range-field {
+    min-width: 140px;
+  }
+
+  button.danger {
+    margin-left: 0;
+  }
+
+  .quick-actions {
+    left: 10px;
+    top: 116px;
+  }
+
+  .chat {
+    left: 10px;
+    top: 166px;
+  }
+
+  .export-panel {
+    left: 10px;
+    top: 166px;
+  }
+
+  .item-popup {
+    left: 10px;
+    top: 216px;
+  }
+
+  .layer-panel {
+    right: 10px;
+    bottom: 10px;
+    width: min(230px, calc(100vw - 20px));
+  }
+
+  .help {
+    left: 10px;
+    right: 10px;
+    bottom: 258px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    gap: 7px;
+  }
+
+  .field {
+    flex: 1 1 auto;
+  }
+
+  .segmented {
+    flex: 1 1 auto;
+  }
+
+  .segmented button {
+    flex: 1;
+  }
+
+  .chat-log {
+    height: 140px;
+  }
+}

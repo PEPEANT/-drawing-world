@@ -1,0 +1,70 @@
+.topbar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 7px 8px;
+  border: 1px solid rgba(220, 226, 234, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: max-content;
+  padding: 0 8px;
+  font-weight: 750;
+}
+
+.brand-mark {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #111827;
+  border-top-color: #ef4444;
+  border-right-color: #22c55e;
+  border-bottom-color: #3b82f6;
+  border-radius: 50%;
+}
+
+.room-chip {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+
+.status.online::before {
+  background: var(--good);
+}
+
+.status.offline::before {
+  background: #9ca3af;
+}
+
+button.danger {
+  padding: 0 12px;
+  color: var(--danger);
+}

@@ -1,0 +1,119 @@
+const { WebSocketServer } = require("ws");
+const { buildAnalyticsState } = require("./analytics");
+const { ADMIN_KEY } = require("./config");
+const { broadcast, send } = require("./protocol");
+const { getRoom, listRooms, rooms } = require("./rooms");
+const { sanitizeRoomName } = require("./validation");
+
+const admins = new Set();
+let notifyTimer = null;
+
+function attachAdminSocket(server) {
+  const wss = new WebSocketServer({ noServer: true });
+
+  server.on("upgrade", (req, socket, head) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    if (url.pathname !== "/admin-ws") return;
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit("connection", ws, req);
+    });
+  });
+
+  wss.on("connection", (ws, req) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    if (url.searchParams.get("key") !== ADMIN_KEY) {
+      send(ws, { type: "error", message: "관리자 키가 올바르지 않습니다." });
+      ws.close(1008, "invalid admin key");
+      return;
+    }
+
+    admins.add(ws);
+    sendAdminState(ws);
+
+    ws.on("message", (raw) => handleAdminMessage(ws, raw));
+    ws.on("close", () => {
+      admins.delete(ws);
+    });
+  });
+}
+
+function handleAdminMessage(ws, raw) {
+  let message;
+  try {
+    message = JSON.parse(raw.toString());
+  } catch {
+    return;
+  }
+
+  if (message.type === "refresh") {
+    sendAdminState(ws);
+    return;
+  }
+
+  if (message.type === "kick") {
+    kickPlayer(message.room, message.id);
+    return;
+  }
+
+  if (message.type === "clearRoom") {
+    clearRoom(message.room);
+  }
+}
+
+function kickPlayer(roomName, playerId) {
+  const room = rooms.get(sanitizeRoomName(roomName));
+  if (!room || typeof playerId !== "string") return;
+
+  for (const client of room.clients) {
+    if (client.id === playerId) {
+      send(client, { type: "kicked", reason: "관리자에 의해 퇴장되었습니다." });
+      client.close(4001, "kicked by admin");
+      break;
+    }
+  }
+}
+
+function clearRoom(roomName) {
+  const room = getRoom(roomName);
+  room.strokes = [];
+  room.items = [];
+  room.radio = null;
+  broadcast(room, { type: "clear", by: "admin" }, undefined);
+  broadcast(room, { type: "clearItems", by: "admin" }, undefined);
+  notifyAdminState();
+}
+
+function notifyAdminState() {
+  if (notifyTimer) return;
+  notifyTimer = setTimeout(() => {
+    notifyTimer = null;
+    for (const admin of admins) {
+      sendAdminState(admin);
+    }
+  }, 120);
+}
+
+function sendAdminState(ws) {
+  send(ws, {
+    type: "state",
+    state: buildAdminState()
+  });
+}
+
+function buildAdminState() {
+  const roomList = listRooms();
+  return {
+    at: Date.now(),
+    roomCount: roomList.length,
+    playerCount: roomList.reduce((total, room) => total + room.playerCount, 0),
+    clientCount: roomList.reduce((total, room) => total + room.clients, 0),
+    adminCount: admins.size,
+    analytics: buildAnalyticsState(),
+    rooms: roomList
+  };
+}
+
+module.exports = {
+  attachAdminSocket,
+  notifyAdminState
+};

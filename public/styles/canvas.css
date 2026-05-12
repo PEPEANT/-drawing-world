@@ -1,0 +1,51 @@
+#world {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+  background: #ffffff;
+}
+
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.topbar,
+.chat,
+.help {
+  pointer-events: auto;
+}
+
+.help {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: min(560px, calc(100vw - 380px));
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.help span {
+  padding: 6px 8px;
+  border: 1px solid rgba(220, 226, 234, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.spectator-mode .topbar,
+.spectator-mode .chat,
+.spectator-mode .chat-toggle,
+.spectator-mode .help,
+.spectator-mode .hotbar,
+.spectator-mode .mobile-controls,
+.spectator-mode .paint-panel {
+  display: none;
+}

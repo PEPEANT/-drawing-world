@@ -1,0 +1,49 @@
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--line);
+  background: #ffffff;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.status-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+
+.status-dot.online {
+  background: var(--good);
+}
+
+.status-dot.error {
+  background: var(--danger);
+}
+
+.admin-shell {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 24px auto;
+}

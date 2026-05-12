@@ -1,0 +1,61 @@
+.mobile-controls {
+  position: absolute;
+  inset: auto 0 18px;
+  display: none;
+  pointer-events: none;
+}
+
+.joystick-base {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 116px;
+  height: 116px;
+  margin-left: -58px;
+  border: 1px solid rgba(17, 24, 39, 0.2);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border: 1px solid rgba(17, 24, 39, 0.22);
+  border-radius: 50%;
+  background: rgba(17, 24, 39, 0.16);
+}
+
+.mobile-tools {
+  position: absolute;
+  right: 12px;
+  bottom: 2px;
+  display: grid;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.mobile-tools button {
+  min-width: 68px;
+  min-height: 42px;
+  border-color: rgba(17, 24, 39, 0.14);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 8px 24px rgba(28, 35, 50, 0.12);
+  font-weight: 750;
+}
+
+.mobile-tools button.active {
+  background: #111827;
+  color: #ffffff;
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+  .mobile-controls {
+    display: block;
+  }
+}

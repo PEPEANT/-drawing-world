@@ -1,0 +1,11 @@
+@import url("./styles/base.css");
+@import url("./styles/layout.css");
+@import url("./styles/auth.css");
+@import url("./styles/dashboard.css");
+@import url("./styles/analytics.css");
+@import url("./styles/table.css");
+@import url("./styles/responsive.css");
+
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>드로잉온라인</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles/main.css">
+  </head>
+  <body class="lobby-open">
+    <canvas id="world" aria-label="드로잉온라인 월드"></canvas>
+
+    <main class="hud" aria-label="드로잉온라인 controls">
+      <section class="topbar" aria-label="status">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span data-brand-name>드로잉온라인</span>
+        </div>
+        <span id="connectionStatus" class="status offline">오프라인</span>
+        <span id="roomName" class="room-chip">room: lobby</span>
+      </section>
+
+      <section id="paintPanel" class="paint-panel hidden" aria-label="paint tools">
+        <header>
+          <strong>붓</strong>
+          <button id="paintPanelClose" type="button">닫기</button>
+        </header>
+
+        <section class="paint-group" aria-label="brush types">
+          <div class="paint-label-row">
+            <span>종류</span>
+            <span id="brushTypeLabel">기본 붓</span>
+          </div>
+          <div id="brushTypeButtons" class="brush-type-grid"></div>
+        </section>
+
+        <section class="paint-group" aria-label="brush appearance">
+          <label class="paint-field">
+            <span>크기</span>
+            <input id="sizeInput" type="range" min="2" max="42" value="8">
+            <output id="sizeOutput">8</output>
+          </label>
+        </section>
+
+        <section class="paint-group" aria-label="color picker">
+          <div class="paint-label-row">
+            <span>색상</span>
+            <output id="colorHexOutput">#000000</output>
+          </div>
+          <div class="paint-color-picker">
+            <canvas id="colorHueCanvas" width="24" height="164" aria-label="색조"></canvas>
+            <canvas id="colorAreaCanvas" width="230" height="164" aria-label="색상 선택"></canvas>
+            <span id="colorPreview" class="color-preview"></span>
+          </div>
+          <input id="colorInput" type="color" aria-label="color value">
+        </section>
+      </section>
+
+      <section class="hotbar" aria-label="tools">
+        <button id="brushButton" class="active" type="button"><span>1</span>붓</button>
+        <button id="eraserButton" type="button"><span>2</span>지우개</button>
+        <button id="itemButton" type="button"><span>3</span>아이템</button>
+      </section>
+
+      <div class="quick-actions" aria-label="quick actions">
+        <button id="chatToggle" class="chat-toggle active" type="button">채팅</button>
+        <button id="exportToggle" class="export-toggle" type="button">내보내기</button>
+        <button id="voiceToggle" class="voice-toggle" type="button">음성</button>
+      </div>
+
+      <section id="exportPanel" class="export-panel hidden" aria-label="export drawing">
+        <header>
+          <strong>내보내기</strong>
+          <button id="exportCloseButton" type="button">닫기</button>
+        </header>
+        <div class="export-format" aria-label="export format">
+          <button class="active" type="button" data-export-format-choice="png">PNG</button>
+          <button type="button" data-export-format-choice="jpg">JPG</button>
+        </div>
+        <div class="export-actions">
+          <button type="button" data-export-scope="full">전체 저장</button>
+          <button type="button" data-export-scope="partial">부분 저장</button>
+        </div>
+        <p id="exportStatus" class="export-status"></p>
+      </section>
+
+      <section id="itemPanel" class="item-panel hidden" aria-label="item tools">
+        <header>
+          <strong>아이템</strong>
+          <button id="itemPanelClose" type="button">닫기</button>
+        </header>
+        <div id="itemTypeButtons" class="item-type-grid"></div>
+        <label class="item-field">
+          <span>이름</span>
+          <input id="itemTitleInput" type="text" maxlength="24" placeholder="표시 이름">
+        </label>
+        <label id="itemUrlField" class="item-field">
+          <span id="itemUrlLabel">링크</span>
+          <input id="itemUrlInput" type="url" maxlength="240" placeholder="https://...">
+        </label>
+        <label id="itemAudioField" class="item-field hidden">
+          <span>MP3 파일</span>
+          <input id="itemAudioFileInput" type="file" accept="audio/mpeg,audio/mp3,.mp3">
+        </label>
+        <p id="itemUploadStatus" class="item-hint"></p>
+        <p id="itemHint" class="item-hint">빈 곳을 클릭하면 아이템이 설치돼.</p>
+      </section>
+
+      <section id="itemPopup" class="item-popup hidden" aria-label="item details">
+        <header>
+          <strong id="itemPopupTitle">아이템</strong>
+          <button id="itemPopupClose" type="button">닫기</button>
+        </header>
+        <p id="itemPopupText"></p>
+        <div class="item-popup-actions">
+          <button id="itemOpenLinkButton" type="button">열기</button>
+          <button id="itemPlayRadioButton" type="button">재생</button>
+        </div>
+      </section>
+
+      <section class="mobile-controls" aria-label="mobile controls">
+        <div id="joystickBase" class="joystick-base">
+          <div id="joystickKnob" class="joystick-knob"></div>
+        </div>
+        <div class="mobile-tools">
+          <button id="mobileBrushButton" type="button">붓</button>
+          <button id="mobileEraserButton" type="button">지우개</button>
+          <button id="mobileItemButton" type="button">아이템</button>
+        </div>
+      </section>
+
+      <aside class="chat" aria-label="chat">
+        <div class="status-row">
+          <span>채팅</span>
+          <button id="chatCloseButton" type="button">닫기</button>
+        </div>
+        <div id="chatLog" class="chat-log" aria-live="polite"></div>
+        <form id="chatForm" class="chat-form">
+          <input id="chatInput" type="text" maxlength="240" placeholder="메시지 입력" autocomplete="off">
+          <button type="submit">전송</button>
+        </form>
+      </aside>
+
+      <aside class="layer-panel" aria-label="layers">
+        <div class="layer-head">
+          <span>레이어</span>
+          <button id="layerAddButton" type="button" aria-label="레이어 추가">+</button>
+        </div>
+        <div id="layerList" class="layer-list"></div>
+        <div class="layer-settings">
+          <label>
+            <span>투명도</span>
+            <input id="layerOpacityInput" type="range" min="10" max="100" value="100">
+            <output id="layerOpacityOutput">100%</output>
+          </label>
+          <div class="layer-actions">
+            <button id="layerClearButton" type="button">비우기</button>
+            <button id="layerDeleteButton" type="button">삭제</button>
+          </div>
+        </div>
+      </aside>
+
+    </main>
+
+    <section id="lobby" class="lobby" aria-label="start lobby">
+      <form id="lobbyForm" class="lobby-panel">
+        <div>
+          <p class="lobby-kicker">드로잉온라인</p>
+          <h1>입장 준비</h1>
+        </div>
+
+        <label class="lobby-field">
+          <span>이름</span>
+          <input id="lobbyNameInput" type="text" maxlength="18" autocomplete="nickname">
+        </label>
+
+        <section class="skin-editor" aria-label="skin editor">
+          <div class="skin-editor-head">
+            <span>스킨</span>
+            <div class="skin-custom-panel">
+              <button id="skinEraserButton" type="button">지우개</button>
+              <button id="skinClearButton" type="button">전체 지우기</button>
+              <button id="skinDefaultButton" type="button">기본</button>
+            </div>
+          </div>
+
+          <div id="skinPresets" class="skin-presets" aria-label="기본 스킨"></div>
+
+          <div class="skin-workbench skin-custom-panel">
+            <canvas id="skinCanvas" width="32" height="32" aria-label="skin editor canvas"></canvas>
+            <div class="skin-preview-wrap">
+              <span>미리보기</span>
+              <canvas id="skinPreview" width="32" height="32" aria-label="skin preview"></canvas>
+            </div>
+          </div>
+
+          <div class="skin-options skin-custom-panel">
+            <label class="skin-color-picker">
+              <span>색상</span>
+              <input id="skinColorInput" type="color">
+            </label>
+            <div class="skin-size-picker">
+              <span>도트</span>
+              <div id="skinBrushSizes" class="skin-brush-sizes" aria-label="skin brush size"></div>
+            </div>
+          </div>
+
+          <div id="skinPalette" class="skin-palette skin-custom-panel" aria-label="skin colors"></div>
+
+          <div class="skin-editor-actions skin-custom-panel">
+            <button id="skinLoadButton" type="button">PNG 불러오기</button>
+            <button id="skinSaveButton" type="button">PNG 저장</button>
+            <input id="skinFileInput" type="file" accept="image/png,image/webp,image/jpeg" hidden>
+          </div>
+        </section>
+
+        <section class="room-list" aria-label="room list">
+          <div class="room-list-head">
+            <span>방 목록</span>
+            <span id="lobbyRoomStatus">불러오는 중</span>
+          </div>
+          <button id="lobbyRoomCard" class="room-card" type="submit">
+            <span>
+              <strong>시뮬라크월드</strong>
+              <small>공용 그림 월드</small>
+            </span>
+            <span id="lobbyRoomCount" class="room-count">0/50</span>
+            <span class="room-enter">입장</span>
+          </button>
+        </section>
+      </form>
+    </section>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

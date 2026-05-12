@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>드로잉온라인 관리자</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/admin/admin.css">
+  </head>
+  <body>
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">드로잉온라인</p>
+        <h1>관리자 페이지</h1>
+      </div>
+      <div class="status-line">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">연결 대기</span>
+      </div>
+    </header>
+
+    <main class="admin-shell">
+      <form id="authForm" class="auth-panel">
+        <label>
+          <span>관리자 키</span>
+          <input class="sr-only" type="text" autocomplete="username" value="admin" tabindex="-1" aria-hidden="true">
+          <input id="keyInput" type="password" autocomplete="current-password" placeholder="admin">
+        </label>
+        <button type="submit">접속</button>
+        <p id="authMessage"></p>
+      </form>
+
+      <section id="dashboard" class="dashboard hidden" aria-label="운영 현황">
+        <div class="metrics">
+          <button id="clientMetricButton" class="metric-button" type="button">
+            <span>접속 클라이언트</span>
+            <strong id="clientCount">0</strong>
+          </button>
+          <div>
+            <span>플레이어</span>
+            <strong id="playerCount">0</strong>
+          </div>
+          <div>
+            <span>방</span>
+            <strong id="roomCount">0</strong>
+          </div>
+          <div>
+            <span>관리자</span>
+            <strong id="adminCount">0</strong>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <span id="updatedAt">갱신 전</span>
+          <button id="refreshButton" type="button">새로고침</button>
+        </div>
+
+        <section id="analyticsPanel" class="analytics-panel hidden" aria-label="접속 통계">
+          <div class="analytics-head">
+            <div>
+              <h2>접속 통계</h2>
+              <span>이 시점부터 누적되는 플레이어 입장 기록이야.</span>
+            </div>
+            <div class="analytics-tabs" aria-label="통계 기간">
+              <button class="active" type="button" data-analytics-range="daily">일간</button>
+              <button type="button" data-analytics-range="monthly">월간</button>
+              <button type="button" data-analytics-range="yearly">년간</button>
+            </div>
+          </div>
+          <div class="analytics-summary">
+            <div>
+              <span>오늘 입장</span>
+              <strong id="analyticsToday">0</strong>
+            </div>
+            <div>
+              <span>이번 달</span>
+              <strong id="analyticsMonth">0</strong>
+            </div>
+            <div>
+              <span>올해</span>
+              <strong id="analyticsYear">0</strong>
+            </div>
+          </div>
+          <div id="analyticsChart" class="analytics-chart"></div>
+        </section>
+
+        <div class="monitor-grid">
+          <section class="preview-card" aria-label="게임 미리보기">
+            <div class="preview-header">
+              <div>
+                <h2>게임 미리보기</h2>
+                <span id="previewRoom">room: lobby</span>
+              </div>
+              <div class="preview-actions">
+                <a id="playerOpen" href="/?room=lobby">플레이어로 접속</a>
+                <a id="previewOpen" href="/?room=lobby&spectator=1" target="_blank" rel="noreferrer">관전 새 창</a>
+              </div>
+            </div>
+            <iframe id="gamePreview" title="게임 미리보기" src="/?room=lobby&spectator=1"></iframe>
+          </section>
+
+          <section id="rooms" class="rooms" aria-label="방 목록"></section>
+        </div>
+      </section>
+    </main>
+
+    <template id="emptyTemplate">
+      <div class="empty">아직 열린 방이 없어.</div>
+    </template>
+
+    <script type="module" src="/admin/admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "drawing-online",
+  "version": "0.1.0",
+  "private": true,
+  "description": "드로잉온라인 shared white-canvas walking and drawing web game.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "check": "npm run check:size",
+    "check:size": "node scripts/check-file-size.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
