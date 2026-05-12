@@ -1,5 +1,6 @@
-import { addStroke, state } from "../state.js";
+import { addStroke, getOwnStrokes, state } from "../state.js";
 import { eraseOwnStrokes } from "../eraser.js";
+import { recordStrokeAdd, recordStrokeDelete } from "../history.js";
 import { saveLocalStrokes } from "../storage.js";
 import { ui } from "../ui/dom.js";
 import { handleItemPointer } from "../ui/item-panel.js";
@@ -71,9 +72,11 @@ function finishCurrentStroke(event, send) {
     return;
   }
   if (state.currentStroke.points.length > 1) {
+    const stroke = state.currentStroke;
     addStroke(state.currentStroke);
-    saveLocalStrokes(state.strokes);
-    send({ type: "stroke", stroke: state.currentStroke });
+    recordStrokeAdd(stroke);
+    saveLocalStrokes(getOwnStrokes());
+    send({ type: "stroke", stroke });
   }
   state.currentStroke = null;
   state.activePointerId = null;
@@ -81,9 +84,11 @@ function finishCurrentStroke(event, send) {
 
 function finishEraserStroke(send) {
   if (state.currentStroke.points.length > 1) {
+    const previousStrokes = new Map(state.strokes.map((stroke) => [stroke.id, stroke]));
     const ids = eraseOwnStrokes(state.currentStroke);
     if (ids.length) {
-      saveLocalStrokes(state.strokes);
+      recordStrokeDelete(ids.map((id) => previousStrokes.get(id)).filter(Boolean));
+      saveLocalStrokes(getOwnStrokes());
       send({ type: "deleteStrokes", ids });
     }
   }

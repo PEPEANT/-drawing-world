@@ -1,4 +1,4 @@
-import { player, replaceItems, replaceStrokes, setSocketId, state } from "./state.js";
+import { getOwnStrokes, player, replaceItems, replaceStrokes, setSocketId, state } from "./state.js";
 import { saveLocalStrokes } from "./storage.js";
 import { addSystemMessage, replaceChatMessages } from "./ui/chat.js";
 import { renderRanking } from "./ui/ranking.js";
@@ -12,9 +12,9 @@ export function handleWelcome(message, send) {
   renderRanking(message.ranking);
   if (serverStrokes.length > 0) {
     replaceStrokes(serverStrokes);
-    saveLocalStrokes(state.strokes);
-  } else if (state.strokes.length > 0) {
-    for (const stroke of state.strokes.slice(-300)) {
+    saveLocalStrokes(getOwnStrokes());
+  } else if (getOwnStrokes().length > 0) {
+    for (const stroke of getOwnStrokes().slice(-300)) {
       send({ type: "stroke", stroke: { ...stroke, author: state.socketId } });
     }
   }

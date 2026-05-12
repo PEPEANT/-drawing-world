@@ -2,7 +2,9 @@ import {
   addLayer,
   deleteLayer,
   getLayer,
+  getOwnStrokes,
   getStrokeLayerId,
+  isOwnStroke,
   replaceStrokes,
   setActiveLayer,
   state,
@@ -32,7 +34,7 @@ export function initLayerPanel({ send }) {
     if (state.layers.length <= 1) return;
     clearLayerStrokes(layerId);
     deleteLayer(layerId);
-    saveLocalStrokes(state.strokes);
+    saveLocalStrokes(getOwnStrokes());
   });
   window.addEventListener("layerschanged", renderLayerPanel);
   renderLayerPanel();
@@ -97,14 +99,16 @@ function renderLayerItem(layer) {
 }
 
 function clearLayerStrokes(layerId) {
-  replaceStrokes(state.strokes.filter((stroke) => getStrokeLayerId(stroke) !== layerId));
-  saveLocalStrokes(state.strokes);
+  const removedOwnStrokes = state.strokes.some((stroke) => isOwnStroke(stroke) && getStrokeLayerId(stroke) === layerId);
+  replaceStrokes(state.strokes.filter((stroke) => !isOwnStroke(stroke) || getStrokeLayerId(stroke) !== layerId));
+  saveLocalStrokes(getOwnStrokes());
+  if (!removedOwnStrokes) return;
   sendToServer({ type: "clearLayer", layerId });
 }
 
 function drawLayerPreview(canvas, layer) {
   const ctx = canvas.getContext("2d");
-  const strokes = state.strokes.filter((stroke) => getStrokeLayerId(stroke) === layer.id);
+  const strokes = state.strokes.filter((stroke) => isOwnStroke(stroke) && getStrokeLayerId(stroke) === layer.id);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!strokes.length) return;
 

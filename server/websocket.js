@@ -103,7 +103,7 @@ function handleMessage(ws, room, raw) {
     case "hello": return handleHello(ws, room, message);
     case "playerUpdate": return handlePlayerUpdate(ws, room, message);
     case "stroke": return handleStroke(ws, room, message);
-    case "clearLayer": return handleClearLayer(room, message);
+    case "clearLayer": return handleClearLayer(ws, room, message);
     case "deleteStrokes": return handleDeleteStrokes(ws, room, message);
     case "chat": return handleChat(ws, room, message);
     case "itemAdd": return handleItemAdd(ws, room, message);
@@ -114,10 +114,10 @@ function handleMessage(ws, room, raw) {
   }
 }
 
-function handleClearLayer(room, message) {
+function handleClearLayer(ws, room, message) {
   const layerId = safeLayerId(message.layerId);
-  room.strokes = room.strokes.filter((stroke) => (stroke.layerId || "layer-1") !== layerId);
-  broadcast(room, { type: "clearLayer", layerId }, undefined);
+  room.strokes = room.strokes.filter((stroke) => stroke.author !== ws.id || (stroke.layerId || "layer-1") !== layerId);
+  broadcast(room, { type: "clearLayer", layerId, author: ws.id }, undefined);
   notifyAdminState();
 }
 

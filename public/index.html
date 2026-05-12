@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>드로잉온라인</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./styles/main.css?v=20260512-4">
+    <link rel="stylesheet" href="./styles/main.css?v=20260512-5">
   </head>
   <body class="lobby-open">
     <canvas id="world" aria-label="드로잉온라인 월드"></canvas>
@@ -57,6 +57,7 @@
       </section>
 
       <section class="hotbar" aria-label="tools">
+        <button id="undoButton" class="history-button" type="button" title="되돌리기" aria-label="되돌리기">↶</button><button id="redoButton" class="history-button" type="button" title="다시하기" aria-label="다시하기">↷</button>
         <button id="brushButton" class="active" type="button"><span>1</span>붓</button>
         <button id="eraserButton" type="button"><span>2</span>지우개</button>
         <button id="itemButton" type="button"><span>3</span>아이템</button>
@@ -135,7 +136,7 @@
           <div id="joystickKnob" class="joystick-knob"></div>
         </div>
         <div class="mobile-tools">
-          <button id="mobileBrushButton" type="button">붓</button>
+          <button id="mobileUndoButton" class="history-button" type="button" title="되돌리기" aria-label="되돌리기">↶</button><button id="mobileBrushButton" type="button">붓</button><button id="mobileRedoButton" class="history-button" type="button" title="다시하기" aria-label="다시하기">↷</button>
           <button id="mobileEraserButton" type="button">지우개</button>
           <button id="mobileItemButton" type="button">아이템</button>
         </div>
@@ -242,6 +243,6 @@
       </form>
     </section>
 
-    <script type="module" src="./src/main.js?v=20260512-7"></script>
+    <script type="module" src="./src/main.js?v=20260512-8"></script>
   </body>
 </html>

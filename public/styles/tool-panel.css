@@ -169,6 +169,16 @@
   color: #ffffff;
 }
 
+.hotbar .history-button {
+  min-width: 44px;
+  font-size: 20px;
+}
+
+.hotbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .hotbar button span {
   color: inherit;
   font-size: 12px;

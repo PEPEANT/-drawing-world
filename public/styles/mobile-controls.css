@@ -54,6 +54,16 @@
   color: #ffffff;
 }
 
+.mobile-tools .history-button {
+  min-width: 44px;
+  font-size: 20px;
+}
+
+.mobile-tools button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
 @media (max-width: 760px), (pointer: coarse) {
   .mobile-controls {
     display: block;

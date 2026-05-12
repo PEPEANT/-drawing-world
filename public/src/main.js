@@ -12,8 +12,10 @@ import { closeLayerPanel, initLayerPanel, openLayerPanel } from "./ui/layers.js"
 import { closeItemPanel, initItemPanel, openItemPanel, syncItemPanel } from "./ui/item-panel.js";
 import { closePaintPanel, initPaintPanel, openPaintPanel, syncPaintPanel } from "./ui/tools.js";
 import { initHud, syncToolButtons } from "./ui/hud.js";
+import { initHistoryControls } from "./ui/history-controls.js";
 import { initRanking } from "./ui/ranking.js";
 import { initVoiceButton } from "./ui/voice.js";
+import { initHistory, redoLastAction, undoLastAction } from "./history.js";
 import { loadLocalStrokes } from "./storage.js";
 import { player, replaceStrokes, state } from "./state.js";
 import { ui } from "./ui/dom.js";
@@ -35,6 +37,8 @@ function init() {
   initItemPanel({ send, setTool });
   initLayerPanel({ send });
   initExportPanel();
+  initHistory({ send });
+  initHistoryControls();
   initRanking({ send });
   initCanvasCursor(canvas);
   initVoiceButton();
@@ -55,7 +59,7 @@ function startGame() {
   if (state.controlsBound) return;
   state.controlsBound = true;
   if (!state.isSpectator) {
-    bindKeyboard({ openChat, toggleTool });
+    bindKeyboard({ openChat, redo: redoLastAction, toggleTool, undo: undoLastAction });
     bindMobileControls({ toggleTool });
     bindPointer({ send });
     bindChat();

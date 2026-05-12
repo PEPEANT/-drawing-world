@@ -3,10 +3,26 @@ import { movePlayerWithCollision, resolvePlayerCollisions } from "../player-phys
 import { player, state } from "../state.js";
 import { isTypingTarget } from "../utils.js";
 
-export function bindKeyboard({ openChat, toggleTool }) {
+export function bindKeyboard({ openChat, redo, toggleTool, undo }) {
   window.addEventListener("keydown", (event) => {
     if (isTypingTarget(event.target)) return;
     const key = event.key.toLowerCase();
+
+    if ((event.ctrlKey || event.metaKey) && key === "z") {
+      event.preventDefault();
+      if (event.shiftKey) {
+        redo();
+      } else {
+        undo();
+      }
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && key === "y") {
+      event.preventDefault();
+      redo();
+      return;
+    }
 
     if (key === "t") {
       openChat();

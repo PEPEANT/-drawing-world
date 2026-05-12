@@ -62,7 +62,7 @@ export function replaceStrokes(nextStrokes) {
 
 export function addStroke(stroke) {
   state.strokes.push(stroke);
-  ensureLayer(stroke.layerId || DEFAULT_LAYER_ID);
+  if (isOwnStroke(stroke)) ensureLayer(stroke.layerId || DEFAULT_LAYER_ID);
   trimStrokes();
   emitLayerChange();
 }
@@ -124,7 +124,7 @@ export function updateLayer(id, patch) {
 export function deleteLayer(id) {
   if (state.layers.length <= 1) return;
   state.layers = state.layers.filter((layer) => layer.id !== id);
-  state.strokes = state.strokes.filter((stroke) => getStrokeLayerId(stroke) !== id);
+  state.strokes = state.strokes.filter((stroke) => !isOwnStroke(stroke) || getStrokeLayerId(stroke) !== id);
   if (state.activeLayerId === id) state.activeLayerId = state.layers[0].id;
   saveLayers();
   emitLayerChange();
@@ -150,6 +150,15 @@ export function getLayer(id) {
 
 export function getStrokeLayerId(stroke) {
   return stroke?.layerId || DEFAULT_LAYER_ID;
+}
+
+export function isOwnStroke(stroke) {
+  if (!stroke) return false;
+  return stroke.author === state.socketId || stroke.author === player.id || stroke.author === "local";
+}
+
+export function getOwnStrokes() {
+  return state.strokes.filter(isOwnStroke);
 }
 
 function loadSavedLayers() {
@@ -180,7 +189,7 @@ function normalizeLayerPatch(patch, layer) {
 
 function syncLayersFromStrokes() {
   for (const stroke of state.strokes) {
-    ensureLayer(getStrokeLayerId(stroke));
+    if (isOwnStroke(stroke)) ensureLayer(getStrokeLayerId(stroke));
   }
 }
 

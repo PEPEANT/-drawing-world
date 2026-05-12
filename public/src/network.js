@@ -2,7 +2,9 @@ import { getRoomName } from "./config.js";
 import {
   addItem,
   addStroke,
+  getOwnStrokes,
   getStrokeLayerId,
+  isOwnStroke,
   player,
   removeItemsByIds,
   replaceItems,
@@ -119,31 +121,35 @@ function handleSocketMessage(message) {
 
   if (message.type === "stroke" && message.stroke) {
     addStroke(message.stroke);
-    saveLocalStrokes(state.strokes);
+    saveLocalStrokes(getOwnStrokes());
     return;
   }
 
   if (message.type === "clear") {
     replaceStrokes([]);
-    saveLocalStrokes(state.strokes);
+    saveLocalStrokes(getOwnStrokes());
     return;
   }
 
   if (message.type === "clearLayer") {
-    replaceStrokes(state.strokes.filter((stroke) => getStrokeLayerId(stroke) !== message.layerId));
-    saveLocalStrokes(state.strokes);
+    replaceStrokes(state.strokes.filter((stroke) => {
+      if (getStrokeLayerId(stroke) !== message.layerId) return true;
+      if (message.author) return stroke.author !== message.author;
+      return !isOwnStroke(stroke);
+    }));
+    saveLocalStrokes(getOwnStrokes());
     return;
   }
 
   if (message.type === "deleteStrokes") {
     removeStrokesByIds(message.ids);
-    saveLocalStrokes(state.strokes);
+    saveLocalStrokes(getOwnStrokes());
     return;
   }
 
   if (message.type === "clearPlayerStrokes" && message.target) {
     replaceStrokes(state.strokes.filter((stroke) => stroke.author !== message.target.id));
-    saveLocalStrokes(state.strokes);
+    saveLocalStrokes(getOwnStrokes());
     addSystemMessage(message.reason || `${message.target.name || "플레이어"} 그림이 삭제됐어.`);
     return;
   }

@@ -51,9 +51,9 @@
   .eraser-panel,
   .item-panel {
     left: 10px;
-    bottom: 82px;
+    bottom: 116px;
     width: min(282px, calc(100vw - 132px));
-    max-height: min(236px, calc(100vh - 148px));
+    max-height: min(216px, calc(100vh - 180px));
     overflow: auto;
     padding: 7px;
   }
@@ -144,8 +144,12 @@
   }
 
   .mobile-tools button {
-    min-width: 62px;
+    min-width: 52px;
     min-height: 38px;
+  }
+
+  #mobileUndoButton {
+    order: 0;
   }
 
   #mobileBrushButton {
@@ -158,6 +162,10 @@
 
   #mobileEraserButton {
     order: 3;
+  }
+
+  #mobileRedoButton {
+    order: 4;
   }
 
   .layer-panel {
@@ -222,7 +230,8 @@
   .eraser-panel,
   .item-panel {
     width: min(260px, calc(100vw - 96px));
-    max-height: min(220px, calc(100vh - 132px));
+    bottom: 108px;
+    max-height: min(200px, calc(100vh - 172px));
   }
 
   .layer-panel {
@@ -231,6 +240,6 @@
   }
 
   .mobile-tools button {
-    min-width: 58px;
+    min-width: 50px;
   }
 }
