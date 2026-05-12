@@ -4,7 +4,7 @@ const { banClient, formatBanReason, listBans, unbanClient } = require("./bans");
 const { ADMIN_KEY } = require("./config");
 const { broadcast, send } = require("./protocol");
 const { getRoom, listRooms, rooms } = require("./rooms");
-const { clearPlayerStrokes: clearPlayerStrokeData } = require("./strokes");
+const { clearPlayerStrokes: clearPlayerStrokeData, deleteAdminStrokeIds } = require("./strokes");
 const { safeText, sanitizeRoomName } = require("./validation");
 
 const admins = new Set();
@@ -58,7 +58,7 @@ function handleAdminMessage(ws, raw) {
   }
 
   if (message.type === "ban") {
-    banPlayer(message.room, message.id, message.hours);
+    banPlayer(message.room, message.id, message);
     return;
   }
 
@@ -69,6 +69,11 @@ function handleAdminMessage(ws, raw) {
 
   if (message.type === "clearPlayer") {
     clearPlayerStrokes(message.room, message.id);
+    return;
+  }
+
+  if (message.type === "deleteStrokes") {
+    deleteSelectedStrokes(message.room, message.ids);
     return;
   }
 
@@ -83,10 +88,10 @@ function handleAdminMessage(ws, raw) {
   }
 }
 
-function banPlayer(roomName, playerId, hours) {
+function banPlayer(roomName, playerId, options) {
   const room = rooms.get(sanitizeRoomName(roomName));
   if (!room || typeof playerId !== "string") return;
-  const durationMs = normalizeHours(hours) * 60 * 60 * 1000;
+  const durationMs = normalizeBanDuration(options);
 
   for (const client of room.clients) {
     if (client.id !== playerId) continue;
@@ -101,6 +106,15 @@ function banPlayer(roomName, playerId, hours) {
     notifyAdminState();
     break;
   }
+}
+
+function deleteSelectedStrokes(roomName, ids) {
+  const room = rooms.get(sanitizeRoomName(roomName));
+  if (!room) return;
+  const deletedIds = deleteAdminStrokeIds(room, ids);
+  if (!deletedIds.length) return;
+  broadcast(room, { type: "deleteStrokes", ids: deletedIds }, undefined);
+  notifyAdminState();
 }
 
 function kickPlayer(roomName, playerId) {
@@ -183,9 +197,21 @@ function buildAdminState() {
   };
 }
 
-function normalizeHours(value) {
-  const hours = Number(value);
-  return Math.max(1, Math.min(720, Number.isFinite(hours) ? hours : 24));
+function normalizeBanDuration(options) {
+  if (Number.isFinite(Number(options?.hours))) {
+    return clampMinutes(Number(options.hours) * 60) * 60 * 1000;
+  }
+  const text = String(options?.durationText || "").trim().toLowerCase();
+  const match = text.match(/^(\d+(?:\.\d+)?)\s*(m|min|h|hr|d)?$/);
+  if (!match) return 24 * 60 * 60 * 1000;
+  const value = Number(match[1]);
+  const unit = match[2] || "m";
+  const minutes = unit.startsWith("d") ? value * 1440 : unit.startsWith("h") ? value * 60 : value;
+  return clampMinutes(minutes) * 60 * 1000;
+}
+
+function clampMinutes(minutes) {
+  return Math.max(1, Math.min(30 * 24 * 60, Number.isFinite(minutes) ? minutes : 1440));
 }
 
 module.exports = {

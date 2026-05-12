@@ -87,8 +87,9 @@ function safeClientId(value) {
 
 function clampDuration(value) {
   const ms = Number(value);
-  const hour = 60 * 60 * 1000;
-  return Math.max(hour, Math.min(30 * 24 * hour, Number.isFinite(ms) ? ms : 24 * hour));
+  const minute = 60 * 1000;
+  const day = 24 * 60 * minute;
+  return Math.max(minute, Math.min(30 * day, Number.isFinite(ms) ? ms : day));
 }
 
 module.exports = {

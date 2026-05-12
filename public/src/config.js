@@ -1,5 +1,7 @@
 export const APP_NAME = "드로잉온라인";
 export const DEFAULT_ROOM = "lobby";
+export const PAPER_COLOR = "#f3f4f6";
+export const GRID_COLOR = "#e1e7ef";
 
 export const WORLD = {
   width: 3200,

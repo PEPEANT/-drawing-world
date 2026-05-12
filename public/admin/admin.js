@@ -56,8 +56,8 @@ dom.rooms.addEventListener("click", (event) => {
 
   if (button.dataset.action === "ban") {
     const name = button.dataset.name || "플레이어";
-    const hours = window.prompt(`${name} 님을 몇 시간 밴할까?`, "24");
-    if (hours) sendAdmin({ type: "ban", room, id: button.dataset.id, hours: Number(hours) });
+    const durationText = window.prompt(`${name} 님 밴 시간. 예: 30m, 2h, 1d`, "24h");
+    if (durationText) sendAdmin({ type: "ban", room, id: button.dataset.id, durationText });
     return;
   }
 
@@ -72,6 +72,16 @@ dom.rooms.addEventListener("click", (event) => {
     const name = button.dataset.name || "플레이어";
     if (window.confirm(`${name} 님의 그림만 초기화할까?`)) {
       sendAdmin({ type: "clearPlayer", room, id: button.dataset.id });
+    }
+    return;
+  }
+
+  if (button.dataset.action === "deleteSelectedStrokes") {
+    const selected = Array.from(button.closest(".room")?.querySelectorAll("[data-stroke-id]:checked") || []);
+    const ids = selected.map((input) => input.dataset.strokeId);
+    if (!ids.length) return;
+    if (window.confirm(`선택한 그림 ${ids.length}개를 삭제할까?`)) {
+      sendAdmin({ type: "deleteStrokes", room, ids });
     }
     return;
   }

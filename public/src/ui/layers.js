@@ -8,7 +8,7 @@ import {
   state,
   updateLayer
 } from "../state.js";
-import { CLIENT_LIMITS } from "../config.js";
+import { CLIENT_LIMITS, PAPER_COLOR } from "../config.js";
 import { saveLocalStrokes } from "../storage.js";
 import { ui } from "./dom.js";
 
@@ -128,7 +128,7 @@ function drawLayerPreview(canvas, layer) {
 function drawPreviewStroke(ctx, stroke, scale, offsetX, offsetY) {
   const points = stroke.points || [];
   if (points.length < 2) return;
-  ctx.strokeStyle = stroke.tool === "eraser" ? "#ffffff" : stroke.color;
+  ctx.strokeStyle = stroke.tool === "eraser" ? PAPER_COLOR : stroke.color;
   ctx.lineWidth = Math.max(1, stroke.size * scale);
   ctx.beginPath();
   ctx.moveTo(points[0].x * scale + offsetX, points[0].y * scale + offsetY);

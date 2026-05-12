@@ -1,17 +1,19 @@
+import { PAPER_COLOR } from "./config.js";
+
 export function drawStroke(ctx, stroke) {
   const points = getDrawablePoints(stroke);
   if (points.length < 2) return;
 
   if (stroke.tool === "eraser") {
     if (stroke.brush === "spray") {
-      drawSpray(ctx, { ...stroke, color: "#ffffff" }, points);
+      drawSpray(ctx, { ...stroke, color: PAPER_COLOR }, points);
       return;
     }
     if (stroke.brush === "square") {
-      drawLine(ctx, points, { color: "#ffffff", cap: "butt", join: "miter", size: stroke.size });
+      drawLine(ctx, points, { color: PAPER_COLOR, cap: "butt", join: "miter", size: stroke.size });
       return;
     }
-    drawLine(ctx, points, { color: "#ffffff", cap: "round", join: "round", size: stroke.size });
+    drawLine(ctx, points, { color: PAPER_COLOR, cap: "round", join: "round", size: stroke.size });
     return;
   }
 

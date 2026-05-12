@@ -1,4 +1,5 @@
 const { sanitizeRoomName } = require("./validation");
+const { buildStrokeModeration } = require("./stroke-moderation");
 
 const rooms = new Map();
 
@@ -39,6 +40,7 @@ function listRooms() {
     players: Array.from(room.players.values()),
     playerCount: room.players.size,
     strokes: room.strokes.length,
+    moderationStrokes: buildStrokeModeration(room),
     items: room.items.length,
     messages: room.messages.length
   }));

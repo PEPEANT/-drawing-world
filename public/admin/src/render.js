@@ -1,4 +1,5 @@
 import { dom } from "./dom.js";
+import { renderStrokeModeration } from "./moderation.js";
 
 export function renderState(state) {
   dom.clientCount.textContent = state.clientCount;
@@ -33,10 +34,11 @@ function renderRoom(room) {
     empty.className = "empty";
     empty.textContent = "아직 닉네임을 등록한 플레이어가 없어.";
     section.append(empty);
-    return section;
+  } else {
+    section.append(renderPlayerTable(room));
   }
 
-  section.append(renderPlayerTable(room));
+  section.append(renderStrokeModeration(room));
   return section;
 }
 

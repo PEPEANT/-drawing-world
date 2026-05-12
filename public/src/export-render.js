@@ -1,4 +1,4 @@
-import { WORLD } from "./config.js";
+import { GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
 import { drawBillboard, ensureBillboardReady } from "./billboard.js";
 import { drawItems } from "./item-render.js";
 import { drawLayeredStrokes } from "./layer-render.js";
@@ -16,7 +16,7 @@ export async function exportDrawing(scope, format) {
   canvas.height = setup.height;
 
   const ctx = canvas.getContext("2d", { alpha: false });
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = PAPER_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(setup.scale, 0, 0, setup.scale, setup.offsetX, setup.offsetY);
   drawPaper(ctx, setup.view, setup.zoom);
@@ -60,9 +60,9 @@ function getViewportExportSetup() {
 }
 
 function drawPaper(ctx, view, zoom) {
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = PAPER_COLOR;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
-  ctx.strokeStyle = "#eef2f7";
+  ctx.strokeStyle = GRID_COLOR;
   ctx.lineWidth = 1 / zoom;
   const startX = Math.floor(view.left / GRID_SIZE) * GRID_SIZE;
   const endX = Math.ceil(view.right / GRID_SIZE) * GRID_SIZE;

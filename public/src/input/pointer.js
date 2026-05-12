@@ -5,6 +5,7 @@ import { ui } from "../ui/dom.js";
 import { handleItemPointer } from "../ui/item-panel.js";
 import { handleVotePointer } from "../ui/ranking.js";
 import { canvas, clampPoint, screenToWorld } from "../render.js";
+import { PAPER_COLOR } from "../config.js";
 import { distance } from "../utils.js";
 
 export function bindPointer({ send }) {
@@ -29,7 +30,7 @@ export function bindPointer({ send }) {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       author: state.socketId,
       layerId: state.activeLayerId,
-      color: state.tool === "eraser" ? "#ffffff" : ui.colorInput.value,
+      color: state.tool === "eraser" ? PAPER_COLOR : ui.colorInput.value,
       size: state.tool === "eraser" ? state.eraserSize : Number(ui.sizeInput.value),
       tool: state.tool,
       brush: state.tool === "eraser" ? state.eraserType : state.brushType,

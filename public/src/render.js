@@ -1,4 +1,4 @@
-import { WORLD } from "./config.js";
+import { GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
 import { drawBillboard } from "./billboard.js";
 import { drawItems } from "./item-render.js";
 import { drawLayeredStrokes } from "./layer-render.js";
@@ -25,7 +25,7 @@ export function resize() {
 
 export function draw() {
   ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = PAPER_COLOR;
   ctx.fillRect(0, 0, state.viewport.width, state.viewport.height);
 
   const view = getViewBounds();
@@ -100,10 +100,10 @@ function getViewBounds() {
 }
 
 function drawPaper(view) {
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = PAPER_COLOR;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
-  ctx.strokeStyle = "#eef2f7";
+  ctx.strokeStyle = GRID_COLOR;
   ctx.lineWidth = 1 / state.camera.zoom;
   const grid = 80;
   const startX = Math.floor(view.left / grid) * grid;
