@@ -1,0 +1,44 @@
+@media (max-width: 480px) {
+  .quick-actions button {
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .paint-panel,
+  .eraser-panel,
+  .item-panel {
+    width: calc(100vw - 92px);
+    max-height: 34vh;
+  }
+
+  .joystick-base {
+    left: 12px;
+    width: 84px;
+    height: 84px;
+  }
+
+  .joystick-knob {
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+  }
+
+  .mobile-tools {
+    left: calc(50% + 34px);
+  }
+
+  .mobile-tools button {
+    min-width: 54px;
+    min-height: 36px;
+    padding: 0 9px;
+  }
+
+  .layer-panel {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 116px;
+    width: auto;
+    max-height: 34vh;
+  }
+}

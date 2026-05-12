@@ -129,22 +129,7 @@ function renderBrushSizes() {
 }
 
 function loadSkin() {
-  if (!player.skin) {
-    applyPreset("painter");
-    return;
-  }
-
-  const image = new Image();
-  image.onload = () => {
-    selectedPreset = "custom";
-    clearSkinContext(ctx);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(image, 0, 0, SKIN_SIZE, SKIN_SIZE);
-    updatePreview();
-    syncEditorUi();
-  };
-  image.onerror = () => applyPreset("painter");
-  image.src = player.skin;
+  applyPreset("painter");
 }
 
 function applyPreset(presetId) {

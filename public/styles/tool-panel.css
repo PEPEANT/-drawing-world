@@ -1,4 +1,5 @@
-.paint-panel {
+.paint-panel,
+.eraser-panel {
   position: absolute;
   left: 14px;
   bottom: 76px;
@@ -12,11 +13,13 @@
   pointer-events: auto;
 }
 
-.paint-panel.hidden {
+.paint-panel.hidden,
+.eraser-panel.hidden {
   display: none;
 }
 
 .paint-panel header,
+.eraser-panel header,
 .paint-field {
   display: flex;
   align-items: center;
@@ -24,15 +27,18 @@
   gap: 10px;
 }
 
-.paint-panel header {
+.paint-panel header,
+.eraser-panel header {
   margin-bottom: 10px;
 }
 
-.paint-panel header strong {
+.paint-panel header strong,
+.eraser-panel header strong {
   font-size: 15px;
 }
 
-.paint-panel header button {
+.paint-panel header button,
+.eraser-panel header button {
   min-height: 28px;
   padding: 0 9px;
   color: var(--muted);

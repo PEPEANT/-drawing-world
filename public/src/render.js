@@ -2,13 +2,13 @@ import { WORLD } from "./config.js";
 import { drawBillboard } from "./billboard.js";
 import { drawItems } from "./item-render.js";
 import { drawLayeredStrokes } from "./layer-render.js";
+import { drawPlayer } from "./player-render.js";
 import { player, state } from "./state.js";
 import { drawStroke } from "./stroke-render.js";
 import { clamp } from "./utils.js";
 
 export const canvas = document.querySelector("#world");
 const ctx = canvas.getContext("2d", { alpha: false });
-const skinImages = new Map();
 
 export function resize() {
   state.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -37,10 +37,10 @@ export function draw() {
   drawItems(ctx);
 
   if (!state.isSpectator) {
-    drawPlayer(player, true);
+    drawPlayer(ctx, player);
   }
   for (const remotePlayer of state.remotePlayers.values()) {
-    drawPlayer(remotePlayer, false);
+    drawPlayer(ctx, remotePlayer);
   }
 
   ctx.restore();
@@ -126,92 +126,6 @@ function drawPaper(view) {
   ctx.lineWidth = 3 / state.camera.zoom;
   ctx.strokeRect(0, 0, WORLD.width, WORLD.height);
   drawBillboard(ctx);
-}
-
-function drawPlayer(entity, isLocal) {
-  const size = isLocal ? 46 : 42;
-  const walk = entity.moving ? Math.sin(Date.now() / 120) * 2.2 : 0;
-  const squash = entity.moving ? 1 + Math.abs(Math.sin(Date.now() / 120)) * 0.035 : 1;
-  ctx.save();
-  ctx.translate(entity.x, entity.y + walk);
-  ctx.scale(entity.facing === -1 ? -1 : 1, squash);
-
-  const image = getSkinImage(entity.skin);
-  if (image && image.complete) {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(image, -size / 2, -size / 2, size, size);
-  } else {
-    drawFallbackAvatar(size, entity.color || "#2563eb");
-  }
-
-  ctx.scale(entity.facing === -1 ? -1 : 1, 1 / squash);
-  ctx.translate(0, -walk);
-  ctx.fillStyle = "#111827";
-  ctx.font = `${12 / state.camera.zoom}px ui-sans-serif, system-ui, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-  ctx.fillText(entity.name || "guest", 0, size / 2 + 7);
-  drawBubble(entity, size);
-  ctx.restore();
-}
-
-function drawFallbackAvatar(size, color) {
-  ctx.fillStyle = color;
-  roundRect(-size / 2, -size / 2, size, size, 6);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(-8, -6, 4, 4);
-  ctx.fillRect(6, -6, 4, 4);
-  ctx.fillStyle = "#111827";
-  ctx.fillRect(-6, 7, 12, 3);
-}
-
-function drawBubble(entity, size) {
-  const bubble = state.chatBubbles.get(entity.id);
-  if (!bubble) return;
-  if (bubble.expiresAt < Date.now()) {
-    state.chatBubbles.delete(entity.id);
-    return;
-  }
-
-  const text = bubble.text.length > 42 ? `${bubble.text.slice(0, 42)}...` : bubble.text;
-  const fontSize = 13 / state.camera.zoom;
-  const paddingX = 9 / state.camera.zoom;
-  const paddingY = 6 / state.camera.zoom;
-  ctx.font = `${fontSize}px ui-sans-serif, system-ui, sans-serif`;
-  const width = Math.min(230 / state.camera.zoom, ctx.measureText(text).width + paddingX * 2);
-  const height = fontSize + paddingY * 2;
-  const x = -width / 2;
-  const y = -size / 2 - height - 12 / state.camera.zoom;
-
-  ctx.fillStyle = "rgba(17, 24, 39, 0.88)";
-  roundRect(x, y, width, height, 7 / state.camera.zoom);
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, 0, y + height / 2);
-}
-
-function getSkinImage(skin) {
-  if (!skin) return null;
-  if (skinImages.has(skin)) return skinImages.get(skin);
-  const image = new Image();
-  image.src = skin;
-  skinImages.set(skin, image);
-  return image;
-}
-
-function roundRect(x, y, width, height, radius) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.fill();
 }
 
 function drawMiniStatus() {

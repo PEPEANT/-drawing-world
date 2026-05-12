@@ -32,5 +32,6 @@ module.exports = {
   LIMITS,
   PORT,
   PUBLIC_DIR,
+  ROOT_DIR,
   mimeTypes
 };

@@ -12,6 +12,8 @@ import {
 import { saveLocalStrokes } from "./storage.js";
 import { addChatBubble, addChatMessage, addSystemMessage } from "./ui/chat.js";
 import { setOnline } from "./ui/hud.js";
+import { renderRanking } from "./ui/ranking.js";
+import { addVoteFeedback } from "./vote-feedback.js";
 
 let ws = null;
 let reconnectAllowed = true;
@@ -26,7 +28,8 @@ export function connect() {
 
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   const spectatorFlag = state.isSpectator ? "&spectator=1" : "";
-  const socketUrl = `${protocol}://${location.host}/ws?room=${encodeURIComponent(getRoomName())}${spectatorFlag}`;
+  const clientFlag = `&clientId=${encodeURIComponent(player.clientId)}`;
+  const socketUrl = `${protocol}://${location.host}/ws?room=${encodeURIComponent(getRoomName())}${clientFlag}${spectatorFlag}`;
   ws = new WebSocket(socketUrl);
 
   ws.addEventListener("open", () => {
@@ -130,6 +133,28 @@ function handleSocketMessage(message) {
     return;
   }
 
+  if (message.type === "clearPlayerStrokes" && message.target) {
+    replaceStrokes(state.strokes.filter((stroke) => stroke.author !== message.target.id));
+    saveLocalStrokes(state.strokes);
+    addSystemMessage(`${message.target.name || "플레이어"} 그림이 비추 누적으로 삭제됐어.`);
+    return;
+  }
+
+  if (message.type === "ranking") {
+    renderRanking(message.ranking);
+    return;
+  }
+
+  if (message.type === "voteResult") {
+    addSystemMessage(message.message || "투표를 처리하지 못했어.");
+    return;
+  }
+
+  if (message.type === "voteFeedback") {
+    addVoteFeedback(message.feedback);
+    return;
+  }
+
   if (message.type === "itemAdd" && message.item) {
     addItem(message.item);
     return;
@@ -171,6 +196,7 @@ function handleWelcome(message) {
 
   const serverStrokes = Array.isArray(message.strokes) ? message.strokes : [];
   replaceItems(message.items);
+  renderRanking(message.ranking);
   if (serverStrokes.length > 0) {
     replaceStrokes(serverStrokes);
     saveLocalStrokes(state.strokes);

@@ -31,7 +31,8 @@
     top: 166px;
   }
 
-  .export-panel {
+  .export-panel,
+  .eraser-panel {
     left: 10px;
     top: 166px;
   }

@@ -6,6 +6,12 @@ export const WORLD = {
   height: 2200
 };
 
+export const PLAYER = {
+  size: 50,
+  collisionRadius: 25,
+  voteRadius: 34
+};
+
 export const STORAGE_KEYS = {
   strokes: "simulac-draw-world:strokes:v1",
   legacyStrokes: "paint-walk:v1",
@@ -31,7 +37,9 @@ export const PALETTE = [
 
 export const CLIENT_LIMITS = {
   localStrokes: 800,
-  activeStrokes: 1200
+  activeStrokes: 1200,
+  layersPerPlayer: 5,
+  downvotesBeforeClear: 3
 };
 
 export function getRoomName() {

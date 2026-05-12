@@ -12,28 +12,17 @@
 
     <main class="hud" aria-label="드로잉온라인 controls">
       <section class="topbar" aria-label="status">
-        <div class="brand">
-          <span class="brand-mark"></span>
-          <span data-brand-name>드로잉온라인</span>
-        </div>
+        <div class="brand"><span class="brand-mark"></span><span data-brand-name>드로잉온라인</span></div>
         <span id="connectionStatus" class="status offline">오프라인</span>
         <span id="roomName" class="room-chip">room: lobby</span>
       </section>
 
       <section id="paintPanel" class="paint-panel hidden" aria-label="paint tools">
-        <header>
-          <strong>붓</strong>
-          <button id="paintPanelClose" type="button">닫기</button>
-        </header>
-
+        <header><strong>붓</strong><button id="paintPanelClose" type="button">닫기</button></header>
         <section class="paint-group" aria-label="brush types">
-          <div class="paint-label-row">
-            <span>종류</span>
-            <span id="brushTypeLabel">기본 붓</span>
-          </div>
+          <div class="paint-label-row"><span>종류</span><span id="brushTypeLabel">기본 붓</span></div>
           <div id="brushTypeButtons" class="brush-type-grid"></div>
         </section>
-
         <section class="paint-group" aria-label="brush appearance">
           <label class="paint-field">
             <span>크기</span>
@@ -41,18 +30,29 @@
             <output id="sizeOutput">8</output>
           </label>
         </section>
-
         <section class="paint-group" aria-label="color picker">
-          <div class="paint-label-row">
-            <span>색상</span>
-            <output id="colorHexOutput">#000000</output>
-          </div>
+          <div class="paint-label-row"><span>색상</span><output id="colorHexOutput">#000000</output></div>
           <div class="paint-color-picker">
             <canvas id="colorHueCanvas" width="24" height="164" aria-label="색조"></canvas>
             <canvas id="colorAreaCanvas" width="230" height="164" aria-label="색상 선택"></canvas>
             <span id="colorPreview" class="color-preview"></span>
           </div>
           <input id="colorInput" type="color" aria-label="color value">
+        </section>
+      </section>
+
+      <section id="eraserPanel" class="eraser-panel hidden" aria-label="eraser tools">
+        <header><strong>지우개</strong><button id="eraserPanelClose" type="button">닫기</button></header>
+        <section class="paint-group" aria-label="eraser types">
+          <div class="paint-label-row"><span>종류</span><span id="eraserTypeLabel">원형 지우개</span></div>
+          <div id="eraserTypeButtons" class="brush-type-grid"></div>
+        </section>
+        <section class="paint-group" aria-label="eraser size">
+          <label class="paint-field">
+            <span>크기</span>
+            <input id="eraserSizeInput" type="range" min="4" max="72" value="18">
+            <output id="eraserSizeOutput">18</output>
+          </label>
         </section>
       </section>
 
@@ -66,7 +66,19 @@
         <button id="chatToggle" class="chat-toggle active" type="button">채팅</button>
         <button id="exportToggle" class="export-toggle" type="button">내보내기</button>
         <button id="voiceToggle" class="voice-toggle" type="button">음성</button>
+        <button id="rankingToggle" class="ranking-toggle active" type="button">랭킹</button>
       </div>
+
+      <aside class="ranking-panel" aria-label="좋아요 랭킹">
+        <div class="ranking-head"><strong>랭킹</strong><span>좋아요</span></div>
+        <ol id="rankingList" class="ranking-list"></ol>
+      </aside>
+
+      <section id="votePopup" class="vote-popup hidden" aria-label="플레이어 추천">
+        <strong id="voteTargetName">플레이어</strong>
+        <div><button id="voteLikeButton" type="button">좋아요</button><button id="voteDislikeButton" type="button">비추</button><button id="voteCloseButton" type="button">닫기</button></div>
+        <p id="voteHint" class="vote-hint">비추 3개 이상이면 해당 플레이어의 그림이 삭제돼.</p>
+      </section>
 
       <section id="exportPanel" class="export-panel hidden" aria-label="export drawing">
         <header>
@@ -130,10 +142,6 @@
       </section>
 
       <aside class="chat" aria-label="chat">
-        <div class="status-row">
-          <span>채팅</span>
-          <button id="chatCloseButton" type="button">닫기</button>
-        </div>
         <div id="chatLog" class="chat-log" aria-live="polite"></div>
         <form id="chatForm" class="chat-form">
           <input id="chatInput" type="text" maxlength="240" placeholder="메시지 입력" autocomplete="off">
@@ -144,7 +152,10 @@
       <aside class="layer-panel" aria-label="layers">
         <div class="layer-head">
           <span>레이어</span>
-          <button id="layerAddButton" type="button" aria-label="레이어 추가">+</button>
+          <div class="layer-head-actions">
+            <button id="layerCloseButton" type="button" aria-label="레이어 닫기">-</button>
+            <button id="layerAddButton" type="button" aria-label="레이어 추가">+</button>
+          </div>
         </div>
         <div id="layerList" class="layer-list"></div>
         <div class="layer-settings">

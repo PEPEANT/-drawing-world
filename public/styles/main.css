@@ -6,7 +6,10 @@
 @import url("./export-panel.css");
 @import url("./item-panel.css");
 @import url("./layer-panel.css");
+@import url("./ranking.css");
 @import url("./mobile-controls.css");
 @import url("./lobby.css");
 @import url("./skin-editor.css");
 @import url("./responsive.css");
+@import url("./mobile-layout.css");
+@import url("./mobile-compact.css");

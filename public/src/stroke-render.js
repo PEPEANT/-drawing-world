@@ -3,6 +3,14 @@ export function drawStroke(ctx, stroke) {
   if (points.length < 2) return;
 
   if (stroke.tool === "eraser") {
+    if (stroke.brush === "spray") {
+      drawSpray(ctx, { ...stroke, color: "#ffffff" });
+      return;
+    }
+    if (stroke.brush === "square") {
+      drawLine(ctx, stroke, { color: "#ffffff", cap: "butt", join: "miter", size: stroke.size });
+      return;
+    }
     drawLine(ctx, stroke, { color: "#ffffff", cap: "round", join: "round", size: stroke.size });
     return;
   }

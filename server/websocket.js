@@ -1,10 +1,13 @@
 const crypto = require("node:crypto");
 const { WebSocketServer } = require("ws");
 const { recordPlayerSession } = require("./analytics");
+const { formatBanReason, getActiveBan } = require("./bans");
 const { notifyAdminState } = require("./admin");
 const { LIMITS } = require("./config");
 const { broadcast, send } = require("./protocol");
+const { handleRadioPlay, handleRadioStop } = require("./radio");
 const { getRoom, removeRoomIfEmpty } = require("./rooms");
+const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const {
   normalizeItem,
   normalizePlayer,
@@ -31,8 +34,17 @@ function attachGameSocket(server) {
     const room = getRoom(roomName);
     const id = crypto.randomUUID();
     const isSpectator = url.searchParams.get("spectator") === "1";
+    const clientId = safeClientId(url.searchParams.get("clientId"));
+    const activeBan = getActiveBan(clientId);
+
+    if (!isSpectator && activeBan) {
+      send(ws, { type: "kicked", reason: formatBanReason(activeBan) });
+      ws.close(4003, "banned");
+      return;
+    }
 
     ws.id = id;
+    ws.clientId = clientId;
     ws.roomName = roomName;
     ws.isSpectator = isSpectator;
     ws.connectedAt = Date.now();
@@ -51,6 +63,7 @@ function attachGameSocket(server) {
       room: roomName,
       strokes: room.strokes,
       items: room.items,
+      ranking: buildRanking(room),
       players: Array.from(room.players.values())
     });
 
@@ -62,7 +75,9 @@ function attachGameSocket(server) {
 function handleClose(ws, room, roomName, id) {
   room.clients.delete(ws);
   room.players.delete(id);
+  removePlayerVotes(room, id);
   broadcast(room, { type: "playerLeave", id }, ws);
+  broadcast(room, { type: "ranking", ranking: buildRanking(room) }, ws);
   removeRoomIfEmpty(roomName);
   notifyAdminState();
 }
@@ -114,6 +129,11 @@ function handleMessage(ws, room, raw) {
 
   if (message.type === "radioStop") {
     handleRadioStop(room, message);
+    return;
+  }
+
+  if (message.type === "vote") {
+    handleVote(ws, room, message);
   }
 }
 
@@ -126,12 +146,20 @@ function handleClearLayer(room, message) {
 
 function handleHello(ws, room, message) {
   const player = normalizePlayer(message.player || {}, ws.id);
-  ws.clientId = safeClientId(message.player?.clientId);
+  ws.clientId = safeClientId(message.player?.clientId) || ws.clientId;
+  const activeBan = getActiveBan(ws.clientId);
+  if (activeBan) {
+    send(ws, { type: "kicked", reason: formatBanReason(activeBan) });
+    ws.close(4003, "banned");
+    return;
+  }
   recordPlayerSession({ clientId: ws.clientId || ws.id, room: ws.roomName, at: ws.connectedAt });
+  player.clientId = ws.clientId;
   player.connectedAt = ws.connectedAt;
   player.updatedAt = Date.now();
   room.players.set(ws.id, player);
   broadcast(room, { type: "playerJoin", player }, ws);
+  broadcast(room, { type: "ranking", ranking: buildRanking(room) }, undefined);
   notifyAdminState();
 }
 
@@ -139,10 +167,27 @@ function handlePlayerUpdate(ws, room, message) {
   const existing = room.players.get(ws.id);
   if (!existing) return;
   const player = normalizePlayer({ ...existing, ...message.player }, ws.id);
+  player.clientId = existing.clientId || ws.clientId;
   player.connectedAt = existing.connectedAt || ws.connectedAt;
   player.updatedAt = Date.now();
   room.players.set(ws.id, player);
   broadcast(room, { type: "playerUpdate", player }, ws);
+  notifyAdminState();
+}
+
+function handleVote(ws, room, message) {
+  const result = applyVote(room, {
+    voterId: ws.id,
+    targetId: typeof message.target === "string" ? message.target : "",
+    value: message.value
+  });
+  if (!result.ok) {
+    send(ws, { type: "voteResult", message: result.reason });
+    return;
+  }
+  broadcast(room, { type: "ranking", ranking: result.ranking }, undefined);
+  if (result.feedback) broadcast(room, { type: "voteFeedback", feedback: result.feedback }, undefined);
+  if (result.clearedTarget) broadcast(room, { type: "clearPlayerStrokes", target: result.clearedTarget }, undefined);
   notifyAdminState();
 }
 
@@ -173,33 +218,6 @@ function handleItemAdd(ws, room, message) {
   }
   broadcast(room, { type: "itemAdd", item }, undefined);
   notifyAdminState();
-}
-
-function handleRadioPlay(ws, room, message) {
-  if (typeof message.id !== "string") return;
-  clearExpiredRadio(room);
-  if (room.radio) {
-    send(ws, { type: "radioBusy", id: room.radio.id });
-    return;
-  }
-  const item = room.items.find((entry) => entry.id === message.id && entry.type === "radio");
-  if (!item) return;
-  room.radio = { id: item.id, by: ws.id, startedAt: Date.now() };
-  broadcast(room, { type: "radioPlay", id: item.id, by: ws.id }, ws);
-}
-
-function handleRadioStop(room, message) {
-  if (typeof message.id !== "string") return;
-  if (room.radio?.id === message.id) {
-    room.radio = null;
-    broadcast(room, { type: "radioStop", id: message.id }, undefined);
-  }
-}
-
-function clearExpiredRadio(room) {
-  if (room.radio && Date.now() - room.radio.startedAt > LIMITS.radioLockMs) {
-    room.radio = null;
-  }
 }
 
 function safeClientId(value) {

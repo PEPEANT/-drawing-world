@@ -134,9 +134,20 @@
 }
 
 .room-header button,
-.kick-button {
+.kick-button,
+.ban-button,
+.unban-button {
   padding: 0 11px;
   color: var(--danger);
+}
+
+.ban-button,
+.unban-button {
+  margin-left: 6px;
+}
+
+.unban-button {
+  color: var(--good);
 }
 
 .room-actions {

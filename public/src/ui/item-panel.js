@@ -17,7 +17,7 @@ export function initItemPanel({ send, setTool }) {
   renderItemTypes();
   initAudioUpload();
   syncItemPanel();
-  ui.itemPanelClose.addEventListener("click", () => setTool("none"));
+  ui.itemPanelClose.addEventListener("click", closeItemPanel);
   ui.itemPopupClose.addEventListener("click", closeItemPopup);
   ui.itemOpenLinkButton.addEventListener("click", openSelectedLink);
   ui.itemPlayRadioButton.addEventListener("click", () => playSelectedRadio(true));

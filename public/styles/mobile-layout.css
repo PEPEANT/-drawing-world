@@ -1,0 +1,236 @@
+@media (max-width: 840px), (pointer: coarse) {
+  .quick-actions {
+    left: 10px;
+    top: 10px;
+    min-height: 36px;
+  }
+
+  .quick-actions button {
+    min-height: 36px;
+    padding: 0 11px;
+    font-size: 13px;
+  }
+
+  .chat {
+    left: 10px;
+    top: 58px;
+    width: min(300px, calc(100vw - 20px));
+  }
+
+  .chat-log {
+    height: 112px;
+    padding: 8px;
+  }
+
+  .chat-form {
+    padding: 8px;
+  }
+
+  .ranking-panel {
+    top: 10px;
+    right: 10px;
+    width: min(210px, calc(100vw - 332px));
+  }
+
+  .ranking-head {
+    padding: 7px 9px;
+  }
+
+  .ranking-list {
+    max-height: 78px;
+    padding: 6px;
+  }
+
+  .ranking-list li {
+    min-height: 26px;
+    padding: 3px 5px;
+    font-size: 12px;
+  }
+
+  .paint-panel,
+  .eraser-panel,
+  .item-panel {
+    left: 10px;
+    bottom: 82px;
+    width: min(282px, calc(100vw - 132px));
+    max-height: min(236px, calc(100vh - 148px));
+    overflow: auto;
+    padding: 7px;
+  }
+
+  .paint-panel header,
+  .eraser-panel header,
+  .item-panel header {
+    margin-bottom: 6px;
+  }
+
+  .paint-panel header strong,
+  .eraser-panel header strong {
+    font-size: 14px;
+  }
+
+  .paint-group {
+    padding-top: 7px;
+  }
+
+  .paint-group + .paint-group {
+    margin-top: 7px;
+  }
+
+  .paint-label-row,
+  .paint-field,
+  .item-field {
+    margin-top: 7px;
+    font-size: 12px;
+  }
+
+  .brush-type-grid,
+  .item-type-grid {
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .brush-type-grid button,
+  .item-type-grid button {
+    min-height: 30px;
+  }
+
+  .paint-color-picker {
+    grid-template-columns: 18px 1fr;
+    gap: 7px;
+  }
+
+  .paint-color-picker canvas {
+    height: 70px;
+  }
+
+  .color-preview {
+    right: 7px;
+    bottom: 7px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .hotbar {
+    display: none;
+  }
+
+  .mobile-controls {
+    inset: auto 0 12px;
+    display: block;
+  }
+
+  .joystick-base {
+    left: 18px;
+    bottom: 0;
+    width: 96px;
+    height: 96px;
+    margin-left: 0;
+  }
+
+  .joystick-knob {
+    width: 38px;
+    height: 38px;
+    margin: -19px 0 0 -19px;
+  }
+
+  .mobile-tools {
+    left: 50%;
+    right: auto;
+    bottom: 0;
+    display: flex;
+    gap: 7px;
+    transform: translateX(-50%);
+  }
+
+  .mobile-tools button {
+    min-width: 62px;
+    min-height: 38px;
+  }
+
+  #mobileBrushButton {
+    order: 1;
+  }
+
+  #mobileItemButton {
+    order: 2;
+  }
+
+  #mobileEraserButton {
+    order: 3;
+  }
+
+  .layer-panel {
+    top: 132px;
+    right: 10px;
+    bottom: auto;
+    width: min(218px, calc(100vw - 20px));
+    max-height: min(248px, calc(100vh - 148px));
+    overflow: hidden;
+  }
+
+  .layer-head {
+    padding: 7px 8px;
+  }
+
+  .layer-list {
+    max-height: 104px;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .layer-item {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .layer-preview {
+    width: 42px;
+    height: 26px;
+  }
+
+  .layer-name-input {
+    height: 28px;
+    padding: 0 5px;
+  }
+
+  .layer-item button {
+    min-height: 28px;
+    padding: 0 7px;
+  }
+
+  .layer-settings {
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .layer-actions button {
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ranking-panel {
+    top: 58px;
+    right: 10px;
+    width: min(200px, calc(100vw - 20px));
+  }
+
+  .paint-panel,
+  .eraser-panel,
+  .item-panel {
+    width: min(260px, calc(100vw - 96px));
+    max-height: min(220px, calc(100vh - 132px));
+  }
+
+  .layer-panel {
+    top: 176px;
+    width: min(210px, calc(100vw - 20px));
+  }
+
+  .mobile-tools button {
+    min-width: 58px;
+  }
+}

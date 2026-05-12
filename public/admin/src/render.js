@@ -8,7 +8,7 @@ export function renderState(state) {
   dom.updatedAt.textContent = `마지막 갱신: ${formatTime(state.at)}`;
   dom.rooms.replaceChildren();
 
-  if (!state.rooms.length) {
+  if (!state.rooms.length && !state.bans?.length) {
     dom.rooms.append(dom.emptyTemplate.content.cloneNode(true));
     return;
   }
@@ -16,6 +16,7 @@ export function renderState(state) {
   for (const room of state.rooms) {
     dom.rooms.append(renderRoom(room));
   }
+  if (state.bans?.length) dom.rooms.append(renderBanSection(state.bans));
 }
 
 function renderRoom(room) {
@@ -103,7 +104,47 @@ function renderPlayerRow(roomName, player) {
   kickButton.className = "kick-button";
   kickButton.dataset.id = player.id;
   kickButton.dataset.name = player.name;
-  row.lastElementChild.append(kickButton);
+  const banButton = createRoomButton("ban", roomName, "밴");
+  banButton.className = "ban-button";
+  banButton.dataset.id = player.id;
+  banButton.dataset.name = player.name;
+  row.lastElementChild.append(kickButton, banButton);
+  return row;
+}
+
+function renderBanSection(bans) {
+  const section = document.createElement("section");
+  section.className = "room ban-list";
+  section.innerHTML = `
+    <div class="room-header">
+      <div class="room-title"><h2>밴 목록</h2><span>${bans.length}명</span></div>
+    </div>
+  `;
+  const table = document.createElement("table");
+  table.className = "player-table";
+  table.innerHTML = "<thead><tr><th>플레이어</th><th>방</th><th>해제 시간</th><th></th></tr></thead>";
+  const body = document.createElement("tbody");
+  for (const ban of bans) body.append(renderBanRow(ban));
+  table.append(body);
+  section.append(table);
+  return section;
+}
+
+function renderBanRow(ban) {
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${escapeHtml(ban.name)}</td>
+    <td>${escapeHtml(ban.room)}</td>
+    <td>${formatTime(ban.expiresAt)}</td>
+    <td></td>
+  `;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "unban-button";
+  button.dataset.action = "unban";
+  button.dataset.clientId = ban.clientId;
+  button.textContent = "해제";
+  row.lastElementChild.append(button);
   return row;
 }
 

@@ -1,5 +1,6 @@
 const { WebSocketServer } = require("ws");
 const { buildAnalyticsState } = require("./analytics");
+const { banClient, formatBanReason, listBans, unbanClient } = require("./bans");
 const { ADMIN_KEY } = require("./config");
 const { broadcast, send } = require("./protocol");
 const { getRoom, listRooms, rooms } = require("./rooms");
@@ -55,8 +56,39 @@ function handleAdminMessage(ws, raw) {
     return;
   }
 
+  if (message.type === "ban") {
+    banPlayer(message.room, message.id, message.hours);
+    return;
+  }
+
+  if (message.type === "unban") {
+    unbanClient(message.clientId);
+    notifyAdminState();
+    return;
+  }
+
   if (message.type === "clearRoom") {
     clearRoom(message.room);
+  }
+}
+
+function banPlayer(roomName, playerId, hours) {
+  const room = rooms.get(sanitizeRoomName(roomName));
+  if (!room || typeof playerId !== "string") return;
+  const durationMs = normalizeHours(hours) * 60 * 60 * 1000;
+
+  for (const client of room.clients) {
+    if (client.id !== playerId) continue;
+    const player = room.players.get(playerId);
+    const ban = banClient(client.clientId || player?.clientId || playerId, {
+      durationMs,
+      name: player?.name,
+      room: room.name
+    });
+    send(client, { type: "kicked", reason: formatBanReason(ban) });
+    client.close(4003, "banned by admin");
+    notifyAdminState();
+    break;
   }
 }
 
@@ -109,8 +141,14 @@ function buildAdminState() {
     clientCount: roomList.reduce((total, room) => total + room.clients, 0),
     adminCount: admins.size,
     analytics: buildAnalyticsState(),
+    bans: listBans(),
     rooms: roomList
   };
+}
+
+function normalizeHours(value) {
+  const hours = Number(value);
+  return Math.max(1, Math.min(720, Number.isFinite(hours) ? hours : 24));
 }
 
 module.exports = {

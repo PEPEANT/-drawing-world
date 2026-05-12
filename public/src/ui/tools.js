@@ -1,5 +1,7 @@
 import { state } from "../state.js";
+import { updateToolCursor } from "./cursor.js";
 import { initColorPicker, syncColorPicker } from "./color-picker.js";
+import { closeLayerPanel } from "./layers.js";
 import { ui } from "./dom.js";
 
 let setToolCallback = null;
@@ -15,7 +17,7 @@ export function initPaintPanel({ setTool }) {
   renderBrushTypes();
   initColorPicker();
 
-  ui.paintPanelClose.addEventListener("click", () => setToolCallback("none"));
+  ui.paintPanelClose.addEventListener("click", closePaintPanel);
 
   ui.paintPanel.addEventListener("click", (event) => {
     const brushButton = event.target.closest("[data-brush-type]");
@@ -24,6 +26,7 @@ export function initPaintPanel({ setTool }) {
       localStorage.setItem("drawing-online:brush-type", state.brushType);
       setToolCallback("brush");
       syncPaintPanel();
+      updateToolCursor();
       return;
     }
 
@@ -52,6 +55,7 @@ export function togglePaintPanel() {
 
 export function closePaintPanel() {
   ui.paintPanel.classList.add("hidden");
+  closeLayerPanel();
 }
 
 export function syncPaintPanel() {
@@ -62,6 +66,7 @@ export function syncPaintPanel() {
   const brush = BRUSH_TYPES.find((item) => item.id === state.brushType) || BRUSH_TYPES[0];
   ui.brushTypeLabel.textContent = brush.label;
   syncColorPicker();
+  updateToolCursor();
 }
 
 function renderBrushTypes() {

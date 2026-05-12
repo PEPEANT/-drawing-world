@@ -1,0 +1,113 @@
+.ranking-panel,
+.vote-popup {
+  position: absolute;
+  border: 1px solid rgba(220, 226, 234, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.ranking-panel {
+  top: 14px;
+  right: 14px;
+  width: min(230px, calc(100vw - 28px));
+  overflow: hidden;
+}
+
+.ranking-panel.is-closed,
+.spectator-mode .ranking-panel {
+  display: none;
+}
+
+.ranking-head,
+.ranking-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.ranking-head {
+  grid-template-columns: 1fr auto;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ranking-head span,
+.ranking-list small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ranking-list {
+  display: grid;
+  gap: 2px;
+  max-height: 220px;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+}
+
+.ranking-list li {
+  min-height: 30px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.ranking-list li:first-child {
+  background: #eef6ff;
+}
+
+.ranking-list strong {
+  min-width: 20px;
+}
+
+.ranking-list span {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vote-popup {
+  z-index: 5;
+  display: grid;
+  gap: 8px;
+  min-width: 190px;
+  padding: 10px;
+}
+
+.vote-popup.hidden {
+  display: none;
+}
+
+.vote-popup div {
+  display: flex;
+  gap: 6px;
+}
+
+.vote-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.vote-popup button {
+  flex: 1;
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+#voteLikeButton {
+  color: var(--good);
+}
+
+#voteDislikeButton {
+  color: var(--danger);
+}

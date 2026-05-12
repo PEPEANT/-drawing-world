@@ -46,6 +46,7 @@
 .spectator-mode .help,
 .spectator-mode .hotbar,
 .spectator-mode .mobile-controls,
-.spectator-mode .paint-panel {
+.spectator-mode .paint-panel,
+.spectator-mode .eraser-panel {
   display: none;
 }

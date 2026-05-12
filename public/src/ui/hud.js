@@ -1,6 +1,7 @@
 import { APP_NAME, getRoomName } from "../config.js";
 import { player, state } from "../state.js";
 import { savePlayerIdentity } from "../storage.js";
+import { updateToolCursor } from "./cursor.js";
 import { ui } from "./dom.js";
 
 export function initHud({ sendPlayerUpdate, toggleTool }) {
@@ -14,11 +15,13 @@ export function initHud({ sendPlayerUpdate, toggleTool }) {
   ui.colorInput.addEventListener("input", () => {
     player.color = ui.colorInput.value;
     savePlayerIdentity(player);
+    updateToolCursor();
     sendPlayerUpdate(true);
   });
 
   ui.sizeInput.addEventListener("input", () => {
     ui.sizeOutput.value = ui.sizeInput.value;
+    updateToolCursor();
   });
 
   ui.brushButton.addEventListener("click", () => toggleTool("brush"));

@@ -5,11 +5,14 @@ import { bindPointer } from "./input/pointer.js";
 import { connect, send, sendPlayerUpdate } from "./network.js";
 import { draw, resize, updateCamera, canvas } from "./render.js";
 import { initLobby } from "./ui/lobby.js";
+import { initCanvasCursor, updateToolCursor } from "./ui/cursor.js";
+import { closeEraserPanel, initEraserPanel, openEraserPanel, syncEraserPanel } from "./ui/eraser-panel.js";
 import { initExportPanel } from "./ui/export-panel.js";
 import { closeLayerPanel, initLayerPanel, openLayerPanel } from "./ui/layers.js";
 import { closeItemPanel, initItemPanel, openItemPanel, syncItemPanel } from "./ui/item-panel.js";
 import { closePaintPanel, initPaintPanel, openPaintPanel, syncPaintPanel } from "./ui/tools.js";
 import { initHud, syncToolButtons } from "./ui/hud.js";
+import { initRanking } from "./ui/ranking.js";
 import { initVoiceButton } from "./ui/voice.js";
 import { loadLocalStrokes } from "./storage.js";
 import { player, replaceStrokes, state } from "./state.js";
@@ -28,9 +31,12 @@ function init() {
     toggleTool
   });
   initPaintPanel({ setTool });
+  initEraserPanel({ setTool });
   initItemPanel({ send, setTool });
   initLayerPanel({ send });
   initExportPanel();
+  initRanking({ send });
+  initCanvasCursor(canvas);
   initVoiceButton();
   bindChatBubbles();
 
@@ -71,24 +77,34 @@ function setTool(nextTool, options = {}) {
   state.tool = nextTool;
   syncToolButtons();
   syncPaintPanel();
+  syncEraserPanel();
   syncItemPanel();
   syncToolPanels();
-  canvas.style.cursor = getCursor();
+  updateToolCursor();
 }
 
 function toggleTool(nextTool) {
-  setTool(state.tool === nextTool ? "none" : nextTool);
+  if (state.tool === nextTool && !isToolPanelHidden(nextTool)) {
+    setTool("none");
+    return;
+  }
+  setTool(nextTool);
 }
 
 function syncToolPanels() {
   closePaintPanel();
+  closeEraserPanel();
   closeLayerPanel();
   closeItemPanel();
+  if (state.tool !== "none" && isCompactScreen()) {
+    closeChat();
+  }
   if (state.tool === "brush") {
     openPaintPanel();
     openLayerPanel();
   }
   if (state.tool === "eraser") {
+    openEraserPanel();
     openLayerPanel();
   }
   if (state.tool === "item") {
@@ -96,17 +112,20 @@ function syncToolPanels() {
   }
 }
 
-function getCursor() {
-  if (state.tool === "eraser") return "cell";
-  if (state.tool === "item") return "copy";
-  if (state.tool === "brush") return "crosshair";
-  return "default";
+function isCompactScreen() {
+  return window.matchMedia("(max-width: 840px), (pointer: coarse)").matches;
+}
+
+function isToolPanelHidden(tool) {
+  if (tool === "brush") return ui.paintPanel.classList.contains("hidden");
+  if (tool === "eraser") return ui.eraserPanel.classList.contains("hidden");
+  if (tool === "item") return ui.itemPanel.classList.contains("hidden");
+  return false;
 }
 
 function bindChat() {
   openChat({ focus: false });
   ui.chatToggle.addEventListener("click", toggleChat);
-  ui.chatCloseButton.addEventListener("click", closeChat);
 
   ui.chatInput.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {

@@ -51,6 +51,18 @@ dom.rooms.addEventListener("click", (event) => {
     if (window.confirm(`${name} 님을 강퇴할까?`)) {
       sendAdmin({ type: "kick", room, id: button.dataset.id });
     }
+    return;
+  }
+
+  if (button.dataset.action === "ban") {
+    const name = button.dataset.name || "플레이어";
+    const hours = window.prompt(`${name} 님을 몇 시간 밴할까?`, "24");
+    if (hours) sendAdmin({ type: "ban", room, id: button.dataset.id, hours: Number(hours) });
+    return;
+  }
+
+  if (button.dataset.action === "unban") {
+    sendAdmin({ type: "unban", clientId: button.dataset.clientId });
   }
 });
 

@@ -15,12 +15,17 @@ export const state = {
   activeLayerId: localStorage.getItem(STORAGE_KEYS.activeLayer) || DEFAULT_LAYER_ID,
   remotePlayers: new Map(),
   chatBubbles: new Map(),
+  voteBubbles: new Map(),
+  ranking: [],
+  voteTargetId: null,
   isSpectator: isSpectatorMode(),
   gameStarted: isSpectatorMode(),
   currentStroke: null,
   activePointerId: null,
   tool: "none",
   brushType: localStorage.getItem("drawing-online:brush-type") || "round",
+  eraserType: localStorage.getItem("drawing-online:eraser-type") || "round",
+  eraserSize: Number(localStorage.getItem("drawing-online:eraser-size")) || 18,
   itemType: localStorage.getItem("drawing-online:item-type") || "flag",
   selectedItemId: null,
   online: false,
@@ -90,6 +95,7 @@ export function trimStrokes() {
 }
 
 export function addLayer() {
+  if (state.layers.length >= CLIENT_LIMITS.layersPerPlayer) return null;
   const layer = createLayer(`layer-${Date.now()}`, `레이어 ${state.layers.length + 1}`);
   state.layers.push(layer);
   setActiveLayer(layer.id);
@@ -125,6 +131,7 @@ export function setActiveLayer(id) {
 
 export function ensureLayer(id) {
   if (!id || getLayer(id)) return;
+  if (state.layers.length >= CLIENT_LIMITS.layersPerPlayer) return;
   state.layers.push(createLayer(id, `레이어 ${state.layers.length + 1}`));
   saveLayers();
 }
@@ -146,7 +153,7 @@ function loadSavedLayers() {
       visible: layer.visible !== false,
       opacity: clampOpacity(layer.opacity)
     }));
-    return layers.length ? layers : [createLayer(DEFAULT_LAYER_ID, "레이어 1")];
+    return layers.length ? layers.slice(0, CLIENT_LIMITS.layersPerPlayer) : [createLayer(DEFAULT_LAYER_ID, "레이어 1")];
   } catch {
     return [createLayer(DEFAULT_LAYER_ID, "레이어 1")];
   }

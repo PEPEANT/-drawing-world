@@ -2,6 +2,7 @@ import { addStroke, state } from "../state.js";
 import { saveLocalStrokes } from "../storage.js";
 import { ui } from "../ui/dom.js";
 import { handleItemPointer } from "../ui/item-panel.js";
+import { handleVotePointer } from "../ui/ranking.js";
 import { canvas, clampPoint, screenToWorld } from "../render.js";
 import { distance } from "../utils.js";
 
@@ -11,6 +12,10 @@ export function bindPointer({ send }) {
     state.activePointerId = event.pointerId;
     canvas.setPointerCapture(state.activePointerId);
     const point = screenToWorld(event.clientX, event.clientY);
+    if (handleVotePointer(clampPoint(point), event)) {
+      cancelPointer();
+      return;
+    }
     if (handleItemPointer(clampPoint(point), send)) {
       cancelPointer();
       return;
@@ -24,9 +29,9 @@ export function bindPointer({ send }) {
       author: state.socketId,
       layerId: state.activeLayerId,
       color: state.tool === "eraser" ? "#ffffff" : ui.colorInput.value,
-      size: Number(ui.sizeInput.value),
+      size: state.tool === "eraser" ? state.eraserSize : Number(ui.sizeInput.value),
       tool: state.tool,
-      brush: state.brushType,
+      brush: state.tool === "eraser" ? state.eraserType : state.brushType,
       points: [clampPoint(point)]
     };
   });

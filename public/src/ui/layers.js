@@ -8,6 +8,7 @@ import {
   state,
   updateLayer
 } from "../state.js";
+import { CLIENT_LIMITS } from "../config.js";
 import { saveLocalStrokes } from "../storage.js";
 import { ui } from "./dom.js";
 
@@ -15,8 +16,9 @@ let sendToServer = () => {};
 
 export function initLayerPanel({ send }) {
   sendToServer = send;
+  ui.layerCloseButton.addEventListener("click", closeLayerPanel);
   ui.layerAddButton.addEventListener("click", () => {
-    addLayer();
+    if (!addLayer()) renderLayerPanel();
   });
   ui.layerOpacityInput.addEventListener("input", () => {
     const opacity = Number(ui.layerOpacityInput.value) / 100;
@@ -55,6 +57,9 @@ export function renderLayerPanel() {
 
   ui.layerOpacityInput.value = Math.round((activeLayer?.opacity || 1) * 100);
   ui.layerOpacityOutput.textContent = `${ui.layerOpacityInput.value}%`;
+  const reachedLimit = state.layers.length >= CLIENT_LIMITS.layersPerPlayer;
+  ui.layerAddButton.disabled = reachedLimit;
+  ui.layerAddButton.title = reachedLimit ? "레이어는 5개까지 만들 수 있어." : "레이어 추가";
   ui.layerDeleteButton.disabled = state.layers.length <= 1;
 }
 

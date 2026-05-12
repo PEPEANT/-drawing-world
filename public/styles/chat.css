@@ -51,27 +51,10 @@
 
 .chat-toggle.active,
 .export-toggle.active,
-.voice-toggle.active {
+.voice-toggle.active,
+.ranking-toggle.active {
   background: #111827;
   color: #ffffff;
-}
-
-.status-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 9px 10px;
-  border-bottom: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.status-row button {
-  min-height: 26px;
-  padding: 0 8px;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 .chat-log {

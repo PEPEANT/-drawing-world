@@ -34,6 +34,11 @@
   font-weight: 750;
 }
 
+.layer-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
 .layer-head button {
   width: 28px;
   min-height: 28px;
@@ -41,6 +46,12 @@
   background: #111827;
   color: #ffffff;
   font-weight: 800;
+}
+
+.layer-head button:disabled {
+  background: #d7dde7;
+  color: #697184;
+  cursor: not-allowed;
 }
 
 .layer-list {

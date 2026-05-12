@@ -1,6 +1,7 @@
-import { WORLD } from "../config.js";
+import { PLAYER, WORLD } from "../config.js";
+import { movePlayerWithCollision, resolvePlayerCollisions } from "../player-physics.js";
 import { player, state } from "../state.js";
-import { clamp, isTypingTarget } from "../utils.js";
+import { isTypingTarget } from "../utils.js";
 
 export function bindKeyboard({ openChat, toggleTool }) {
   window.addEventListener("keydown", (event) => {
@@ -54,14 +55,15 @@ export function updatePlayer() {
 
   if (dx === 0 && dy === 0) {
     player.moving = false;
+    resolvePlayerCollisions();
     return;
   }
-  const length = Math.hypot(dx, dy);
   const speed = state.keys.has("shift") ? 7.2 : 4.3;
   player.facing = dx < -0.05 ? -1 : dx > 0.05 ? 1 : player.facing;
   player.moving = true;
-  player.x = clamp(player.x + (dx / length) * speed, 24, WORLD.width - 24);
-  player.y = clamp(player.y + (dy / length) * speed, 24, WORLD.height - 24);
+  movePlayerWithCollision(dx, dy, speed);
+  player.x = Math.max(PLAYER.collisionRadius, Math.min(WORLD.width - PLAYER.collisionRadius, player.x));
+  player.y = Math.max(PLAYER.collisionRadius, Math.min(WORLD.height - PLAYER.collisionRadius, player.y));
 }
 
 function isMoveKey(key) {
