@@ -1,27 +1,27 @@
 export function drawStroke(ctx, stroke) {
-  const points = stroke.points || [];
+  const points = getDrawablePoints(stroke);
   if (points.length < 2) return;
 
   if (stroke.tool === "eraser") {
     if (stroke.brush === "spray") {
-      drawSpray(ctx, { ...stroke, color: "#ffffff" });
+      drawSpray(ctx, { ...stroke, color: "#ffffff" }, points);
       return;
     }
     if (stroke.brush === "square") {
-      drawLine(ctx, stroke, { color: "#ffffff", cap: "butt", join: "miter", size: stroke.size });
+      drawLine(ctx, points, { color: "#ffffff", cap: "butt", join: "miter", size: stroke.size });
       return;
     }
-    drawLine(ctx, stroke, { color: "#ffffff", cap: "round", join: "round", size: stroke.size });
+    drawLine(ctx, points, { color: "#ffffff", cap: "round", join: "round", size: stroke.size });
     return;
   }
 
   if (stroke.brush === "spray") {
-    drawSpray(ctx, stroke);
+    drawSpray(ctx, stroke, points);
     return;
   }
 
   if (stroke.brush === "marker") {
-    drawLine(ctx, stroke, {
+    drawLine(ctx, points, {
       color: stroke.color,
       cap: "round",
       join: "round",
@@ -32,15 +32,14 @@ export function drawStroke(ctx, stroke) {
   }
 
   if (stroke.brush === "square") {
-    drawLine(ctx, stroke, { color: stroke.color, cap: "butt", join: "miter", size: stroke.size });
+    drawLine(ctx, points, { color: stroke.color, cap: "butt", join: "miter", size: stroke.size });
     return;
   }
 
-  drawLine(ctx, stroke, { color: stroke.color, cap: "round", join: "round", size: stroke.size });
+  drawLine(ctx, points, { color: stroke.color, cap: "round", join: "round", size: stroke.size });
 }
 
-function drawLine(ctx, stroke, options) {
-  const points = stroke.points || [];
+function drawLine(ctx, points, options) {
   ctx.save();
   ctx.globalAlpha *= options.alpha || 1;
   ctx.lineCap = options.cap;
@@ -64,8 +63,7 @@ function drawLine(ctx, stroke, options) {
   ctx.restore();
 }
 
-function drawSpray(ctx, stroke) {
-  const points = stroke.points || [];
+function drawSpray(ctx, stroke, points) {
   const radius = Math.max(4, stroke.size * 0.9);
   const density = Math.max(6, Math.round(stroke.size * 1.1));
   const baseSeed = hashString(stroke.id || "");
@@ -88,6 +86,11 @@ function drawSpray(ctx, stroke) {
   }
 
   ctx.restore();
+}
+
+function getDrawablePoints(stroke) {
+  if (!Array.isArray(stroke?.points)) return [];
+  return stroke.points.filter((point) => point && Number.isFinite(point.x) && Number.isFinite(point.y));
 }
 
 function hashString(value) {

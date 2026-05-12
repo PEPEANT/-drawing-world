@@ -71,6 +71,14 @@ export function replaceItems(nextItems) {
   state.items = Array.isArray(nextItems) ? nextItems : [];
 }
 
+export function removeItemsByIds(ids) {
+  const removedIds = new Set(Array.isArray(ids) ? ids : []);
+  if (!removedIds.size) return [];
+  const removed = state.items.filter((item) => removedIds.has(item.id));
+  state.items = state.items.filter((item) => !removedIds.has(item.id));
+  return removed;
+}
+
 export function addItem(item) {
   state.items.push(item);
 }

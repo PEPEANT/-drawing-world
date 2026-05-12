@@ -13,15 +13,20 @@ export function drawLayeredStrokes(ctx, drawStroke) {
 
 function drawLayerStrokes(ctx, layerId, drawStroke) {
   for (const stroke of state.strokes) {
-    if (stroke.tool !== "eraser" && getStrokeLayerId(stroke) === layerId) {
+    if (isVisibleStroke(stroke, layerId)) {
       drawStroke(ctx, stroke);
     }
   }
-  if (state.currentStroke?.tool !== "eraser" && getStrokeLayerId(state.currentStroke) === layerId) {
-    drawStroke(ctx, state.currentStroke);
+  const currentStroke = state.currentStroke;
+  if (isVisibleStroke(currentStroke, layerId)) {
+    drawStroke(ctx, currentStroke);
   }
 }
 
 function getFallbackLayer() {
   return { id: DEFAULT_LAYER_ID, visible: true, opacity: 1 };
+}
+
+function isVisibleStroke(stroke, layerId) {
+  return stroke && stroke.tool !== "eraser" && getStrokeLayerId(stroke) === layerId;
 }

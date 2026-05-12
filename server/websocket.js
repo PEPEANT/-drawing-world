@@ -6,6 +6,7 @@ const { notifyAdminState } = require("./admin");
 const { LIMITS } = require("./config");
 const { broadcast, send } = require("./protocol");
 const { handleRadioPlay, handleRadioStop } = require("./radio");
+const { removeOwnerItems } = require("./items");
 const { getRoom, removeRoomIfEmpty } = require("./rooms");
 const { deleteOwnStrokeIds } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
@@ -76,7 +77,11 @@ function attachGameSocket(server) {
 function handleClose(ws, room, roomName, id) {
   room.clients.delete(ws);
   room.players.delete(id);
+  const removedItemIds = removeOwnerItems(room, { playerId: id, clientId: ws.clientId });
   removePlayerVotes(room, id);
+  if (removedItemIds.length) {
+    broadcast(room, { type: "removeItems", ids: removedItemIds }, ws);
+  }
   broadcast(room, { type: "playerLeave", id }, ws);
   broadcast(room, { type: "ranking", ranking: buildRanking(room) }, ws);
   removeRoomIfEmpty(roomName);
