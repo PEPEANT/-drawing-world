@@ -61,6 +61,21 @@ dom.rooms.addEventListener("click", (event) => {
     return;
   }
 
+  if (button.dataset.action === "warn") {
+    const name = button.dataset.name || "플레이어";
+    const text = window.prompt(`${name} 님에게 보낼 경고 메시지`, "그림/채팅 이용 규칙을 지켜주세요.");
+    if (text) sendAdmin({ type: "warn", room, id: button.dataset.id, text });
+    return;
+  }
+
+  if (button.dataset.action === "clearPlayer") {
+    const name = button.dataset.name || "플레이어";
+    if (window.confirm(`${name} 님의 그림만 초기화할까?`)) {
+      sendAdmin({ type: "clearPlayer", room, id: button.dataset.id });
+    }
+    return;
+  }
+
   if (button.dataset.action === "unban") {
     sendAdmin({ type: "unban", clientId: button.dataset.clientId });
   }

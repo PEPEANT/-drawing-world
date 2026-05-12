@@ -4,7 +4,8 @@ const { banClient, formatBanReason, listBans, unbanClient } = require("./bans");
 const { ADMIN_KEY } = require("./config");
 const { broadcast, send } = require("./protocol");
 const { getRoom, listRooms, rooms } = require("./rooms");
-const { sanitizeRoomName } = require("./validation");
+const { clearPlayerStrokes: clearPlayerStrokeData } = require("./strokes");
+const { safeText, sanitizeRoomName } = require("./validation");
 
 const admins = new Set();
 let notifyTimer = null;
@@ -61,6 +62,16 @@ function handleAdminMessage(ws, raw) {
     return;
   }
 
+  if (message.type === "warn") {
+    warnPlayer(message.room, message.id, message.text);
+    return;
+  }
+
+  if (message.type === "clearPlayer") {
+    clearPlayerStrokes(message.room, message.id);
+    return;
+  }
+
   if (message.type === "unban") {
     unbanClient(message.clientId);
     notifyAdminState();
@@ -103,6 +114,32 @@ function kickPlayer(roomName, playerId) {
       break;
     }
   }
+}
+
+function warnPlayer(roomName, playerId, text) {
+  const room = rooms.get(sanitizeRoomName(roomName));
+  const warning = safeText(text, 160) || "운영 규칙을 지켜주세요.";
+  if (!room || typeof playerId !== "string") return;
+
+  for (const client of room.clients) {
+    if (client.id === playerId) {
+      send(client, { type: "adminWarning", text: warning });
+      break;
+    }
+  }
+}
+
+function clearPlayerStrokes(roomName, playerId) {
+  const room = rooms.get(sanitizeRoomName(roomName));
+  if (!room || typeof playerId !== "string") return;
+  const player = room.players.get(playerId);
+  if (!clearPlayerStrokeData(room, playerId)) return;
+  broadcast(room, {
+    type: "clearPlayerStrokes",
+    target: { id: playerId, name: player?.name || "플레이어" },
+    reason: `${player?.name || "플레이어"} 그림이 관리자에 의해 초기화됐어.`
+  }, undefined);
+  notifyAdminState();
 }
 
 function clearRoom(roomName) {

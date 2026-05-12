@@ -136,14 +136,26 @@
 .room-header button,
 .kick-button,
 .ban-button,
+.warn-button,
+.clear-player-button,
 .unban-button {
   padding: 0 11px;
   color: var(--danger);
 }
 
 .ban-button,
+.warn-button,
+.clear-player-button,
 .unban-button {
   margin-left: 6px;
+}
+
+.warn-button {
+  color: var(--accent);
+}
+
+.clear-player-button {
+  color: #b45309;
 }
 
 .unban-button {

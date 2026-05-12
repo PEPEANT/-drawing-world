@@ -13,11 +13,11 @@ export function drawLayeredStrokes(ctx, drawStroke) {
 
 function drawLayerStrokes(ctx, layerId, drawStroke) {
   for (const stroke of state.strokes) {
-    if (getStrokeLayerId(stroke) === layerId) {
+    if (stroke.tool !== "eraser" && getStrokeLayerId(stroke) === layerId) {
       drawStroke(ctx, stroke);
     }
   }
-  if (state.currentStroke && getStrokeLayerId(state.currentStroke) === layerId) {
+  if (state.currentStroke?.tool !== "eraser" && getStrokeLayerId(state.currentStroke) === layerId) {
     drawStroke(ctx, state.currentStroke);
   }
 }

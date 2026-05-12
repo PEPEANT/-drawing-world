@@ -9,6 +9,7 @@ import {
   setSocketId,
   state
 } from "./state.js";
+import { removeStrokesByIds } from "./eraser.js";
 import { saveLocalStrokes } from "./storage.js";
 import { addChatBubble, addChatMessage, addSystemMessage } from "./ui/chat.js";
 import { setOnline } from "./ui/hud.js";
@@ -133,10 +134,21 @@ function handleSocketMessage(message) {
     return;
   }
 
+  if (message.type === "deleteStrokes") {
+    removeStrokesByIds(message.ids);
+    saveLocalStrokes(state.strokes);
+    return;
+  }
+
   if (message.type === "clearPlayerStrokes" && message.target) {
     replaceStrokes(state.strokes.filter((stroke) => stroke.author !== message.target.id));
     saveLocalStrokes(state.strokes);
-    addSystemMessage(`${message.target.name || "플레이어"} 그림이 비추 누적으로 삭제됐어.`);
+    addSystemMessage(message.reason || `${message.target.name || "플레이어"} 그림이 삭제됐어.`);
+    return;
+  }
+
+  if (message.type === "adminWarning") {
+    addSystemMessage(`관리자 경고: ${message.text || "운영 규칙을 지켜줘."}`);
     return;
   }
 

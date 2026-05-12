@@ -108,7 +108,15 @@ function renderPlayerRow(roomName, player) {
   banButton.className = "ban-button";
   banButton.dataset.id = player.id;
   banButton.dataset.name = player.name;
-  row.lastElementChild.append(kickButton, banButton);
+  const warnButton = createRoomButton("warn", roomName, "경고");
+  warnButton.className = "warn-button";
+  warnButton.dataset.id = player.id;
+  warnButton.dataset.name = player.name;
+  const clearButton = createRoomButton("clearPlayer", roomName, "그림 초기화");
+  clearButton.className = "clear-player-button";
+  clearButton.dataset.id = player.id;
+  clearButton.dataset.name = player.name;
+  row.lastElementChild.append(warnButton, clearButton, kickButton, banButton);
   return row;
 }
 

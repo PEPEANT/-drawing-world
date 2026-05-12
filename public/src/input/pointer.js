@@ -1,4 +1,5 @@
 import { addStroke, state } from "../state.js";
+import { eraseOwnStrokes } from "../eraser.js";
 import { saveLocalStrokes } from "../storage.js";
 import { ui } from "../ui/dom.js";
 import { handleItemPointer } from "../ui/item-panel.js";
@@ -64,10 +65,26 @@ function cancelPointer() {
 
 function finishCurrentStroke(event, send) {
   if (!state.currentStroke || event.pointerId !== state.activePointerId) return;
+  if (state.currentStroke.tool === "eraser") {
+    finishEraserStroke(send);
+    return;
+  }
   if (state.currentStroke.points.length > 1) {
     addStroke(state.currentStroke);
     saveLocalStrokes(state.strokes);
     send({ type: "stroke", stroke: state.currentStroke });
+  }
+  state.currentStroke = null;
+  state.activePointerId = null;
+}
+
+function finishEraserStroke(send) {
+  if (state.currentStroke.points.length > 1) {
+    const ids = eraseOwnStrokes(state.currentStroke);
+    if (ids.length) {
+      saveLocalStrokes(state.strokes);
+      send({ type: "deleteStrokes", ids });
+    }
   }
   state.currentStroke = null;
   state.activePointerId = null;

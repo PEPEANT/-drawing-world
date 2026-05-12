@@ -7,6 +7,7 @@ const { LIMITS } = require("./config");
 const { broadcast, send } = require("./protocol");
 const { handleRadioPlay, handleRadioStop } = require("./radio");
 const { getRoom, removeRoomIfEmpty } = require("./rooms");
+const { deleteOwnStrokeIds } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const {
   normalizeItem,
@@ -92,48 +93,18 @@ function handleMessage(ws, room, raw) {
     return;
   }
 
-  if (message.type === "hello") {
-    handleHello(ws, room, message);
-    return;
-  }
-
-  if (message.type === "playerUpdate") {
-    handlePlayerUpdate(ws, room, message);
-    return;
-  }
-
-  if (message.type === "stroke") {
-    handleStroke(ws, room, message);
-    return;
-  }
-
-  if (message.type === "clearLayer") {
-    handleClearLayer(room, message);
-    return;
-  }
-
-  if (message.type === "chat") {
-    handleChat(ws, room, message);
-    return;
-  }
-
-  if (message.type === "itemAdd") {
-    handleItemAdd(ws, room, message);
-    return;
-  }
-
-  if (message.type === "radioPlay") {
-    handleRadioPlay(ws, room, message);
-    return;
-  }
-
-  if (message.type === "radioStop") {
-    handleRadioStop(room, message);
-    return;
-  }
-
-  if (message.type === "vote") {
-    handleVote(ws, room, message);
+  switch (message.type) {
+    case "hello": return handleHello(ws, room, message);
+    case "playerUpdate": return handlePlayerUpdate(ws, room, message);
+    case "stroke": return handleStroke(ws, room, message);
+    case "clearLayer": return handleClearLayer(room, message);
+    case "deleteStrokes": return handleDeleteStrokes(ws, room, message);
+    case "chat": return handleChat(ws, room, message);
+    case "itemAdd": return handleItemAdd(ws, room, message);
+    case "radioPlay": return handleRadioPlay(ws, room, message);
+    case "radioStop": return handleRadioStop(room, message);
+    case "vote": return handleVote(ws, room, message);
+    default: return undefined;
   }
 }
 
@@ -141,6 +112,13 @@ function handleClearLayer(room, message) {
   const layerId = safeLayerId(message.layerId);
   room.strokes = room.strokes.filter((stroke) => (stroke.layerId || "layer-1") !== layerId);
   broadcast(room, { type: "clearLayer", layerId }, undefined);
+  notifyAdminState();
+}
+
+function handleDeleteStrokes(ws, room, message) {
+  const deletedIds = deleteOwnStrokeIds(room, ws.id, message.ids);
+  if (!deletedIds.length) return;
+  broadcast(room, { type: "deleteStrokes", ids: deletedIds }, ws);
   notifyAdminState();
 }
 
