@@ -27,22 +27,19 @@ function createHttpServer() {
     const filePath = path.normalize(path.join(PUBLIC_DIR, requestedPath));
 
     if (!filePath.startsWith(PUBLIC_DIR)) {
-      res.writeHead(403);
+      res.writeHead(403, noStoreHeaders("text/plain; charset=utf-8"));
       res.end("Forbidden");
       return;
     }
 
     fs.readFile(filePath, (error, data) => {
       if (error) {
-        res.writeHead(404);
+        res.writeHead(404, noStoreHeaders("text/plain; charset=utf-8"));
         res.end("Not found");
         return;
       }
 
-      res.writeHead(200, {
-        "Content-Type": mimeTypes[path.extname(filePath)] || "application/octet-stream",
-        "Cache-Control": "no-store"
-      });
+      res.writeHead(200, noStoreHeaders(mimeTypes[path.extname(filePath)] || "application/octet-stream"));
       res.end(data);
     });
   });
@@ -107,11 +104,17 @@ function handleAudioUpload(req, res) {
 }
 
 function respondJson(res, payload, status = 200) {
-  res.writeHead(status, {
-    "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": "no-store"
-  });
+  res.writeHead(status, noStoreHeaders("application/json; charset=utf-8"));
   res.end(JSON.stringify(payload));
+}
+
+function noStoreHeaders(contentType) {
+  return {
+    "Content-Type": contentType,
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0"
+  };
 }
 
 module.exports = {
