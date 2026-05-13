@@ -1,0 +1,87 @@
+.ai-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 18px;
+  align-items: center;
+  padding: 22px 28px;
+  border-bottom: 1px solid #d8dee8;
+  background: #ffffff;
+}
+
+.ai-header p {
+  margin: 0 0 4px;
+  color: #586174;
+  font-size: 13px;
+}
+
+.ai-header h1 {
+  margin: 0;
+  font-size: 27px;
+}
+
+.ai-header nav {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-header a {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  color: #111827;
+  padding: 9px 12px;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.status-line {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #586174;
+  font-size: 14px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.status-dot.online {
+  background: #059669;
+}
+
+.status-dot.error {
+  background: #dc2626;
+}
+
+.ai-shell {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 24px auto 48px;
+}
+
+.control-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 780px) {
+  .ai-header,
+  .control-bar,
+  .metrics,
+  .grid,
+  .auth-panel {
+    grid-template-columns: 1fr;
+  }
+}

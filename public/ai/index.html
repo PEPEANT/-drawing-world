@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI 관측실 v0.1</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/ai/ai.css?v=20260513-1">
+  </head>
+  <body>
+    <header class="ai-header">
+      <div>
+        <p>시뮬라크월드</p>
+        <h1>AI 관측실 v0.1</h1>
+      </div>
+      <nav>
+        <a href="/">유저</a>
+        <a href="/admin">관리자</a>
+      </nav>
+      <div class="status-line">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">연결 대기</span>
+      </div>
+    </header>
+
+    <main class="ai-shell">
+      <form id="authForm" class="auth-panel">
+        <label>
+          <span>관리자 키</span>
+          <input id="keyInput" type="password" autocomplete="current-password" placeholder="admin">
+        </label>
+        <button type="submit">관측실 접속</button>
+        <p id="authMessage"></p>
+      </form>
+
+      <section id="observatory" class="hidden">
+        <section class="notice">
+          <strong>로컬 관측 엔진</strong>
+          <span>현재 v0.1은 외부 AI API를 호출하지 않고, 서버 상태를 읽어 판단/주제/발표를 생성합니다.</span>
+        </section>
+
+        <section class="control-bar">
+          <label>
+            <span>관측 방</span>
+            <select id="roomSelect"></select>
+          </label>
+          <button id="refreshButton" type="button">새로 관측</button>
+          <span id="updatedAt">-</span>
+        </section>
+
+        <section class="metrics">
+          <div><span>접속자</span><strong id="clientCount">0</strong></div>
+          <div><span>플레이어</span><strong id="playerCount">0</strong></div>
+          <div><span>선 기록</span><strong id="strokeCount">0</strong></div>
+          <div><span>채팅</span><strong id="messageCount">0</strong></div>
+        </section>
+
+        <section class="grid">
+          <article class="panel">
+            <h2>AI 판단</h2>
+            <div id="riskBadge" class="risk low">안정</div>
+            <p id="summaryText">관측 대기 중입니다.</p>
+            <p id="actionText"></p>
+          </article>
+
+          <article class="panel">
+            <h2>관측 신호</h2>
+            <ul id="signalList" class="signal-list"></ul>
+          </article>
+
+          <article class="panel">
+            <h2>최근 채팅</h2>
+            <div id="messageList" class="message-list"></div>
+          </article>
+
+          <article class="panel">
+            <h2>오늘의 주제 제안</h2>
+            <div id="topicList" class="topic-list"></div>
+          </article>
+        </section>
+
+        <section class="announce-panel">
+          <div>
+            <h2>승인 후 공용방 발표</h2>
+            <p>선택한 문구는 AI 관측실 이름으로 게임 채팅에 남습니다.</p>
+          </div>
+          <textarea id="announcementInput" maxlength="240" rows="3" placeholder="예: 오늘의 주제는 'AI 이후의 교실'입니다. 10분 동안 자유롭게 그려보세요."></textarea>
+          <div class="announce-actions">
+            <button id="announceButton" type="button">채팅에 발표</button>
+            <span id="announceStatus"></span>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <template id="emptyTemplate">
+      <p class="empty">아직 관측할 내용이 없습니다.</p>
+    </template>
+
+    <script type="module" src="/ai/ai.js?v=20260513-1"></script>
+  </body>
+</html>

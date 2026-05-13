@@ -48,6 +48,7 @@ function createHttpServer() {
 function resolvePublicPath(pathname) {
   if (pathname === "/") return "/index.html";
   if (pathname === "/admin") return "/admin/index.html";
+  if (pathname === "/ai") return "/ai/index.html";
   if (pathname.endsWith("/")) return `${pathname}index.html`;
   return pathname;
 }
