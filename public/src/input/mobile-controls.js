@@ -4,11 +4,8 @@ import { ui } from "../ui/dom.js";
 const maxDistance = 46;
 let joystickPointerId = null;
 
-export function bindMobileControls({ toggleTool }) {
-  ui.mobileBrushButton.addEventListener("click", () => toggleTool("brush"));
-  ui.mobileEraserButton.addEventListener("click", () => toggleTool("eraser"));
-  ui.mobileItemButton.addEventListener("click", () => toggleTool("item"));
-
+export function bindMobileControls() {
+  if (!ui.joystickBase) return;
   ui.joystickBase.addEventListener("pointerdown", startJoystick);
   ui.joystickBase.addEventListener("pointermove", moveJoystick);
   ui.joystickBase.addEventListener("pointerup", stopJoystick);

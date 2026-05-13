@@ -13,6 +13,7 @@ import {
 } from "./state.js";
 import { removeStrokesByIds } from "./eraser.js";
 import { saveLocalStrokes } from "./storage.js";
+import { addArenaEvent, applyArenaState, syncArenaHud } from "./arena-client.js";
 import { addChatBubble, addChatMessage, addSystemMessage } from "./ui/chat.js";
 import { setOnline } from "./ui/hud.js";
 import { renderRanking } from "./ui/ranking.js";
@@ -86,6 +87,7 @@ export function sendPlayerUpdate(force = false, now = performance.now()) {
       clientId: player.clientId,
       color: player.color,
       skin: player.skin,
+      role: player.role,
       facing: player.facing,
       moving: player.moving,
       x: player.x,
@@ -108,9 +110,24 @@ function handleSocketMessage(message) {
   }
 
   if (message.type === "playerJoin" || message.type === "playerUpdate") {
-    if (message.player && message.player.id !== state.socketId) {
+    if (message.player && message.player.id === state.socketId) {
+      Object.assign(player, message.player);
+      syncArenaHud();
+      return;
+    }
+    if (message.player) {
       state.remotePlayers.set(message.player.id, message.player);
     }
+    return;
+  }
+
+  if (message.type === "arenaState") {
+    applyArenaState(message.state);
+    return;
+  }
+
+  if (message.type === "arenaEvent") {
+    addArenaEvent(message.event);
     return;
   }
 

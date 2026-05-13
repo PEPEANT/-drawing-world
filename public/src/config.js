@@ -1,4 +1,4 @@
-export const APP_NAME = "드로잉온라인";
+export const APP_NAME = "시뮬라크월드: PvP 아레나";
 export const DEFAULT_ROOM = "lobby";
 export const PAPER_COLOR = "#f3f4f6";
 export const GRID_COLOR = "#e1e7ef";
@@ -42,6 +42,12 @@ export const CLIENT_LIMITS = {
   activeStrokes: 1200,
   layersPerPlayer: 5,
   downvotesBeforeClear: 3
+};
+
+export const ARENA_ROLES = {
+  striker: { label: "공격", hp: 120, hint: "빠른 근접 압박" },
+  ranger: { label: "원거리", hp: 90, hint: "먼 거리 견제" },
+  healer: { label: "힐러", hp: 100, hint: "아군 회복" }
 };
 
 export function getRoomName() {

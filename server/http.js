@@ -9,7 +9,7 @@ function createHttpServer() {
   return http.createServer((req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (url.pathname === "/healthz") {
-      respondJson(res, { ok: true, name: "드로잉온라인", at: Date.now() });
+      respondJson(res, { ok: true, name: "시뮬라크월드: PvP 아레나", at: Date.now() });
       return;
     }
 
@@ -58,7 +58,7 @@ function getPublicRooms() {
   return [
     {
       id: "lobby",
-      name: "시뮬라크월드",
+      name: "PvP 아레나",
       slug: "lobby",
       players: lobby?.playerCount || 0,
       viewers: lobby?.viewers || 0,

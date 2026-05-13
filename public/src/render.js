@@ -1,10 +1,8 @@
 import { GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
+import { drawArenaEvents, drawArenaGround } from "./arena-render.js";
 import { drawBillboard } from "./billboard.js";
-import { drawItems } from "./item-render.js";
-import { drawLayeredStrokes } from "./layer-render.js";
 import { drawPlayer } from "./player-render.js";
 import { player, state } from "./state.js";
-import { drawStroke } from "./stroke-render.js";
 import { clamp } from "./utils.js";
 
 export const canvas = document.querySelector("#world");
@@ -32,9 +30,7 @@ export function draw() {
   ctx.save();
   applyWorldTransform();
   drawPaper(view);
-
-  drawLayeredStrokes(ctx, drawStroke);
-  drawItems(ctx);
+  drawArenaGround(ctx);
 
   if (!state.isSpectator) {
     drawPlayer(ctx, player);
@@ -42,6 +38,7 @@ export function draw() {
   for (const remotePlayer of state.remotePlayers.values()) {
     drawPlayer(ctx, remotePlayer);
   }
+  drawArenaEvents(ctx);
 
   ctx.restore();
   drawMiniStatus();
@@ -134,7 +131,7 @@ function drawMiniStatus() {
   ctx.fillStyle = "rgba(17, 24, 39, 0.72)";
   ctx.font = "12px ui-sans-serif, system-ui, sans-serif";
   ctx.fillText(
-    `${Math.round(player.x)}, ${Math.round(player.y)} · ${state.strokes.length} strokes`,
+    `${Math.round(player.x)}, ${Math.round(player.y)} · ${player.hp || 0}/${player.maxHp || 0} HP`,
     18,
     state.viewport.height - 28
   );

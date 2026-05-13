@@ -8,5 +8,5 @@ attachGameSocket(server);
 attachAdminSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`드로잉온라인 running at http://localhost:${PORT}`);
+  console.log(`시뮬라크월드 PvP 아레나 running at http://localhost:${PORT}`);
 });

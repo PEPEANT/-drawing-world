@@ -10,6 +10,9 @@ export function handleWelcome(message, send) {
   replaceItems(message.items);
   replaceChatMessages(message.messages);
   renderRanking(message.ranking);
+  if (message.arena) {
+    state.arena = message.arena;
+  }
   if (serverStrokes.length > 0) {
     replaceStrokes(serverStrokes);
     saveLocalStrokes(getOwnStrokes());
@@ -38,6 +41,7 @@ export function handleWelcome(message, send) {
       clientId: player.clientId,
       color: player.color,
       skin: player.skin,
+      role: player.role,
       facing: player.facing,
       moving: player.moving,
       x: player.x,

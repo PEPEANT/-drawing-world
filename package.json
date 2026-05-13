@@ -1,8 +1,8 @@
 {
-  "name": "drawing-online",
+  "name": "simulac-world-arena",
   "version": "0.1.0",
   "private": true,
-  "description": "드로잉온라인 shared white-canvas walking and drawing web game.",
+  "description": "시뮬라크월드 PvP 아레나 웹게임.",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",

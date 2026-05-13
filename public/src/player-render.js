@@ -11,6 +11,8 @@ export function drawPlayer(ctx, entity) {
   ctx.save();
   ctx.translate(entity.x, entity.y + walk);
   ctx.scale(entity.facing === -1 ? -1 : 1, squash);
+  ctx.globalAlpha = entity.alive === false ? 0.42 : 1;
+  drawTeamRing(ctx, entity, size);
 
   const image = getSkinImage(entity.skin);
   if (image && image.complete) {
@@ -22,6 +24,8 @@ export function drawPlayer(ctx, entity) {
 
   ctx.scale(entity.facing === -1 ? -1 : 1, 1 / squash);
   ctx.translate(0, -walk);
+  ctx.globalAlpha = 1;
+  drawHealthBar(ctx, entity, size);
   drawName(ctx, entity, size);
   drawVoteBubble(ctx, entity, size);
   drawChatBubble(ctx, entity, size);
@@ -44,6 +48,27 @@ function drawFallbackAvatar(ctx, size, color) {
   ctx.fillRect(6, -6, 4, 4);
   ctx.fillStyle = "#111827";
   ctx.fillRect(-6, 7, 12, 3);
+}
+
+function drawTeamRing(ctx, entity, size) {
+  ctx.strokeStyle = entity.team === "blue" ? "#2563eb" : "#ef4444";
+  ctx.lineWidth = 4 / state.camera.zoom;
+  ctx.beginPath();
+  ctx.arc(0, 0, size * 0.62, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawHealthBar(ctx, entity, size) {
+  const maxHp = Math.max(1, entity.maxHp || 100);
+  const hp = Math.max(0, Math.min(maxHp, entity.hp ?? maxHp));
+  const width = 54 / state.camera.zoom;
+  const height = 7 / state.camera.zoom;
+  const x = -width / 2;
+  const y = -size / 2 - 16 / state.camera.zoom;
+  ctx.fillStyle = "rgba(17, 24, 39, 0.22)";
+  roundRect(ctx, x, y, width, height, 4 / state.camera.zoom);
+  ctx.fillStyle = hp / maxHp > 0.35 ? "#16a34a" : "#dc2626";
+  roundRect(ctx, x, y, width * (hp / maxHp), height, 4 / state.camera.zoom);
 }
 
 function drawVoteBubble(ctx, entity, size) {

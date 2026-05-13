@@ -1,5 +1,13 @@
 const crypto = require("node:crypto");
 const { WebSocketServer } = require("ws");
+const {
+  buildArenaState,
+  handleArenaAction,
+  handleArenaRole,
+  preserveArenaFields,
+  setupArenaPlayer,
+  startArenaLoop
+} = require("./arena");
 const { recordPlayerSession } = require("./analytics");
 const { formatBanReason, getActiveBan } = require("./bans");
 const { notifyAdminState } = require("./admin");
@@ -20,6 +28,7 @@ const {
 } = require("./validation");
 
 function attachGameSocket(server) {
+  startArenaLoop();
   const wss = new WebSocketServer({ noServer: true });
 
   server.on("upgrade", (req, socket, head) => {
@@ -67,6 +76,7 @@ function attachGameSocket(server) {
       items: room.items,
       messages: room.messages,
       ranking: buildRanking(room),
+      arena: buildArenaState(room),
       players: Array.from(room.players.values())
     });
 
@@ -85,6 +95,7 @@ function handleClose(ws, room, roomName, id) {
   }
   broadcast(room, { type: "playerLeave", id }, ws);
   broadcast(room, { type: "ranking", ranking: buildRanking(room) }, ws);
+  broadcast(room, { type: "arenaState", state: buildArenaState(room) }, ws);
   removeRoomIfEmpty(roomName);
   notifyAdminState();
 }
@@ -110,6 +121,8 @@ function handleMessage(ws, room, raw) {
     case "radioPlay": return handleRadioPlay(ws, room, message);
     case "radioStop": return handleRadioStop(room, message);
     case "vote": return handleVote(ws, room, message);
+    case "arenaAction": return handleArenaAction(ws, room, message);
+    case "arenaRole": return handleArenaRole(ws, room, message);
     default: return undefined;
   }
 }
@@ -130,6 +143,7 @@ function handleDeleteStrokes(ws, room, message) {
 
 function handleHello(ws, room, message) {
   const player = normalizePlayer(message.player || {}, ws.id);
+  setupArenaPlayer(room, player, message.player?.role);
   ws.clientId = safeClientId(message.player?.clientId) || ws.clientId;
   const activeBan = getActiveBan(ws.clientId);
   if (activeBan) {
@@ -142,7 +156,9 @@ function handleHello(ws, room, message) {
   player.connectedAt = ws.connectedAt;
   player.updatedAt = Date.now();
   room.players.set(ws.id, player);
+  send(ws, { type: "playerUpdate", player });
   broadcast(room, { type: "playerJoin", player }, ws);
+  send(ws, { type: "arenaState", state: buildArenaState(room) });
   broadcast(room, { type: "ranking", ranking: buildRanking(room) }, undefined);
   notifyAdminState();
 }
@@ -151,6 +167,7 @@ function handlePlayerUpdate(ws, room, message) {
   const existing = room.players.get(ws.id);
   if (!existing) return;
   const player = normalizePlayer({ ...existing, ...message.player }, ws.id);
+  preserveArenaFields(player, existing);
   player.clientId = existing.clientId || ws.clientId;
   player.connectedAt = existing.connectedAt || ws.connectedAt;
   player.updatedAt = Date.now();
@@ -206,8 +223,7 @@ function handleItemAdd(ws, room, message) {
 
 function safeClientId(value) {
   if (typeof value !== "string") return "";
-  const clean = value.replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
-  return clean;
+  return value.replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
 }
 
 function handleChat(ws, room, message) {
@@ -229,6 +245,4 @@ function handleChat(ws, room, message) {
   broadcast(room, { type: "chat", message: chatMessage }, undefined);
 }
 
-module.exports = {
-  attachGameSocket
-};
+module.exports = { attachGameSocket };

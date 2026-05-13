@@ -3,7 +3,7 @@ import { movePlayerWithCollision, resolvePlayerCollisions } from "../player-phys
 import { player, state } from "../state.js";
 import { isTypingTarget } from "../utils.js";
 
-export function bindKeyboard({ openChat, redo, toggleTool, undo }) {
+export function bindKeyboard({ arenaAttack, arenaSkill, openChat, redo, selectArenaRole, undo }) {
   window.addEventListener("keydown", (event) => {
     if (isTypingTarget(event.target)) return;
     const key = event.key.toLowerCase();
@@ -30,20 +30,32 @@ export function bindKeyboard({ openChat, redo, toggleTool, undo }) {
       return;
     }
 
+    if (key === " ") {
+      arenaAttack();
+      event.preventDefault();
+      return;
+    }
+
+    if (key === "q") {
+      arenaSkill();
+      event.preventDefault();
+      return;
+    }
+
     if (key === "1") {
-      toggleTool("brush");
+      selectArenaRole("striker");
       event.preventDefault();
       return;
     }
 
     if (key === "2") {
-      toggleTool("eraser");
+      selectArenaRole("ranger");
       event.preventDefault();
       return;
     }
 
     if (key === "3") {
-      toggleTool("item");
+      selectArenaRole("healer");
       event.preventDefault();
       return;
     }

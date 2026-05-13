@@ -1,0 +1,191 @@
+.arena-mode .paint-panel,
+.arena-mode .eraser-panel,
+.arena-mode .export-panel,
+.arena-mode .item-panel,
+.arena-mode .layer-panel,
+.arena-mode .hotbar,
+.arena-mode .export-toggle {
+  display: none !important;
+}
+
+.arena-hud {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  display: grid;
+  grid-template-columns: 86px minmax(150px, 220px) 86px;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.arena-score,
+.arena-center,
+.arena-player-panel,
+.arena-hotbar {
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 32px rgba(28, 35, 50, 0.12);
+}
+
+.arena-score {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 8px;
+  font-weight: 900;
+}
+
+.arena-score span,
+.arena-center span,
+.arena-player-panel small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.arena-score strong {
+  font-size: 25px;
+}
+
+.arena-score.red strong,
+.team-red {
+  color: #ef4444;
+}
+
+.arena-score.blue strong,
+.team-blue {
+  color: #2563eb;
+}
+
+.arena-center {
+  display: grid;
+  justify-items: center;
+  padding: 8px 12px;
+}
+
+.arena-center strong {
+  font-size: 14px;
+}
+
+.arena-player-panel {
+  position: absolute;
+  left: 12px;
+  bottom: 16px;
+  width: 210px;
+  padding: 12px;
+  pointer-events: none;
+}
+
+.arena-player-panel > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 900;
+}
+
+.arena-hp {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.15);
+}
+
+.arena-hp span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #16a34a;
+}
+
+.arena-hotbar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.arena-hotbar button {
+  min-width: 112px;
+  min-height: 44px;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.arena-hotbar span {
+  margin-right: 6px;
+  color: inherit;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.arena-role-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.arena-role-picker > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.arena-role-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.arena-role-buttons button {
+  display: grid;
+  gap: 4px;
+  min-height: 62px;
+  padding: 8px;
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.arena-role-buttons button.active {
+  border-color: #111827;
+  background: #111827;
+  color: #ffffff;
+}
+
+.arena-role-buttons span {
+  font-size: 12px;
+  opacity: 0.74;
+}
+
+@media (max-width: 760px) {
+  .arena-hud {
+    top: 8px;
+    grid-template-columns: 64px minmax(120px, 1fr) 64px;
+    width: calc(100vw - 16px);
+  }
+
+  .arena-player-panel {
+    left: 10px;
+    bottom: 122px;
+    width: 168px;
+  }
+
+  .arena-hotbar {
+    bottom: 10px;
+  }
+
+  .arena-hotbar button {
+    min-width: 88px;
+  }
+
+  .arena-role-buttons {
+    grid-template-columns: 1fr;
+  }
+}
