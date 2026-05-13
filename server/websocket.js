@@ -7,6 +7,7 @@ const { LIMITS } = require("./config");
 const { broadcast, send } = require("./protocol");
 const { handleRadioPlay, handleRadioStop } = require("./radio");
 const { removeOwnerItems } = require("./items");
+const { parseRequestUrl } = require("./request-url");
 const { getRoom, removeRoomIfEmpty } = require("./rooms");
 const { deleteOwnStrokeIds } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
@@ -23,7 +24,7 @@ function attachGameSocket(server) {
   const wss = new WebSocketServer({ noServer: true });
 
   server.on("upgrade", (req, socket, head) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
+    const url = parseRequestUrl(req);
     if (url.pathname !== "/ws") return;
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit("connection", ws, req);
@@ -31,7 +32,7 @@ function attachGameSocket(server) {
   });
 
   wss.on("connection", (ws, req) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
+    const url = parseRequestUrl(req);
     const roomName = sanitizeRoomName(url.searchParams.get("room"));
     const room = getRoom(roomName);
     const id = crypto.randomUUID();
