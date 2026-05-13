@@ -4,10 +4,11 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { LIMITS, PUBLIC_DIR, mimeTypes } = require("./config");
 const { listRooms } = require("./rooms");
+const { parseRequestUrl } = require("./request-url");
 
 function createHttpServer() {
   return http.createServer((req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
+    const url = parseRequestUrl(req);
     if (url.pathname === "/healthz") {
       respondJson(res, { ok: true, name: "시뮬라크월드: PvP 아레나", at: Date.now() });
       return;
