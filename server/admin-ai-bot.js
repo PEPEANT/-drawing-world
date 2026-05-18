@@ -1,5 +1,6 @@
 const { createAiBot, getAiBot, removeAiBot } = require("./ai-bot");
 const { startAiBotWalk, stopAiBotWalk } = require("./ai-bot-brain");
+const { replyToAiBotPrompt } = require("./ai-bot-dialogue");
 const { decorateAiBotMemory } = require("./ai-bot-memory");
 const { send } = require("./protocol");
 const { getRoom, rooms } = require("./rooms");
@@ -28,6 +29,13 @@ function handleAiBotAdminMessage(ws, message, notifyAdminState) {
     const targetRoom = rooms.get(room);
     const result = stopAiBotWalk(targetRoom, getAiBot(room));
     send(ws, { type: "aiBotStopped", bot: decorateAiBotMemory(result.bot, room) });
+    notifyAdminState();
+    return true;
+  }
+  if (message.type === "aiBotTalk") {
+    const bot = getAiBot(room);
+    const reply = replyToAiBotPrompt(rooms.get(room), bot, message.text);
+    send(ws, { type: "aiBotTalked", bot: decorateAiBotMemory(bot, room), reply });
     notifyAdminState();
     return true;
   }

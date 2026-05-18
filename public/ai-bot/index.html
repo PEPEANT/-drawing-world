@@ -3,20 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>v2 봇 실험실</title>
+    <title>AI봇 실험실</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/ai-bot/styles.css?v=20260519-1">
-    <link rel="stylesheet" href="/ai-bot/cortex.css?v=20260519-1">
+    <link rel="stylesheet" href="/ai-bot/styles.css?v=20260519-2">
+    <link rel="stylesheet" href="/ai-bot/cortex.css?v=20260519-2">
+    <link rel="stylesheet" href="/ai-bot/dialog.css?v=20260519-2">
   </head>
   <body>
     <header class="lab-header">
       <div>
-        <p>AI 시스템</p>
-        <h1>v2 봇 실험실</h1>
+        <p>AI 실험실</p>
+        <h1>AI봇 실험실</h1>
       </div>
       <nav>
         <a href="/admin">관리자</a>
-        <a href="/ai">v1 관측실</a>
+        <a href="/ai">AI 관측실</a>
         <a href="/">라이브 월드</a>
       </nav>
       <div class="status-line">
@@ -35,12 +36,12 @@
     </form>
 
     <main id="labBody" class="lab-shell is-locked">
-      <section class="bot-stage" aria-label="bot stage">
-        <section class="cortex-panel" aria-label="ai cortex foundation">
+      <section class="bot-stage" aria-label="AI봇 무대">
+        <section class="cortex-panel" aria-label="AI봇 지능 피질">
           <div class="cortex-head">
             <div>
               <p>지능 피질</p>
-              <h2>관측자 v2</h2>
+              <h2>AI봇</h2>
             </div>
             <strong id="cortexStatus">토대 대기</strong>
           </div>
@@ -50,23 +51,27 @@
             <span class="node n9"></span><span class="node n10"></span><span class="node n11"></span><span class="node n12"></span>
             <span class="link l1"></span><span class="link l2"></span><span class="link l3"></span><span class="link l4"></span>
           </div>
-          <div class="cortex-states">
-            <span>감각 <strong id="senseState">대기</strong></span>
-            <span>기억 <strong id="memoryState">비어 있음</strong></span>
-            <span>의도 <strong id="intentState">준비</strong></span>
-            <span>행동 <strong id="actionState">잠김</strong></span>
+          <div class="cortex-layers">
+            <span><b>감각망</b><strong id="senseState">대기</strong></span>
+            <span><b>기억층</b><strong id="memoryState">비어 있음</strong></span>
+            <span><b>의도핵</b><strong id="intentState">준비</strong></span>
+            <span><b>행동회로</b><strong id="actionState">잠김</strong></span>
           </div>
+          <p id="cortexDetail" class="cortex-detail">AI봇을 생성하면 감각, 기억, 의도, 행동 회로가 연결돼.</p>
         </section>
+
         <div class="grid-floor">
-          <div class="bot-avatar">
-            <span></span>
+          <div id="botSpeech" class="bot-speech">...</div>
+          <div id="botAvatar" class="bot-avatar">
+            <img id="botSkin" alt="AI봇 스킨" hidden>
+            <span class="bot-ring"></span>
           </div>
         </div>
       </section>
 
-      <aside class="control-panel" aria-label="bot controls">
+      <aside class="control-panel" aria-label="AI봇 조작">
         <div class="panel-head">
-          <p>observer-v2</p>
+          <p>AI봇</p>
           <h2 id="botTitle">대기 중</h2>
         </div>
         <div class="control-grid">
@@ -79,6 +84,14 @@
           <span id="botRoom">room: lobby</span>
           <span id="botState">bot: none</span>
         </div>
+        <form id="talkForm" class="talk-panel">
+          <label for="talkInput">AI봇에게 말하기</label>
+          <div>
+            <input id="talkInput" type="text" maxlength="120" placeholder="예: 지금 뭘 보고 있어?">
+            <button id="talkButton" type="submit" disabled>보내기</button>
+          </div>
+          <p id="talkReply">AI봇이 생성되면 월드 채팅으로 대답해.</p>
+        </form>
         <div class="memory-panel">
           <div class="memory-head">
             <span>오늘 기억</span>
@@ -91,6 +104,6 @@
       </aside>
     </main>
 
-    <script type="module" src="/ai-bot/lab.js?v=20260519-1"></script>
+    <script type="module" src="/ai-bot/lab.js?v=20260519-2"></script>
   </body>
 </html>

@@ -22,7 +22,6 @@ body {
   border-bottom: 1px solid #d7deea;
   background: #ffffff;
 }
-
 .lab-header p,
 .lab-header h1,
 .panel-head p,
@@ -38,7 +37,6 @@ body {
   color: #64748b;
   font-size: 13px;
 }
-
 .lab-header h1 {
   font-size: 28px;
 }
@@ -51,7 +49,8 @@ body {
 
 .lab-header a,
 .auth-panel button,
-.control-grid button {
+.control-grid button,
+.talk-panel button {
   min-height: 36px;
   border: 1px solid #d7deea;
   border-radius: 8px;
@@ -76,7 +75,6 @@ body {
   border-radius: 999px;
   background: #94a3b8;
 }
-
 .status-dot.online {
   background: #059669;
 }
@@ -105,7 +103,8 @@ body {
   font-size: 13px;
 }
 
-.auth-panel input {
+.auth-panel input,
+.talk-panel input {
   height: 38px;
   border: 1px solid #d7deea;
   border-radius: 8px;
@@ -147,19 +146,18 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   transform: translate(-50%, -50%);
 }
 
-.bot-avatar span {
+.bot-avatar img {
   display: block;
   width: 100%;
   height: 100%;
-  border: 3px solid #111827;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #93c5fd, #f9a8d4);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 14px 20px rgba(15, 23, 42, 0.22));
 }
 
 .control-panel {
@@ -180,12 +178,14 @@ body {
   gap: 8px;
 }
 
-.control-grid button {
+.control-grid button,
+.talk-panel button {
   color: #2563eb;
   cursor: pointer;
 }
 
 .control-grid button:disabled,
+.talk-panel button:disabled,
 .is-locked .control-grid button {
   color: #94a3b8;
   cursor: not-allowed;

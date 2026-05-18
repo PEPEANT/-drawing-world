@@ -11,7 +11,7 @@
 }
 
 .cortex-head,
-.cortex-states {
+.cortex-layers {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -107,29 +107,55 @@
 .l3 { left: 46%; top: 68%; width: 130px; transform: rotate(-26deg); }
 .l4 { left: 18%; top: 78%; width: 210px; transform: rotate(-8deg); }
 
-.cortex-states {
+.cortex-layers {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   color: #64748b;
   font-size: 12px;
 }
 
-.cortex-states span,
-.cortex-states strong {
+.cortex-layers span {
+  min-height: 58px;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  padding: 8px;
+}
+
+.cortex-layers b,
+.cortex-layers strong {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cortex-states strong {
+.cortex-layers b {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.cortex-layers strong {
   margin-top: 3px;
   color: #111827;
   font-size: 13px;
 }
 
+.has-bot .cortex-layers span {
+  border-color: rgba(14, 165, 233, 0.2);
+  box-shadow: inset 0 -3px 0 rgba(14, 165, 233, 0.12);
+}
+
+.cortex-detail {
+  margin: 0;
+  padding: 0 12px 12px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 @media (max-width: 860px) {
-  .cortex-states {
+  .cortex-layers {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

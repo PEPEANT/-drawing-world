@@ -1,4 +1,5 @@
 const { chooseScoredTarget } = require("./ai-bot-targets");
+const { buildObservationSpeech, publishAiBotSpeech } = require("./ai-bot-dialogue");
 const { getAiMemorySummary, recordAiObservation } = require("./ai-bot-memory");
 const { broadcast } = require("./protocol");
 
@@ -7,6 +8,7 @@ const TICK_MS = 180;
 const SPEED = 78;
 const STOP_DISTANCE = 18;
 const OBSERVE_MS = 2200;
+const SPEECH_COOLDOWN_MS = 9000;
 const controllers = new Map();
 
 function startAiBotWalk(room, bot) {
@@ -18,7 +20,8 @@ function startAiBotWalk(room, bot) {
     target: null,
     pauseUntil: 0,
     visits: previous?.visits || {},
-    memory: getAiMemorySummary(room.name)
+    memory: getAiMemorySummary(room.name),
+    lastSpeechAt: previous?.lastSpeechAt || 0
   };
   controller.timer = setInterval(() => tick(room, bot, controller), TICK_MS);
   controller.timer.unref?.();
@@ -54,12 +57,18 @@ function tick(room, bot, controller) {
   const dy = controller.target.y - bot.y;
   const distance = Math.hypot(dx, dy);
   if (distance <= STOP_DISTANCE) {
+    const observedTarget = controller.target;
     bot.x = controller.target.x;
     bot.y = controller.target.y;
     bot.moving = false;
-    controller.memory = recordAiObservation(room.name, bot, controller.target, now);
-    bot.ai = buildAiState("observing", controller.target, controller.memory);
+    controller.memory = recordAiObservation(room.name, bot, observedTarget, now);
+    const speech = buildObservationSpeech(observedTarget, controller.memory);
+    bot.ai = { ...buildAiState("observing", observedTarget, controller.memory), speech };
     bot.updatedAt = now;
+    if (now - controller.lastSpeechAt >= SPEECH_COOLDOWN_MS) {
+      publishAiBotSpeech(room, bot, speech);
+      controller.lastSpeechAt = now;
+    }
     controller.target = null;
     controller.pauseUntil = now + OBSERVE_MS;
     broadcast(room, { type: "playerUpdate", player: bot }, undefined);

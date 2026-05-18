@@ -1,0 +1,74 @@
+.bot-ring {
+  position: absolute;
+  inset: -8px;
+  border: 2px solid rgba(14, 165, 233, 0.7);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.has-bot .bot-ring {
+  opacity: 1;
+  animation: botPulse 1.8s ease-in-out infinite;
+}
+
+.bot-speech {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 76px);
+  width: min(320px, calc(100% - 48px));
+  min-height: 38px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.9);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 9px 11px;
+  text-align: center;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+}
+
+.talk-panel {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #e5eaf2;
+}
+
+.talk-panel label {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.talk-panel div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 74px;
+  gap: 8px;
+}
+
+.talk-panel button {
+  min-height: 38px;
+  line-height: 36px;
+}
+
+.talk-panel p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@keyframes botPulse {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.42;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.86;
+  }
+}

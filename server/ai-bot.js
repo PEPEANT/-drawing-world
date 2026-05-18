@@ -26,7 +26,7 @@ function createAiBot(roomName = "lobby") {
   const bot = {
     id,
     clientId: BOT_CLIENT_ID,
-    name: "AI 관측자 v2",
+    name: "AI봇",
     color: "#8b5cf6",
     skin: BOT_SKIN,
     x: 1600,
