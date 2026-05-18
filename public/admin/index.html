@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>드로잉온라인 관리자</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/admin/admin.css?v=20260518-3">
+    <link rel="stylesheet" href="/admin/admin.css?v=20260518-4">
   </head>
   <body>
     <header class="admin-header">
@@ -14,6 +14,7 @@
         <h1>관리자 페이지</h1>
       </div>
       <nav class="admin-links">
+        <a href="/archive" target="_blank" rel="noreferrer">지난 그림</a>
         <a href="/ai">AI 관측실</a>
         <a href="/">유저 페이지</a>
       </nav>
@@ -56,7 +57,11 @@
 
         <div class="toolbar">
           <span id="updatedAt">갱신 전</span>
-          <button id="refreshButton" type="button">새로고침</button>
+          <div class="toolbar-actions">
+            <span id="snapshotMessage"></span>
+            <button id="snapshotButton" type="button">오늘 그림 보존</button>
+            <button id="refreshButton" type="button">새로고침</button>
+          </div>
         </div>
 
         <section id="analyticsPanel" class="analytics-panel hidden" aria-label="접속 통계">
@@ -112,6 +117,6 @@
       <div class="empty">아직 열린 방이 없어.</div>
     </template>
 
-    <script type="module" src="/admin/admin.js?v=20260518-3"></script>
+    <script type="module" src="/admin/admin.js?v=20260518-4"></script>
   </body>
 </html>

@@ -47,6 +47,24 @@
   font-size: 13px;
 }
 
+.toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-actions span {
+  color: var(--good);
+}
+
+.toolbar-actions button {
+  padding: 0 11px;
+}
+
+#snapshotButton {
+  color: var(--accent);
+}
+
 .rooms {
   display: grid;
   gap: 12px;

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>시뮬라크월드 지난 그림</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/archive/styles.css?v=20260518-1">
+  </head>
+  <body>
+    <header class="archive-header">
+      <div>
+        <p>시뮬라크월드</p>
+        <h1>지난 그림</h1>
+      </div>
+      <nav>
+        <label class="file-button">
+          JSON 불러오기
+          <input id="snapshotFile" type="file" accept="application/json,.json">
+        </label>
+        <a href="/">라이브 월드</a>
+        <a href="/admin">관리자</a>
+      </nav>
+    </header>
+
+    <main class="archive-shell">
+      <aside>
+        <div class="panel-head">
+          <h2>보존 목록</h2>
+          <button id="refreshButton" type="button">새로고침</button>
+        </div>
+        <div id="snapshotList" class="snapshot-list"></div>
+      </aside>
+
+      <section class="viewer">
+        <div class="viewer-head">
+          <div>
+            <h2 id="snapshotTitle">그림을 선택해줘</h2>
+            <span id="snapshotMeta">저장된 JSON을 불러오거나 보존 목록에서 선택</span>
+          </div>
+          <span class="locked">읽기 전용</span>
+        </div>
+        <canvas id="archiveCanvas" width="1200" height="780"></canvas>
+      </section>
+    </main>
+
+    <script type="module" src="/archive/archive.js?v=20260518-1"></script>
+  </body>
+</html>

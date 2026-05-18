@@ -1,5 +1,6 @@
 import { dom } from "./src/dom.js";
 import { initAnalyticsPanel, renderAnalytics } from "./src/analytics.js";
+import { downloadSnapshot } from "./src/snapshot.js";
 import { openPlayerRoom, setPreviewRoom } from "./src/preview.js";
 import { renderState } from "./src/render.js";
 import { connectAdmin, sendAdmin } from "./src/socket.js";
@@ -22,6 +23,11 @@ dom.authForm.addEventListener("submit", (event) => {
 
 dom.refreshButton.addEventListener("click", () => {
   sendAdmin({ type: "refresh" });
+});
+
+dom.snapshotButton.addEventListener("click", () => {
+  dom.snapshotMessage.textContent = "보존 중...";
+  sendAdmin({ type: "saveSnapshot", room: currentRoom() });
 });
 
 dom.rooms.addEventListener("click", (event) => {
@@ -117,6 +123,12 @@ function startAdmin(key) {
     onState(state) {
       renderState(state);
       renderAnalytics(state.analytics);
+    },
+    onSnapshotSaved(snapshot) {
+      dom.snapshotMessage.textContent = downloadSnapshot(snapshot);
+    },
+    onSnapshotError(message) {
+      dom.snapshotMessage.textContent = message || "그림을 보존하지 못했어.";
     }
   });
 }
@@ -134,4 +146,8 @@ function getSelectedStrokeIds(input) {
   } catch {
     return [];
   }
+}
+
+function currentRoom() {
+  return dom.previewRoom.textContent.replace(/^room:\s*/, "").trim() || "lobby";
 }

@@ -1,4 +1,5 @@
 const { notifyAdminState } = require("./admin");
+const { createDailySnapshot } = require("./daily-archive");
 const {
   buildFeaturedTop,
   recordArtworkLike,
@@ -17,11 +18,12 @@ function startDailyResetSweep() {
 }
 
 function resetRoomIfNeeded(room) {
-  const reset = rollRoomDay(room);
+  const reset = rollRoomDay(room, Date.now(), (targetRoom, day) => createDailySnapshot(targetRoom, "daily-reset", day));
   if (!reset) return;
   broadcast(room, {
     type: "dailyReset",
     day: reset.day,
+    snapshot: reset.snapshot ? summarizeSnapshot(reset.snapshot) : null,
     winners: reset.winners,
     featured: buildFeaturedTop(room)
   }, undefined);
@@ -40,6 +42,17 @@ function syncFeaturedVote(room, ws, message, targetId, result) {
 function broadcastFeaturedRemoval(room, targetId) {
   removeFeaturedForTarget(room, targetId);
   broadcast(room, { type: "featured", featured: buildFeaturedTop(room) }, undefined);
+}
+
+function summarizeSnapshot(snapshot) {
+  return {
+    id: snapshot.id,
+    day: snapshot.day,
+    room: snapshot.room,
+    title: snapshot.title,
+    strokeCount: snapshot.strokeCount,
+    savedAt: snapshot.savedAt
+  };
 }
 
 module.exports = {

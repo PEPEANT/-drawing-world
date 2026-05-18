@@ -17,6 +17,8 @@ export const dom = {
   adminCount: document.querySelector("#adminCount"),
   updatedAt: document.querySelector("#updatedAt"),
   refreshButton: document.querySelector("#refreshButton"),
+  snapshotButton: document.querySelector("#snapshotButton"),
+  snapshotMessage: document.querySelector("#snapshotMessage"),
   previewFrame: document.querySelector("#gamePreview"),
   previewOpen: document.querySelector("#previewOpen"),
   playerOpen: document.querySelector("#playerOpen"),

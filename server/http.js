@@ -3,6 +3,7 @@ const http = require("node:http");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { LIMITS, PUBLIC_DIR, mimeTypes } = require("./config");
+const { getDailySnapshot, listDailySnapshots } = require("./daily-archive");
 const { listRooms } = require("./rooms");
 const { parseRequestUrl } = require("./request-url");
 
@@ -16,6 +17,17 @@ function createHttpServer() {
 
     if (url.pathname === "/api/rooms") {
       respondJson(res, { rooms: getPublicRooms() });
+      return;
+    }
+
+    if (url.pathname === "/api/archive") {
+      respondJson(res, { snapshots: listDailySnapshots() });
+      return;
+    }
+
+    if (url.pathname.startsWith("/api/archive/")) {
+      const snapshot = getDailySnapshot(url.pathname.split("/").pop());
+      respondJson(res, snapshot ? { snapshot } : { error: "not found" }, snapshot ? 200 : 404);
       return;
     }
 
@@ -49,6 +61,7 @@ function createHttpServer() {
 function resolvePublicPath(pathname) {
   if (pathname === "/") return "/index.html";
   if (pathname === "/admin") return "/admin/index.html";
+  if (pathname === "/archive") return "/archive/index.html";
   if (pathname === "/ai") return "/ai/index.html";
   if (pathname.endsWith("/")) return `${pathname}index.html`;
   return pathname;

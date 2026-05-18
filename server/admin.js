@@ -2,13 +2,10 @@ const { WebSocketServer } = require("ws");
 const { buildAiState, publishAiAnnouncement } = require("./ai-observatory");
 const { buildAdminState } = require("./admin-state");
 const { banClient, formatBanReason, unbanClient } = require("./bans");
+const { normalizeBanDuration } = require("./ban-duration");
 const { ADMIN_KEY } = require("./config");
-const {
-  buildFeaturedTop,
-  clearFeaturedRoom,
-  finalizeRoomWinners,
-  removeFeaturedForTarget
-} = require("./featured");
+const { createDailySnapshot } = require("./daily-archive");
+const { buildFeaturedTop, clearFeaturedRoom, finalizeRoomWinners, removeFeaturedForTarget } = require("./featured");
 const { broadcast, send } = require("./protocol");
 const { getRoom, rooms } = require("./rooms");
 const { clearPlayerStrokes: clearPlayerStrokeData, deleteAdminStrokeIds } = require("./strokes");
@@ -95,6 +92,11 @@ function handleAdminMessage(ws, raw) {
     return;
   }
 
+  if (message.type === "saveSnapshot") {
+    saveRoomSnapshot(ws, message.room);
+    return;
+  }
+
   if (message.type === "unban") {
     unbanClient(message.clientId);
     notifyAdminState();
@@ -132,6 +134,21 @@ function deleteSelectedStrokes(roomName, ids) {
   const deletedIds = deleteAdminStrokeIds(room, ids);
   if (!deletedIds.length) return;
   broadcast(room, { type: "deleteStrokes", ids: deletedIds }, undefined);
+  notifyAdminState();
+}
+
+function saveRoomSnapshot(ws, roomName) {
+  const room = rooms.get(sanitizeRoomName(roomName || "lobby"));
+  if (!room) {
+    send(ws, { type: "snapshotError", message: "저장할 방이 없어." });
+    return;
+  }
+  const snapshot = createDailySnapshot(room, "admin-manual");
+  if (!snapshot) {
+    send(ws, { type: "snapshotError", message: "저장할 그림이 없어." });
+    return;
+  }
+  send(ws, { type: "snapshotSaved", snapshot });
   notifyAdminState();
 }
 
@@ -225,23 +242,6 @@ function publishAiMessage(ws, message) {
   send(ws, { type: "aiPublished", message: chatMessage });
   sendAiState(ws);
   notifyAdminState();
-}
-
-function normalizeBanDuration(options) {
-  if (Number.isFinite(Number(options?.hours))) {
-    return clampMinutes(Number(options.hours) * 60) * 60 * 1000;
-  }
-  const text = String(options?.durationText || "").trim().toLowerCase();
-  const match = text.match(/^(\d+(?:\.\d+)?)\s*(m|min|h|hr|d)?$/);
-  if (!match) return 24 * 60 * 60 * 1000;
-  const value = Number(match[1]);
-  const unit = match[2] || "m";
-  const minutes = unit.startsWith("d") ? value * 1440 : unit.startsWith("h") ? value * 60 : value;
-  return clampMinutes(minutes) * 60 * 1000;
-}
-
-function clampMinutes(minutes) {
-  return Math.max(1, Math.min(30 * 24 * 60, Number.isFinite(minutes) ? minutes : 1440));
 }
 
 module.exports = { attachAdminSocket, notifyAdminState };

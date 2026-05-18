@@ -12,17 +12,18 @@ const DAY_OFFSET_MS = 9 * 60 * 60 * 1000;
 const SCREEN_COUNT = 3;
 const MERGE_RADIUS = 300;
 
-function rollRoomDay(room, now = Date.now()) {
+function rollRoomDay(room, now = Date.now(), beforeReset) {
   const day = getDayKey(now);
   const state = getState(room, now);
   if (state.day === day) return null;
 
+  const snapshot = typeof beforeReset === "function" ? beforeReset(room, state.day) : null;
   const winners = finalizeRoomWinners(room, "daily-reset");
   room.strokes = [];
   room.votes = null;
   room.featured = createState(day);
   deleteActiveRoom(room.name);
-  return { day, winners };
+  return { day, snapshot, winners };
 }
 
 function recordArtworkLike(room, vote) {

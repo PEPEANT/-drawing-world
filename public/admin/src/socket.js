@@ -25,6 +25,16 @@ export function connectAdmin(key, handlers) {
 
     if (message.type === "state") {
       handlers.onState(message.state);
+      return;
+    }
+
+    if (message.type === "snapshotSaved") {
+      handlers.onSnapshotSaved?.(message.snapshot);
+      return;
+    }
+
+    if (message.type === "snapshotError") {
+      handlers.onSnapshotError?.(message.message);
     }
   });
 }
