@@ -197,6 +197,7 @@ function handleVote(ws, room, message) {
 function handleStroke(ws, room, message) {
   const stroke = normalizeStroke(message.stroke, ws.id, ws.clientId || ws.id);
   if (!stroke) return;
+  stroke.name = room.players.get(ws.id)?.name || "";
   stroke.order = room.strokeSeq = (room.strokeSeq || 0) + 1;
   room.strokes.push(stroke);
   if (room.strokes.length > LIMITS.maxStrokesPerRoom) {

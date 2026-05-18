@@ -77,10 +77,10 @@ dom.rooms.addEventListener("click", (event) => {
   }
 
   if (button.dataset.action === "deleteSelectedStrokes") {
-    const selected = Array.from(button.closest(".room")?.querySelectorAll("[data-stroke-id]:checked") || []);
-    const ids = selected.map((input) => input.dataset.strokeId);
+    const selected = Array.from(button.closest(".room")?.querySelectorAll("[data-stroke-id]:checked, [data-stroke-ids]:checked") || []);
+    const ids = [...new Set(selected.flatMap(getSelectedStrokeIds))];
     if (!ids.length) return;
-    if (window.confirm(`선택한 그림 ${ids.length}개를 삭제할까?`)) {
+    if (window.confirm(`선택한 그림 묶음 ${selected.length}개, 선 ${ids.length}개를 삭제할까?`)) {
       sendAdmin({ type: "deleteStrokes", room, ids });
     }
     return;
@@ -124,4 +124,14 @@ function startAdmin(key) {
 function setStatus(text, mode) {
   dom.statusText.textContent = text;
   dom.statusDot.className = `status-dot ${mode === "online" ? "online" : mode === "error" ? "error" : ""}`;
+}
+
+function getSelectedStrokeIds(input) {
+  if (input.dataset.strokeId) return [input.dataset.strokeId];
+  try {
+    const ids = JSON.parse(input.dataset.strokeIds || "[]");
+    return Array.isArray(ids) ? ids.filter((id) => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
 }
