@@ -65,9 +65,10 @@ export function replaceStrokes(nextStrokes) {
 
 export function addStroke(stroke) {
   state.strokes = mergeStroke(state.strokes, stroke);
-  if (isOwnStroke(stroke)) ensureLayer(stroke.layerId || DEFAULT_LAYER_ID);
+  const own = isOwnStroke(stroke);
+  if (own) ensureLayer(stroke.layerId || DEFAULT_LAYER_ID);
   trimStrokes();
-  emitLayerChange();
+  if (own) emitLayerChange();
 }
 
 export function replaceItems(nextItems) {

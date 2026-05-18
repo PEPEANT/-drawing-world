@@ -34,10 +34,10 @@ export function draw() {
   ctx.save();
   applyWorldTransform();
   drawPaper(view);
-  drawGalleryScreens(ctx);
+  drawGalleryScreens(ctx, view);
 
-  drawLayeredStrokes(ctx, drawStroke);
-  drawItems(ctx);
+  drawLayeredStrokes(ctx, drawStroke, view);
+  drawItems(ctx, view);
 
   if (!state.isSpectator) {
     drawPlayer(ctx, player);
@@ -128,7 +128,7 @@ function drawPaper(view) {
   ctx.strokeStyle = "#cbd5e1";
   ctx.lineWidth = 3 / state.camera.zoom;
   ctx.strokeRect(0, 0, WORLD.width, WORLD.height);
-  drawBillboard(ctx);
+  drawBillboard(ctx, view);
 }
 
 function drawMiniStatus() {

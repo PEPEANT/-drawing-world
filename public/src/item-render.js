@@ -1,7 +1,8 @@
 import { state } from "./state.js";
 
-export function drawItems(ctx) {
+export function drawItems(ctx, view) {
   for (const item of state.items) {
+    if (view && !itemIntersectsView(item, view)) continue;
     if (item.type === "radio") {
       drawRadio(ctx, item);
     } else {
@@ -64,6 +65,16 @@ function drawRadio(ctx, item) {
 
 function shortLabel(value) {
   return value.length > 12 ? `${value.slice(0, 12)}...` : value;
+}
+
+function itemIntersectsView(item, view) {
+  const radius = item.type === "radio" ? 70 : 60;
+  return (
+    item.x - radius <= view.right &&
+    item.x + radius >= view.left &&
+    item.y - radius <= view.bottom &&
+    item.y + radius >= view.top
+  );
 }
 
 function roundRect(ctx, x, y, width, height, radius) {

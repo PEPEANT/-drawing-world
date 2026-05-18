@@ -21,6 +21,7 @@ import { handleWelcome } from "./welcome.js";
 
 let ws = null, reconnectAllowed = true;
 let kickReason = "";
+let lastPlayerPayload = "";
 
 export function connect() {
   if (!("WebSocket" in window) || location.protocol === "file:") {
@@ -74,23 +75,22 @@ export function send(payload) {
 }
 
 export function sendPlayerUpdate(force = false, now = performance.now()) {
-  if (state.isSpectator) return;
-  if (!state.online || !ws || ws.readyState !== WebSocket.OPEN) return;
-  if (!force && now - state.lastPositionSent < 80) return;
-  state.lastPositionSent = now;
-  send({
-    type: "playerUpdate",
-    player: {
-      name: player.name,
-      clientId: player.clientId,
-      color: player.color,
-      skin: player.skin,
-      facing: player.facing,
-      moving: player.moving,
-      x: player.x,
-      y: player.y
-    }
-  });
+  if (state.isSpectator || !state.online || !ws || ws.readyState !== WebSocket.OPEN) return;
+  const payload = {
+    name: player.name,
+    clientId: player.clientId,
+    color: player.color,
+    skin: player.skin,
+    facing: player.facing,
+    moving: player.moving,
+    x: Math.round(player.x * 10) / 10,
+    y: Math.round(player.y * 10) / 10
+  };
+  const serialized = JSON.stringify(payload);
+  const changed = serialized !== lastPlayerPayload;
+  if (!force && now - state.lastPositionSent < (changed ? 80 : 1800)) return;
+  state.lastPositionSent = now; lastPlayerPayload = serialized;
+  send({ type: "playerUpdate", player: payload });
 }
 
 function handleSocketMessage(message) {
@@ -120,7 +120,7 @@ function handleSocketMessage(message) {
 
   if (message.type === "stroke" && message.stroke) {
     addStroke(message.stroke);
-    saveLocalStrokes(getOwnStrokes());
+    if (isOwnStroke(message.stroke)) saveLocalStrokes(getOwnStrokes());
     return;
   }
 

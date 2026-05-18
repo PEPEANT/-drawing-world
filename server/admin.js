@@ -16,6 +16,7 @@ const { safeText, sanitizeRoomName } = require("./validation");
 
 const admins = new Set();
 let notifyTimer = null;
+const ADMIN_NOTIFY_DELAY_MS = 1000;
 
 function attachAdminSocket(server) {
   const wss = new WebSocketServer({ noServer: true });
@@ -190,13 +191,15 @@ function clearRoom(roomName) {
 }
 
 function notifyAdminState() {
+  if (!admins.size) return;
   if (notifyTimer) return;
   notifyTimer = setTimeout(() => {
     notifyTimer = null;
+    if (!admins.size) return;
     for (const admin of admins) {
       sendAdminState(admin);
     }
-  }, 120);
+  }, ADMIN_NOTIFY_DELAY_MS);
 }
 
 function sendAdminState(ws) {

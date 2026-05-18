@@ -9,8 +9,9 @@ const SCREENS = [
 
 const SCREEN = { width: 390, height: 240, radius: 10 };
 
-export function drawGalleryScreens(ctx) {
+export function drawGalleryScreens(ctx, view) {
   for (let index = 0; index < SCREENS.length; index += 1) {
+    if (view && !screenIntersectsView(SCREENS[index], view)) continue;
     drawScreen(ctx, SCREENS[index], state.featured[index], index);
   }
 }
@@ -165,4 +166,12 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
+}
+
+function screenIntersectsView(screen, view) {
+  const left = screen.x - SCREEN.width / 2 - 70;
+  const right = screen.x + SCREEN.width / 2 + 70;
+  const top = screen.y - SCREEN.height / 2;
+  const bottom = SCREEN.height + 20;
+  return left <= view.right && right >= view.left && top <= view.bottom && bottom >= view.top;
 }

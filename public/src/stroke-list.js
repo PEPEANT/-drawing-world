@@ -1,7 +1,11 @@
 export function mergeStroke(strokes, stroke) {
   if (!stroke?.id) return sortStrokes([...strokes, stroke]);
   const index = strokes.findIndex((entry) => entry.id === stroke.id);
-  if (index === -1) return sortStrokes([...strokes, stroke]);
+  if (index === -1) {
+    const last = strokes[strokes.length - 1];
+    if (!last || getOrder(last) <= getOrder(stroke)) return [...strokes, stroke];
+    return sortStrokes([...strokes, stroke]);
+  }
   const next = strokes.slice();
   next[index] = { ...next[index], ...stroke };
   return sortStrokes(next);

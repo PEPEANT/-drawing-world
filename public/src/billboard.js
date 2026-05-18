@@ -8,7 +8,8 @@ export const BILLBOARD = {
   height: 350
 };
 
-export function drawBillboard(ctx) {
+export function drawBillboard(ctx, view) {
+  if (view && !rectIntersectsView(getBillboardRect(), view)) return;
   const x = BILLBOARD.x - BILLBOARD.width / 2;
   const y = BILLBOARD.y - BILLBOARD.height / 2;
   ctx.save();
@@ -23,6 +24,19 @@ export function drawBillboard(ctx) {
     drawFallback(ctx, x, y);
   }
   ctx.restore();
+}
+
+function getBillboardRect() {
+  return {
+    left: BILLBOARD.x - BILLBOARD.width / 2,
+    right: BILLBOARD.x + BILLBOARD.width / 2,
+    top: BILLBOARD.y - BILLBOARD.height / 2,
+    bottom: BILLBOARD.y + BILLBOARD.height / 2
+  };
+}
+
+function rectIntersectsView(rect, view) {
+  return rect.left <= view.right && rect.right >= view.left && rect.top <= view.bottom && rect.bottom >= view.top;
 }
 
 export async function ensureBillboardReady() {
