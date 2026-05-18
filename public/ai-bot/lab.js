@@ -12,6 +12,8 @@ const dom = {
   botTitle: document.querySelector("#botTitle"),
   botRoom: document.querySelector("#botRoom"),
   botState: document.querySelector("#botState"),
+  memoryCount: document.querySelector("#memoryCount"),
+  memoryList: document.querySelector("#memoryList"),
   cortexStatus: document.querySelector("#cortexStatus"),
   senseState: document.querySelector("#senseState"),
   memoryState: document.querySelector("#memoryState"),
@@ -136,6 +138,7 @@ function renderBot(bot, created) {
   dom.walkButton.disabled = bot?.ai?.mode === "walking";
   dom.stopButton.disabled = bot?.ai?.mode !== "walking";
   dom.leaveButton.disabled = false;
+  renderMemory(bot?.ai?.memory);
   setBotState(getBotStatusText(bot, created));
 }
 
@@ -153,6 +156,7 @@ function renderNoBot() {
   dom.walkButton.disabled = true;
   dom.stopButton.disabled = true;
   dom.leaveButton.disabled = true;
+  renderMemory(null);
   setBotState("대기 중");
 }
 
@@ -166,6 +170,33 @@ function getTargetText(bot) {
   const target = bot?.ai?.target || "비어 있음";
   const score = Number(bot?.ai?.score);
   return Number.isFinite(score) ? `${target} · ${score}점` : target;
+}
+
+function renderMemory(memory) {
+  const total = Number(memory?.total) || 0;
+  dom.memoryCount.textContent = `${total}회`;
+  const recent = Array.isArray(memory?.recent) ? memory.recent : [];
+  if (!recent.length) {
+    dom.memoryList.replaceChildren(createMemoryItem("아직 기록 없음"));
+    return;
+  }
+  dom.memoryList.replaceChildren(...recent.slice(0, 3).map((entry) => (
+    createMemoryItem(`${formatTime(entry.at)} ${entry.target} · ${entry.score || 0}점`)
+  )));
+}
+
+function createMemoryItem(text) {
+  const item = document.createElement("li");
+  item.textContent = text;
+  return item;
+}
+
+function formatTime(value) {
+  if (!Number.isFinite(value)) return "--:--";
+  return new Intl.DateTimeFormat("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(value));
 }
 
 function getBotStatusText(bot, created) {

@@ -1,4 +1,5 @@
 const { chooseScoredTarget } = require("./ai-bot-targets");
+const { getAiMemorySummary, recordAiObservation } = require("./ai-bot-memory");
 const { broadcast } = require("./protocol");
 
 const WORLD = { width: 3200, height: 2200 };
@@ -12,7 +13,13 @@ function startAiBotWalk(room, bot) {
   if (!room || !bot) return { bot: null, walking: false };
   const previous = controllers.get(room.name);
   if (previous) clearInterval(previous.timer);
-  const controller = { step: previous?.step || 0, target: null, pauseUntil: 0, visits: previous?.visits || {} };
+  const controller = {
+    step: previous?.step || 0,
+    target: null,
+    pauseUntil: 0,
+    visits: previous?.visits || {},
+    memory: getAiMemorySummary(room.name)
+  };
   controller.timer = setInterval(() => tick(room, bot, controller), TICK_MS);
   controller.timer.unref?.();
   controllers.set(room.name, controller);
@@ -29,7 +36,7 @@ function stopAiBotWalk(room, bot) {
   }
   if (!bot) return { bot: null, walking: false };
   bot.moving = false;
-  bot.ai = { mode: "idle", intent: "대기", target: "" };
+  bot.ai = { mode: "idle", intent: "대기", target: "", memory: getAiMemorySummary(room?.name) };
   bot.updatedAt = Date.now();
   if (room?.players.has(bot.id)) {
     broadcast(room, { type: "playerUpdate", player: bot }, undefined);
@@ -50,7 +57,8 @@ function tick(room, bot, controller) {
     bot.x = controller.target.x;
     bot.y = controller.target.y;
     bot.moving = false;
-    bot.ai = buildAiState("observing", controller.target);
+    controller.memory = recordAiObservation(room.name, bot, controller.target, now);
+    bot.ai = buildAiState("observing", controller.target, controller.memory);
     bot.updatedAt = now;
     controller.target = null;
     controller.pauseUntil = now + OBSERVE_MS;
@@ -63,7 +71,7 @@ function tick(room, bot, controller) {
   bot.y = clamp(bot.y + (dy / distance) * step, 0, WORLD.height);
   bot.facing = dx < -1 ? -1 : 1;
   bot.moving = true;
-  bot.ai = buildAiState("walking", controller.target);
+  bot.ai = buildAiState("walking", controller.target, controller.memory);
   bot.updatedAt = now;
   broadcast(room, { type: "playerUpdate", player: bot }, undefined);
 }
@@ -73,13 +81,14 @@ function assignTarget(room, bot, controller) {
   controller.target = chooseScoredTarget(room, bot, controller);
 }
 
-function buildAiState(mode, target) {
+function buildAiState(mode, target, memory) {
   return {
     mode,
     intent: target.intent,
     target: target.label,
     score: target.score,
-    reason: target.reason
+    reason: target.reason,
+    memory
   };
 }
 

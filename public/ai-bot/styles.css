@@ -199,6 +199,40 @@ body {
   border-top: 1px solid #e5eaf2;
 }
 
+.memory-panel {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #e5eaf2;
+}
+
+.memory-head {
+  display: flex;
+  justify-content: space-between;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.memory-head strong {
+  color: #111827;
+}
+
+.memory-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  color: #475569;
+  font-size: 12px;
+  list-style: none;
+}
+
+.memory-list li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 860px) {
   .lab-header,
   .auth-panel,
