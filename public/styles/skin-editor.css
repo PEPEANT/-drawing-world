@@ -17,18 +17,21 @@
   font-size: 13px;
 }
 
-.skin-editor-head div {
+.skin-edit-tools {
   display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
-.skin-editor-head button {
+.skin-edit-tools button {
   min-height: 28px;
   padding: 0 9px;
   font-size: 12px;
 }
 
-.skin-editor-head button.active {
+.skin-edit-tools button.active {
   background: #111827;
   color: #ffffff;
 }
@@ -112,6 +115,7 @@
 
 .skin-options {
   align-items: end;
+  flex-wrap: wrap;
 }
 
 .skin-color-picker,
@@ -187,6 +191,10 @@
   .skin-options {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .skin-edit-tools {
+    justify-content: flex-start;
   }
 
   .skin-presets {

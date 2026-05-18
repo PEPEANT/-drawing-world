@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>드로잉온라인</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./styles/main.css?v=20260512-5">
+    <link rel="stylesheet" href="./styles/main.css?v=20260518-1">
   </head>
   <body class="lobby-open">
     <canvas id="world" aria-label="드로잉온라인 월드"></canvas>
@@ -189,11 +189,6 @@
         <section class="skin-editor" aria-label="skin editor">
           <div class="skin-editor-head">
             <span>스킨</span>
-            <div class="skin-custom-panel">
-              <button id="skinEraserButton" type="button">지우개</button>
-              <button id="skinClearButton" type="button">전체 지우기</button>
-              <button id="skinDefaultButton" type="button">기본</button>
-            </div>
           </div>
 
           <div id="skinPresets" class="skin-presets" aria-label="기본 스킨"></div>
@@ -214,6 +209,11 @@
             <div class="skin-size-picker">
               <span>도트</span>
               <div id="skinBrushSizes" class="skin-brush-sizes" aria-label="skin brush size"></div>
+            </div>
+            <div class="skin-edit-tools">
+              <button id="skinEraserButton" type="button">지우개</button>
+              <button id="skinClearButton" type="button">전체 지우기</button>
+              <button id="skinDefaultButton" type="button">기본</button>
             </div>
           </div>
 
