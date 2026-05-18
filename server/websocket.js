@@ -9,7 +9,7 @@ const { handleRadioPlay, handleRadioStop } = require("./radio");
 const { removeOwnerItems } = require("./items");
 const { parseRequestUrl } = require("./request-url");
 const { getRoom, removeRoomIfEmpty } = require("./rooms");
-const { deleteOwnStrokeIds } = require("./strokes");
+const { deleteOwnStrokeIds, isOwnedBy } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const {
   normalizeItem,
@@ -117,13 +117,13 @@ function handleMessage(ws, room, raw) {
 
 function handleClearLayer(ws, room, message) {
   const layerId = safeLayerId(message.layerId);
-  room.strokes = room.strokes.filter((stroke) => stroke.author !== ws.id || (stroke.layerId || "layer-1") !== layerId);
-  broadcast(room, { type: "clearLayer", layerId, author: ws.id }, undefined);
+  room.strokes = room.strokes.filter((stroke) => !isOwnedBy(stroke, ws.id, ws.clientId) || (stroke.layerId || "layer-1") !== layerId);
+  broadcast(room, { type: "clearLayer", layerId, author: ws.id, owner: ws.clientId }, undefined);
   notifyAdminState();
 }
 
 function handleDeleteStrokes(ws, room, message) {
-  const deletedIds = deleteOwnStrokeIds(room, ws.id, message.ids);
+  const deletedIds = deleteOwnStrokeIds(room, ws.id, ws.clientId, message.ids);
   if (!deletedIds.length) return;
   broadcast(room, { type: "deleteStrokes", ids: deletedIds }, ws);
   notifyAdminState();
@@ -177,7 +177,7 @@ function handleVote(ws, room, message) {
 }
 
 function handleStroke(ws, room, message) {
-  const stroke = normalizeStroke(message.stroke, ws.id);
+  const stroke = normalizeStroke(message.stroke, ws.id, ws.clientId || ws.id);
   if (!stroke) return;
   room.strokes.push(stroke);
   if (room.strokes.length > LIMITS.maxStrokesPerRoom) {

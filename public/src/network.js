@@ -134,6 +134,7 @@ function handleSocketMessage(message) {
   if (message.type === "clearLayer") {
     replaceStrokes(state.strokes.filter((stroke) => {
       if (getStrokeLayerId(stroke) !== message.layerId) return true;
+      if (message.owner) return stroke.owner !== message.owner;
       if (message.author) return stroke.author !== message.author;
       return !isOwnStroke(stroke);
     }));

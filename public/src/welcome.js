@@ -10,14 +10,8 @@ export function handleWelcome(message, send) {
   replaceItems(message.items);
   replaceChatMessages(message.messages);
   renderRanking(message.ranking);
-  if (serverStrokes.length > 0) {
-    replaceStrokes(serverStrokes);
-    saveLocalStrokes(getOwnStrokes());
-  } else if (getOwnStrokes().length > 0) {
-    for (const stroke of getOwnStrokes().slice(-300)) {
-      send({ type: "stroke", stroke: { ...stroke, author: state.socketId } });
-    }
-  }
+  replaceStrokes(serverStrokes);
+  saveLocalStrokes(getOwnStrokes());
 
   state.remotePlayers = new Map();
   for (const remotePlayer of message.players || []) {

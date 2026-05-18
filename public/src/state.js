@@ -154,7 +154,12 @@ export function getStrokeLayerId(stroke) {
 
 export function isOwnStroke(stroke) {
   if (!stroke) return false;
-  return stroke.author === state.socketId || stroke.author === player.id || stroke.author === "local";
+  return (
+    stroke.author === state.socketId ||
+    stroke.author === player.id ||
+    stroke.author === "local" ||
+    stroke.owner === player.clientId
+  );
 }
 
 export function getOwnStrokes() {

@@ -1,7 +1,11 @@
-function deleteOwnStrokeIds(room, playerId, ids) {
+function deleteOwnStrokeIds(room, playerId, ownerId, ids) {
   const requested = new Set(Array.isArray(ids) ? ids.filter((id) => typeof id === "string") : []);
   if (!requested.size) return [];
-  return deleteStrokeIds(room, (stroke) => requested.has(stroke.id) && stroke.author === playerId);
+  return deleteStrokeIds(room, (stroke) => requested.has(stroke.id) && isOwnedBy(stroke, playerId, ownerId));
+}
+
+function isOwnedBy(stroke, playerId, ownerId) {
+  return stroke.author === playerId || (ownerId && stroke.owner === ownerId);
 }
 
 function deleteAdminStrokeIds(room, ids) {
@@ -27,5 +31,6 @@ function clearPlayerStrokes(room, playerId) {
 module.exports = {
   clearPlayerStrokes,
   deleteAdminStrokeIds,
-  deleteOwnStrokeIds
+  deleteOwnStrokeIds,
+  isOwnedBy
 };

@@ -1,4 +1,4 @@
-import { addStroke, getOwnStrokes, state } from "../state.js";
+import { addStroke, getOwnStrokes, player, state } from "../state.js";
 import { eraseOwnStrokes } from "../eraser.js";
 import { recordStrokeAdd, recordStrokeDelete } from "../history.js";
 import { saveLocalStrokes } from "../storage.js";
@@ -30,6 +30,7 @@ export function bindPointer({ send }) {
     state.currentStroke = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       author: state.socketId,
+      owner: player.clientId,
       layerId: state.activeLayerId,
       color: state.tool === "eraser" ? PAPER_COLOR : ui.colorInput.value,
       size: state.tool === "eraser" ? state.eraserSize : Number(ui.sizeInput.value),

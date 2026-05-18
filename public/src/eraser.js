@@ -1,4 +1,4 @@
-import { getStrokeLayerId, replaceStrokes, state } from "./state.js";
+import { getStrokeLayerId, isOwnStroke, replaceStrokes, state } from "./state.js";
 
 export function eraseOwnStrokes(eraserStroke) {
   const ids = new Set();
@@ -26,7 +26,7 @@ function canEraseStroke(stroke, eraserStroke) {
   return (
     stroke &&
     stroke.tool !== "eraser" &&
-    stroke.author === state.socketId &&
+    isOwnStroke(stroke) &&
     getStrokeLayerId(stroke) === getStrokeLayerId(eraserStroke)
   );
 }

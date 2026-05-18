@@ -25,7 +25,7 @@ init();
 function init() {
   document.body.classList.toggle("spectator-mode", state.isSpectator);
   document.body.classList.toggle("lobby-open", !state.isSpectator);
-  replaceStrokes(loadLocalStrokes());
+  replaceStrokes(shouldUseOfflineCache() ? loadLocalStrokes() : []);
 
   initHud({
     sendPlayerUpdate,
@@ -53,6 +53,10 @@ function init() {
   resize();
   window.addEventListener("resize", resize);
   requestAnimationFrame(loop);
+}
+
+function shouldUseOfflineCache() {
+  return !("WebSocket" in window) || location.protocol === "file:";
 }
 
 function startGame() {

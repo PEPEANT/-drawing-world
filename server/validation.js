@@ -60,7 +60,7 @@ function safeSkin(value) {
   return value.length <= 7000 ? value : "";
 }
 
-function normalizeStroke(data, id) {
+function normalizeStroke(data, id, owner) {
   if (!data || !Array.isArray(data.points) || data.points.length < 2) return null;
   const points = data.points
     .slice(0, 700)
@@ -75,6 +75,7 @@ function normalizeStroke(data, id) {
   return {
     id: typeof data.id === "string" ? data.id.slice(0, 80) : crypto.randomUUID(),
     author: id,
+    owner: safeOwner(owner),
     color: /^#[0-9a-f]{6}$/i.test(data.color) ? data.color : "#111827",
     layerId: safeLayerId(data.layerId),
     size: isFiniteNumber(data.size) ? Math.max(1, Math.min(80, data.size)) : 6,
@@ -82,6 +83,11 @@ function normalizeStroke(data, id) {
     brush: safeBrush(data.brush),
     points
   };
+}
+
+function safeOwner(value) {
+  if (typeof value !== "string") return "";
+  return value.replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
 }
 
 function normalizeItem(data, id) {
