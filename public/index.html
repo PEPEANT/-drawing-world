@@ -78,7 +78,7 @@
       <section id="votePopup" class="vote-popup hidden" aria-label="플레이어 추천">
         <strong id="voteTargetName">플레이어</strong>
         <div><button id="voteLikeButton" type="button">좋아요</button><button id="voteDislikeButton" type="button">비추</button><button id="voteCloseButton" type="button">닫기</button></div>
-        <p id="voteHint" class="vote-hint">비추 3개 이상이면 해당 플레이어의 그림이 삭제돼.</p>
+        <p id="voteHint" class="vote-hint">추천 1개 이상이면 근처 그림이 스크린 후보로 등록돼. 비추 3개 이상이면 해당 플레이어의 그림이 삭제돼.</p>
       </section>
 
       <section id="exportPanel" class="export-panel hidden" aria-label="export drawing">
@@ -212,6 +212,7 @@
             </div>
             <div class="skin-edit-tools">
               <button id="skinEraserButton" type="button">지우개</button>
+              <button id="skinFillButton" type="button">페인트</button>
               <button id="skinClearButton" type="button">전체 지우기</button>
               <button id="skinDefaultButton" type="button">기본</button>
             </div>
@@ -243,6 +244,6 @@
       </form>
     </section>
 
-    <script type="module" src="./src/main.js?v=20260512-8"></script>
+    <script type="module" src="./src/main.js?v=20260518-2"></script>
   </body>
 </html>

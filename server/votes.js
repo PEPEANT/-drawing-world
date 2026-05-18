@@ -1,4 +1,5 @@
 const { LIMITS } = require("./config");
+const { isOwnedBy } = require("./strokes");
 
 function applyVote(room, vote) {
   const value = vote.value === -1 ? -1 : 1;
@@ -12,7 +13,9 @@ function applyVote(room, vote) {
   const votes = getVoteStore(room);
   const key = `${vote.voterId}:${vote.targetId}`;
   const previous = votes.byVoter.get(key) || 0;
-  if (previous === value) return { ok: true, changed: false, ranking: buildRanking(room) };
+  if (previous === value) {
+    return { ok: true, changed: false, previous, value, ranking: buildRanking(room) };
+  }
 
   adjustScore(votes, vote.targetId, previous, -1);
   adjustScore(votes, vote.targetId, value, 1);
@@ -21,7 +24,7 @@ function applyVote(room, vote) {
   const score = getScore(votes, vote.targetId);
   const feedback = buildVoteFeedback(room, vote.targetId, value, score);
   const clearedTarget = score.dislikes >= LIMITS.downvotesBeforeClear ? clearTarget(room, vote.targetId) : null;
-  return { ok: true, changed: true, clearedTarget, feedback, ranking: buildRanking(room) };
+  return { ok: true, changed: true, previous, value, clearedTarget, feedback, ranking: buildRanking(room) };
 }
 
 function buildRanking(room) {
@@ -80,9 +83,9 @@ function buildVoteFeedback(room, targetId, value, score) {
 
 function clearTarget(room, targetId) {
   const player = room.players.get(targetId);
-  room.strokes = room.strokes.filter((stroke) => stroke.author !== targetId);
+  room.strokes = room.strokes.filter((stroke) => !isOwnedBy(stroke, targetId, player?.clientId));
   resetDownvotes(room, targetId);
-  return { id: targetId, name: player?.name || "player" };
+  return { id: targetId, owner: player?.clientId || "", name: player?.name || "player" };
 }
 
 function resetDownvotes(room, targetId) {

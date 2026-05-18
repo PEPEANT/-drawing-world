@@ -1,4 +1,5 @@
 import { dom } from "./dom.js";
+import { renderFeaturedArchive } from "./featured.js";
 import { renderStrokeModeration } from "./moderation.js";
 
 export function renderState(state) {
@@ -9,7 +10,10 @@ export function renderState(state) {
   dom.updatedAt.textContent = `마지막 갱신: ${formatTime(state.at)}`;
   dom.rooms.replaceChildren();
 
-  if (!state.rooms.length && !state.bans?.length) {
+  const featured = renderFeaturedArchive(state.featured);
+  if (featured) dom.rooms.append(featured);
+
+  if (!state.rooms.length && !state.bans?.length && !featured) {
     dom.rooms.append(dom.emptyTemplate.content.cloneNode(true));
     return;
   }

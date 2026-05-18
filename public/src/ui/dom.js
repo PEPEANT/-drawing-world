@@ -73,6 +73,7 @@ export const ui = {
   skinColorInput: document.querySelector("#skinColorInput"),
   skinBrushSizes: document.querySelector("#skinBrushSizes"),
   skinEraserButton: document.querySelector("#skinEraserButton"),
+  skinFillButton: document.querySelector("#skinFillButton"),
   skinClearButton: document.querySelector("#skinClearButton"),
   skinDefaultButton: document.querySelector("#skinDefaultButton"),
   skinLoadButton: document.querySelector("#skinLoadButton"),

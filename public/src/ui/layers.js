@@ -131,9 +131,16 @@ function drawLayerPreview(canvas, layer) {
 
 function drawPreviewStroke(ctx, stroke, scale, offsetX, offsetY) {
   const points = stroke.points || [];
-  if (points.length < 2) return;
+  if (points.length < 1) return;
   ctx.strokeStyle = stroke.tool === "eraser" ? PAPER_COLOR : stroke.color;
+  ctx.fillStyle = ctx.strokeStyle;
   ctx.lineWidth = Math.max(1, stroke.size * scale);
+  if (points.length === 1) {
+    ctx.beginPath();
+    ctx.arc(points[0].x * scale + offsetX, points[0].y * scale + offsetY, ctx.lineWidth / 2, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
   ctx.beginPath();
   ctx.moveTo(points[0].x * scale + offsetX, points[0].y * scale + offsetY);
   for (const point of points.slice(1)) {

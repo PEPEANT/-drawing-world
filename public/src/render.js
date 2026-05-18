@@ -1,5 +1,6 @@
 import { GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
 import { drawBillboard } from "./billboard.js";
+import { drawGalleryScreens } from "./gallery-screens.js";
 import { drawItems } from "./item-render.js";
 import { drawLayeredStrokes } from "./layer-render.js";
 import { drawPlayer } from "./player-render.js";
@@ -11,7 +12,8 @@ export const canvas = document.querySelector("#world");
 const ctx = canvas.getContext("2d", { alpha: false });
 
 export function resize() {
-  state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const ratio = window.devicePixelRatio || 1;
+  state.dpr = Math.min(ratio < 1 ? 1 / ratio : ratio, 2);
   state.viewport = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -32,6 +34,7 @@ export function draw() {
   ctx.save();
   applyWorldTransform();
   drawPaper(view);
+  drawGalleryScreens(ctx);
 
   drawLayeredStrokes(ctx, drawStroke);
   drawItems(ctx);

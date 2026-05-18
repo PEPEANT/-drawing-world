@@ -22,9 +22,9 @@ function deleteStrokeIds(room, predicate) {
   return deletedIds;
 }
 
-function clearPlayerStrokes(room, playerId) {
+function clearPlayerStrokes(room, playerId, ownerId) {
   const before = room.strokes.length;
-  room.strokes = room.strokes.filter((stroke) => stroke.author !== playerId);
+  room.strokes = room.strokes.filter((stroke) => !isOwnedBy(stroke, playerId, ownerId));
   return before - room.strokes.length;
 }
 

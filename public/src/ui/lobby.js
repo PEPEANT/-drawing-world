@@ -3,6 +3,7 @@ import { player, state } from "../state.js";
 import { savePlayerIdentity } from "../storage.js";
 import { clamp } from "../utils.js";
 import { ui } from "./dom.js";
+import { fillSkinArea } from "./skin-fill.js";
 import { initRoomList } from "./room-list.js";
 import { loadSkinImageFile, saveSkinPng as saveSkinFile } from "./skin-files.js";
 import { SKIN_PRESETS, SKIN_SIZE, clearSkinContext } from "./skin-presets.js";
@@ -50,6 +51,7 @@ export function initLobby({ startGame }) {
 
   ui.skinColorInput.addEventListener("input", () => selectColor(ui.skinColorInput.value));
   ui.skinEraserButton.addEventListener("click", () => setSkinTool("eraser"));
+  ui.skinFillButton.addEventListener("click", () => setSkinTool("fill"));
   ui.skinClearButton.addEventListener("click", clearSkin);
   ui.skinDefaultButton.addEventListener("click", () => applyPreset("painter"));
   ui.skinLoadButton.addEventListener("click", () => ui.skinFileInput.click());
@@ -166,7 +168,9 @@ function paintPixel(event) {
   const startX = clamp(x - Math.floor(skinBrushSize / 2), 0, SKIN_SIZE - skinBrushSize);
   const startY = clamp(y - Math.floor(skinBrushSize / 2), 0, SKIN_SIZE - skinBrushSize);
 
-  if (skinTool === "eraser") {
+  if (skinTool === "fill") {
+    fillSkinArea(ctx, x, y, selectedColor);
+  } else if (skinTool === "eraser") {
     ctx.clearRect(startX, startY, skinBrushSize, skinBrushSize);
   } else {
     ctx.fillStyle = selectedColor;
@@ -222,6 +226,7 @@ function updatePreview() {
 function syncEditorUi() {
   ui.skinEditor.classList.toggle("is-customizing", selectedPreset === "custom");
   ui.skinEraserButton.classList.toggle("active", skinTool === "eraser");
+  ui.skinFillButton.classList.toggle("active", skinTool === "fill");
   for (const swatch of ui.skinPalette.querySelectorAll("[data-color]")) {
     swatch.classList.toggle("active", skinTool === "pen" && swatch.dataset.color === selectedColor);
   }

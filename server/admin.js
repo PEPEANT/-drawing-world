@@ -1,10 +1,16 @@
 const { WebSocketServer } = require("ws");
 const { buildAiState, publishAiAnnouncement } = require("./ai-observatory");
-const { buildAnalyticsState } = require("./analytics");
-const { banClient, formatBanReason, listBans, unbanClient } = require("./bans");
+const { buildAdminState } = require("./admin-state");
+const { banClient, formatBanReason, unbanClient } = require("./bans");
 const { ADMIN_KEY } = require("./config");
+const {
+  buildFeaturedTop,
+  clearFeaturedRoom,
+  finalizeRoomWinners,
+  removeFeaturedForTarget
+} = require("./featured");
 const { broadcast, send } = require("./protocol");
-const { getRoom, listRooms, rooms } = require("./rooms");
+const { getRoom, rooms } = require("./rooms");
 const { clearPlayerStrokes: clearPlayerStrokeData, deleteAdminStrokeIds } = require("./strokes");
 const { safeText, sanitizeRoomName } = require("./validation");
 
@@ -158,22 +164,28 @@ function clearPlayerStrokes(roomName, playerId) {
   const room = rooms.get(sanitizeRoomName(roomName));
   if (!room || typeof playerId !== "string") return;
   const player = room.players.get(playerId);
-  if (!clearPlayerStrokeData(room, playerId)) return;
+  if (!clearPlayerStrokeData(room, playerId, player?.clientId)) return;
+  removeFeaturedForTarget(room, playerId);
   broadcast(room, {
     type: "clearPlayerStrokes",
-    target: { id: playerId, name: player?.name || "플레이어" },
+    target: { id: playerId, owner: player?.clientId || "", name: player?.name || "플레이어" },
     reason: `${player?.name || "플레이어"} 그림이 관리자에 의해 초기화됐어.`
   }, undefined);
+  broadcast(room, { type: "featured", featured: buildFeaturedTop(room) }, undefined);
   notifyAdminState();
 }
 
 function clearRoom(roomName) {
   const room = getRoom(roomName);
+  finalizeRoomWinners(room, "admin-clear");
   room.strokes = [];
   room.items = [];
   room.radio = null;
+  room.votes = null;
+  clearFeaturedRoom(room);
   broadcast(room, { type: "clear", by: "admin" }, undefined);
   broadcast(room, { type: "clearItems", by: "admin" }, undefined);
+  broadcast(room, { type: "featured", featured: buildFeaturedTop(room) }, undefined);
   notifyAdminState();
 }
 
@@ -190,7 +202,7 @@ function notifyAdminState() {
 function sendAdminState(ws) {
   send(ws, {
     type: "state",
-    state: buildAdminState()
+    state: buildAdminState(admins.size)
   });
 }
 
@@ -212,20 +224,6 @@ function publishAiMessage(ws, message) {
   notifyAdminState();
 }
 
-function buildAdminState() {
-  const roomList = listRooms();
-  return {
-    at: Date.now(),
-    roomCount: roomList.length,
-    playerCount: roomList.reduce((total, room) => total + room.playerCount, 0),
-    clientCount: roomList.reduce((total, room) => total + room.clients, 0),
-    adminCount: admins.size,
-    analytics: buildAnalyticsState(),
-    bans: listBans(),
-    rooms: roomList
-  };
-}
-
 function normalizeBanDuration(options) {
   if (Number.isFinite(Number(options?.hours))) {
     return clampMinutes(Number(options.hours) * 60) * 60 * 1000;
@@ -243,7 +241,4 @@ function clampMinutes(minutes) {
   return Math.max(1, Math.min(30 * 24 * 60, Number.isFinite(minutes) ? minutes : 1440));
 }
 
-module.exports = {
-  attachAdminSocket,
-  notifyAdminState
-};
+module.exports = { attachAdminSocket, notifyAdminState };

@@ -1,5 +1,6 @@
 const { sanitizeRoomName } = require("./validation");
 const { buildStrokeModeration } = require("./stroke-moderation");
+const { buildFeaturedTop } = require("./featured");
 
 const rooms = new Map();
 
@@ -12,6 +13,7 @@ function getRoom(name) {
       items: [],
       messages: [],
       radio: null,
+      strokeSeq: 0,
       players: new Map(),
       clients: new Set()
     });
@@ -41,6 +43,7 @@ function listRooms() {
     playerCount: room.players.size,
     strokes: room.strokes.length,
     moderationStrokes: buildStrokeModeration(room),
+    featured: buildFeaturedTop(room),
     items: room.items.length,
     messages: room.messages.length
   }));

@@ -1,4 +1,5 @@
 import { CLIENT_LIMITS, PALETTE, STORAGE_KEYS, WORLD, isSpectatorMode } from "./config.js";
+import { mergeStroke, sortStrokes } from "./stroke-list.js";
 
 export const DEFAULT_LAYER_ID = "layer-1";
 
@@ -17,7 +18,9 @@ export const state = {
   chatBubbles: new Map(),
   voteBubbles: new Map(),
   ranking: [],
+  featured: [],
   voteTargetId: null,
+  votePoint: null,
   isSpectator: isSpectatorMode(),
   gameStarted: isSpectatorMode(),
   currentStroke: null,
@@ -55,13 +58,13 @@ export function setSocketId(id) {
 }
 
 export function replaceStrokes(nextStrokes) {
-  state.strokes = Array.isArray(nextStrokes) ? nextStrokes : [];
+  state.strokes = Array.isArray(nextStrokes) ? sortStrokes(nextStrokes) : [];
   syncLayersFromStrokes();
   emitLayerChange();
 }
 
 export function addStroke(stroke) {
-  state.strokes.push(stroke);
+  state.strokes = mergeStroke(state.strokes, stroke);
   if (isOwnStroke(stroke)) ensureLayer(stroke.layerId || DEFAULT_LAYER_ID);
   trimStrokes();
   emitLayerChange();

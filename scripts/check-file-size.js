@@ -10,6 +10,7 @@ const ignoredDirs = new Set([
   ".git",
   ".playwright-mcp",
   "artifacts",
+  "data",
   "node_modules"
 ]);
 

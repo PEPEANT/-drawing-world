@@ -14,3 +14,13 @@ export function addVoteFeedback(feedback) {
     expiresAt: Date.now() + DURATION
   });
 }
+
+export function addFeaturedFeedback(targetId, text) {
+  if (typeof targetId !== "string" || !targetId) return;
+  state.voteBubbles.set(targetId, {
+    text: text || "스크린 후보 등록!",
+    color: "rgba(37, 99, 235, 0.94)",
+    duration: 2200,
+    expiresAt: Date.now() + 2200
+  });
+}

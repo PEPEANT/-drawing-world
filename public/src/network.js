@@ -16,11 +16,10 @@ import { saveLocalStrokes } from "./storage.js";
 import { addChatBubble, addChatMessage, addSystemMessage } from "./ui/chat.js";
 import { setOnline } from "./ui/hud.js";
 import { renderRanking } from "./ui/ranking.js";
-import { addVoteFeedback } from "./vote-feedback.js";
+import { addFeaturedFeedback, addVoteFeedback } from "./vote-feedback.js";
 import { handleWelcome } from "./welcome.js";
 
-let ws = null;
-let reconnectAllowed = true;
+let ws = null, reconnectAllowed = true;
 let kickReason = "";
 
 export function connect() {
@@ -125,9 +124,25 @@ function handleSocketMessage(message) {
     return;
   }
 
+  if (message.type === "claimStrokes") {
+    replaceStrokes(state.strokes.map((stroke) => (
+      stroke.owner === message.owner ? { ...stroke, author: message.author } : stroke
+    )));
+    saveLocalStrokes(getOwnStrokes());
+    return;
+  }
+
   if (message.type === "clear") {
     replaceStrokes([]);
     saveLocalStrokes(getOwnStrokes());
+    return;
+  }
+
+  if (message.type === "dailyReset") {
+    replaceStrokes([]);
+    state.featured = Array.isArray(message.featured) ? message.featured : [];
+    saveLocalStrokes(getOwnStrokes());
+    addSystemMessage("Daily drawing board reset.");
     return;
   }
 
@@ -149,7 +164,9 @@ function handleSocketMessage(message) {
   }
 
   if (message.type === "clearPlayerStrokes" && message.target) {
-    replaceStrokes(state.strokes.filter((stroke) => stroke.author !== message.target.id));
+    replaceStrokes(state.strokes.filter((stroke) => (
+      stroke.author !== message.target.id && (!message.target.owner || stroke.owner !== message.target.owner)
+    )));
     saveLocalStrokes(getOwnStrokes());
     addSystemMessage(message.reason || `${message.target.name || "플레이어"} 그림이 삭제됐어.`);
     return;
@@ -162,6 +179,17 @@ function handleSocketMessage(message) {
 
   if (message.type === "ranking") {
     renderRanking(message.ranking);
+    return;
+  }
+
+  if (message.type === "featured") {
+    state.featured = Array.isArray(message.featured) ? message.featured : [];
+    state.featuredUpdatedAt = Date.now();
+    return;
+  }
+
+  if (message.type === "featuredFeedback") {
+    addFeaturedFeedback(message.targetId, message.text);
     return;
   }
 

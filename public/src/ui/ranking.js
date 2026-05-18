@@ -1,5 +1,5 @@
 import { CLIENT_LIMITS, PLAYER } from "../config.js";
-import { getStrokeLayerId, state } from "../state.js";
+import { getStrokeLayerId, player, state } from "../state.js";
 import { ui } from "./dom.js";
 
 let sendVote = () => {};
@@ -10,7 +10,7 @@ export function initRanking({ send }) {
   ui.voteLikeButton.addEventListener("click", () => submitVote(1));
   ui.voteDislikeButton.addEventListener("click", () => submitVote(-1));
   ui.voteCloseButton.addEventListener("click", closeVotePopup);
-  ui.voteHint.textContent = `비추 ${CLIENT_LIMITS.downvotesBeforeClear}개 이상이면 해당 플레이어의 그림이 삭제돼.`;
+  ui.voteHint.textContent = `추천 ${CLIENT_LIMITS.likesBeforeFeatured}개 이상이면 근처 그림이 스크린 후보로 등록돼. 비추 ${CLIENT_LIMITS.downvotesBeforeClear}개 이상이면 해당 플레이어의 그림이 삭제돼.`;
   renderRanking([]);
 }
 
@@ -48,6 +48,7 @@ export function handleVotePointer(point, event) {
   const target = findVoteTarget(point);
   if (!target) return false;
   state.voteTargetId = target.id;
+  state.votePoint = { x: point.x, y: point.y };
   ui.voteTargetName.textContent = target.name || "플레이어";
   ui.votePopup.style.left = `${Math.min(window.innerWidth - 210, event.clientX + 12)}px`;
   ui.votePopup.style.top = `${Math.min(window.innerHeight - 86, event.clientY + 12)}px`;
@@ -57,12 +58,13 @@ export function handleVotePointer(point, event) {
 
 export function closeVotePopup() {
   state.voteTargetId = null;
+  state.votePoint = null;
   ui.votePopup.classList.add("hidden");
 }
 
 function submitVote(value) {
   if (!state.voteTargetId) return;
-  sendVote({ type: "vote", target: state.voteTargetId, value });
+  sendVote({ type: "vote", target: state.voteTargetId, value, point: state.votePoint });
   closeVotePopup();
 }
 
@@ -89,21 +91,27 @@ function findStrokeAuthor(point) {
     const stroke = state.strokes[i];
     if (!canVoteStroke(stroke)) continue;
     if (distanceToStroke(point, stroke) <= maxDistance) {
-      const player = state.remotePlayers.get(stroke.author);
-      if (player) return { id: player.id, name: player.name };
+      const target = findPlayerByStroke(stroke);
+      if (target) return { id: target.id, name: target.name };
     }
   }
   return null;
 }
 
 function canVoteStroke(stroke) {
-  if (!stroke || stroke.tool === "eraser" || stroke.author === state.socketId) return false;
+  if (!stroke || stroke.tool === "eraser" || stroke.author === state.socketId || stroke.owner === player.clientId) return false;
   const layer = state.layers.find((entry) => entry.id === getStrokeLayerId(stroke));
   return layer?.visible !== false;
 }
 
+function findPlayerByStroke(stroke) {
+  if (state.remotePlayers.has(stroke.author)) return state.remotePlayers.get(stroke.author);
+  return Array.from(state.remotePlayers.values()).find((entry) => entry.clientId && entry.clientId === stroke.owner);
+}
+
 function distanceToStroke(point, stroke) {
   const points = stroke.points || [];
+  if (points.length === 1) return Math.hypot(point.x - points[0].x, point.y - points[0].y);
   let best = Infinity;
   for (let i = 1; i < points.length; i += 1) {
     best = Math.min(best, distanceToSegment(point, points[i - 1], points[i]));

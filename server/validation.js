@@ -61,16 +61,17 @@ function safeSkin(value) {
 }
 
 function normalizeStroke(data, id, owner) {
-  if (!data || !Array.isArray(data.points) || data.points.length < 2) return null;
+  if (!data || !Array.isArray(data.points) || data.points.length < 1) return null;
   const points = data.points
     .slice(0, 700)
     .filter((point) => point && isFiniteNumber(point.x) && isFiniteNumber(point.y))
     .map((point) => ({
       x: Math.max(0, Math.min(3200, point.x)),
-      y: Math.max(0, Math.min(2200, point.y))
+      y: Math.max(0, Math.min(2200, point.y)),
+      pressure: isFiniteNumber(point.pressure) ? Math.max(0, Math.min(1, point.pressure)) : 0.5
     }));
 
-  if (points.length < 2) return null;
+  if (points.length < 1) return null;
 
   return {
     id: typeof data.id === "string" ? data.id.slice(0, 80) : crypto.randomUUID(),

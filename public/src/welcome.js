@@ -10,6 +10,7 @@ export function handleWelcome(message, send) {
   replaceItems(message.items);
   replaceChatMessages(message.messages);
   renderRanking(message.ranking);
+  state.featured = Array.isArray(message.featured) ? message.featured : [];
   replaceStrokes(serverStrokes);
   saveLocalStrokes(getOwnStrokes());
 

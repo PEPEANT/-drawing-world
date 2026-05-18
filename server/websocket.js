@@ -5,23 +5,25 @@ const { formatBanReason, getActiveBan } = require("./bans");
 const { notifyAdminState } = require("./admin");
 const { LIMITS } = require("./config");
 const { broadcast, send } = require("./protocol");
-const { handleRadioPlay, handleRadioStop } = require("./radio");
+const { handleRadioPlay, handleRadioStop, releaseRadioOwner } = require("./radio");
 const { removeOwnerItems } = require("./items");
+const { claimOwnerStrokes, hasActiveClient, safeOwner: safeClientId } = require("./ownership");
 const { parseRequestUrl } = require("./request-url");
 const { getRoom, removeRoomIfEmpty } = require("./rooms");
 const { deleteOwnStrokeIds, isOwnedBy } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
+const { buildFeaturedTop } = require("./featured");
 const {
-  normalizeItem,
-  normalizePlayer,
-  normalizeStroke,
-  safeLayerId,
-  safeText,
-  sanitizeRoomName
-} = require("./validation");
+  broadcastFeaturedRemoval,
+  resetRoomIfNeeded,
+  syncFeaturedVote,
+  startDailyResetSweep
+} = require("./featured-realtime");
+const { normalizeItem, normalizePlayer, normalizeStroke, safeLayerId, safeText, sanitizeRoomName } = require("./validation");
 
 function attachGameSocket(server) {
   const wss = new WebSocketServer({ noServer: true });
+  startDailyResetSweep();
 
   server.on("upgrade", (req, socket, head) => {
     const url = parseRequestUrl(req);
@@ -35,6 +37,7 @@ function attachGameSocket(server) {
     const url = parseRequestUrl(req);
     const roomName = sanitizeRoomName(url.searchParams.get("room"));
     const room = getRoom(roomName);
+    resetRoomIfNeeded(room);
     const id = crypto.randomUUID();
     const isSpectator = url.searchParams.get("spectator") === "1";
     const clientId = safeClientId(url.searchParams.get("clientId"));
@@ -43,6 +46,11 @@ function attachGameSocket(server) {
     if (!isSpectator && activeBan) {
       send(ws, { type: "kicked", reason: formatBanReason(activeBan) });
       ws.close(4003, "banned");
+      return;
+    }
+    if (!isSpectator && hasActiveClient(room, clientId)) {
+      send(ws, { type: "kicked", reason: "이미 같은 브라우저가 이 방에 접속 중이에요." });
+      ws.close(4008, "duplicate client");
       return;
     }
 
@@ -68,6 +76,7 @@ function attachGameSocket(server) {
       items: room.items,
       messages: room.messages,
       ranking: buildRanking(room),
+      featured: buildFeaturedTop(room),
       players: Array.from(room.players.values())
     });
 
@@ -79,6 +88,7 @@ function attachGameSocket(server) {
 function handleClose(ws, room, roomName, id) {
   room.clients.delete(ws);
   room.players.delete(id);
+  releaseRadioOwner(room, { playerId: id, clientId: ws.clientId });
   const removedItemIds = removeOwnerItems(room, { playerId: id, clientId: ws.clientId });
   removePlayerVotes(room, id);
   if (removedItemIds.length) {
@@ -92,6 +102,7 @@ function handleClose(ws, room, roomName, id) {
 
 function handleMessage(ws, room, raw) {
   if (ws.isSpectator) return;
+  resetRoomIfNeeded(room);
 
   let message;
   try {
@@ -109,7 +120,7 @@ function handleMessage(ws, room, raw) {
     case "chat": return handleChat(ws, room, message);
     case "itemAdd": return handleItemAdd(ws, room, message);
     case "radioPlay": return handleRadioPlay(ws, room, message);
-    case "radioStop": return handleRadioStop(room, message);
+    case "radioStop": return handleRadioStop(ws, room, message);
     case "vote": return handleVote(ws, room, message);
     default: return undefined;
   }
@@ -144,6 +155,8 @@ function handleHello(ws, room, message) {
   player.updatedAt = Date.now();
   room.players.set(ws.id, player);
   broadcast(room, { type: "playerJoin", player }, ws);
+  const claimed = claimOwnerStrokes(room, player.clientId, ws.id);
+  if (claimed) broadcast(room, { type: "claimStrokes", owner: player.clientId, author: ws.id }, undefined);
   broadcast(room, { type: "ranking", ranking: buildRanking(room) }, undefined);
   notifyAdminState();
 }
@@ -161,29 +174,35 @@ function handlePlayerUpdate(ws, room, message) {
 }
 
 function handleVote(ws, room, message) {
+  const targetId = typeof message.target === "string" ? message.target : "";
   const result = applyVote(room, {
     voterId: ws.id,
-    targetId: typeof message.target === "string" ? message.target : "",
+    targetId,
     value: message.value
   });
   if (!result.ok) {
     send(ws, { type: "voteResult", message: result.reason });
     return;
   }
+  syncFeaturedVote(room, ws, message, targetId, result);
   broadcast(room, { type: "ranking", ranking: result.ranking }, undefined);
   if (result.feedback) broadcast(room, { type: "voteFeedback", feedback: result.feedback }, undefined);
-  if (result.clearedTarget) broadcast(room, { type: "clearPlayerStrokes", target: result.clearedTarget }, undefined);
+  if (result.clearedTarget) {
+    broadcastFeaturedRemoval(room, result.clearedTarget.id);
+    broadcast(room, { type: "clearPlayerStrokes", target: result.clearedTarget }, undefined);
+  }
   notifyAdminState();
 }
 
 function handleStroke(ws, room, message) {
   const stroke = normalizeStroke(message.stroke, ws.id, ws.clientId || ws.id);
   if (!stroke) return;
+  stroke.order = room.strokeSeq = (room.strokeSeq || 0) + 1;
   room.strokes.push(stroke);
   if (room.strokes.length > LIMITS.maxStrokesPerRoom) {
     room.strokes.splice(0, room.strokes.length - LIMITS.maxStrokesPerRoom);
   }
-  broadcast(room, { type: "stroke", stroke }, ws);
+  broadcast(room, { type: "stroke", stroke }, undefined);
   notifyAdminState();
 }
 
@@ -205,12 +224,6 @@ function handleItemAdd(ws, room, message) {
   notifyAdminState();
 }
 
-function safeClientId(value) {
-  if (typeof value !== "string") return "";
-  const clean = value.replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
-  return clean;
-}
-
 function handleChat(ws, room, message) {
   const player = room.players.get(ws.id);
   const text = safeText(message.text, LIMITS.maxChatLength);
@@ -230,6 +243,4 @@ function handleChat(ws, room, message) {
   broadcast(room, { type: "chat", message: chatMessage }, undefined);
 }
 
-module.exports = {
-  attachGameSocket
-};
+module.exports = { attachGameSocket };

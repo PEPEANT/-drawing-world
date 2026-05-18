@@ -39,6 +39,7 @@ export function initItemPanel({ send, setTool }) {
     addSystemMessage("이미 다른 라디오가 재생 중이야.");
   });
   window.addEventListener("radioStop", (event) => stopRadio(event.detail.id));
+  window.addEventListener("beforeunload", sendCurrentRadioStop);
 }
 
 export function toggleItemPanel() {
@@ -153,12 +154,19 @@ function playRadioById(id, shouldBroadcast) {
 
 function playRadio(item, send, shouldBroadcast) {
   if (!item.url) return;
+  if (currentRadioId && currentRadioId !== item.id) {
+    sendCurrentRadioStop();
+  }
   if (!currentAudio) currentAudio = new Audio();
   currentAudio.pause();
   currentAudio.src = item.url;
   currentRadioId = item.id;
   currentAudio.onended = () => {
-    if (currentRadioId && sendToServer) sendToServer({ type: "radioStop", id: currentRadioId });
+    sendCurrentRadioStop();
+    currentRadioId = null;
+  };
+  currentAudio.onerror = () => {
+    sendCurrentRadioStop();
     currentRadioId = null;
   };
   currentAudio.play().then(() => {
@@ -176,6 +184,12 @@ function stopRadio(id) {
   currentAudio.pause();
   currentAudio.currentTime = 0;
   currentRadioId = null;
+}
+
+function sendCurrentRadioStop() {
+  if (currentRadioId && sendToServer) {
+    sendToServer({ type: "radioStop", id: currentRadioId });
+  }
 }
 
 function normalizeUrl(value) {

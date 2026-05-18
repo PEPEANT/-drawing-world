@@ -26,6 +26,16 @@ export function recordStrokeDelete(strokes) {
   emitHistoryChange();
 }
 
+export function recordStrokeSplit(removed, added) {
+  const removedStrokes = removed.filter(Boolean).map(cloneStroke);
+  const addedStrokes = added.filter(Boolean).map(cloneStroke);
+  if (!removedStrokes.length && !addedStrokes.length) return;
+  undoStack.push({ type: "split", removed: removedStrokes, added: addedStrokes });
+  redoStack.length = 0;
+  trimHistory();
+  emitHistoryChange();
+}
+
 export function undoLastAction() {
   const action = undoStack.pop();
   if (!action) return;
@@ -57,6 +67,11 @@ function applyInverse(action) {
   }
   if (action.type === "delete") {
     restoreStrokes(action.strokes);
+    return;
+  }
+  if (action.type === "split") {
+    removeStrokeIds(action.added.map((stroke) => stroke.id));
+    restoreStrokes(action.removed);
   }
 }
 
@@ -67,6 +82,11 @@ function applyAction(action) {
   }
   if (action.type === "delete") {
     removeStrokeIds(action.strokes.map((stroke) => stroke.id));
+    return;
+  }
+  if (action.type === "split") {
+    removeStrokeIds(action.removed.map((stroke) => stroke.id));
+    restoreStrokes(action.added);
   }
 }
 

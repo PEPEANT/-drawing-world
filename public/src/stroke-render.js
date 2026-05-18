@@ -2,7 +2,7 @@ import { PAPER_COLOR } from "./config.js";
 
 export function drawStroke(ctx, stroke) {
   const points = getDrawablePoints(stroke);
-  if (points.length < 2) return;
+  if (points.length < 1) return;
 
   if (stroke.tool === "eraser") {
     if (stroke.brush === "spray") {
@@ -42,6 +42,14 @@ export function drawStroke(ctx, stroke) {
 }
 
 function drawLine(ctx, points, options) {
+  if (points.length === 1) {
+    drawDot(ctx, points[0], options);
+    return;
+  }
+  if (hasPressure(points) && options.cap === "round") {
+    drawPressureLine(ctx, points, options);
+    return;
+  }
   ctx.save();
   ctx.globalAlpha *= options.alpha || 1;
   ctx.lineCap = options.cap;
@@ -62,6 +70,34 @@ function drawLine(ctx, points, options) {
   const last = points[points.length - 1];
   ctx.lineTo(last.x, last.y);
   ctx.stroke();
+  ctx.restore();
+}
+
+function drawPressureLine(ctx, points, options) {
+  ctx.save();
+  ctx.globalAlpha *= options.alpha || 1;
+  ctx.lineCap = options.cap;
+  ctx.lineJoin = options.join;
+  ctx.strokeStyle = options.color;
+  for (let i = 1; i < points.length; i += 1) {
+    const previous = points[i - 1];
+    const point = points[i];
+    ctx.lineWidth = pressureSize(options.size, (pressureOf(previous) + pressureOf(point)) / 2);
+    ctx.beginPath();
+    ctx.moveTo(previous.x, previous.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawDot(ctx, point, options) {
+  ctx.save();
+  ctx.globalAlpha *= options.alpha || 1;
+  ctx.fillStyle = options.color;
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, pressureSize(options.size, pressureOf(point)) / 2, 0, Math.PI * 2);
+  ctx.fill();
   ctx.restore();
 }
 
@@ -93,6 +129,18 @@ function drawSpray(ctx, stroke, points) {
 function getDrawablePoints(stroke) {
   if (!Array.isArray(stroke?.points)) return [];
   return stroke.points.filter((point) => point && Number.isFinite(point.x) && Number.isFinite(point.y));
+}
+
+function hasPressure(points) {
+  return points.some((point) => Number.isFinite(point.pressure) && Math.abs(point.pressure - 0.5) > 0.01);
+}
+
+function pressureOf(point) {
+  return Number.isFinite(point.pressure) ? Math.max(0, Math.min(1, point.pressure)) : 0.5;
+}
+
+function pressureSize(size, pressure) {
+  return Math.max(1, size * (0.45 + pressure * 1.1));
 }
 
 function hashString(value) {

@@ -41,6 +41,7 @@ export const CLIENT_LIMITS = {
   localStrokes: 800,
   activeStrokes: 1200,
   layersPerPlayer: 5,
+  likesBeforeFeatured: 1,
   downvotesBeforeClear: 3
 };
 
