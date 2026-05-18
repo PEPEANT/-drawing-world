@@ -1,9 +1,11 @@
+import { WORLD } from "./config.js";
+
 const billboardImage = new Image();
 billboardImage.src = "/assets/simulacre-billboard.png";
 
 export const BILLBOARD = {
   x: 1600,
-  y: 2010,
+  y: WORLD.height + 220,
   width: 1100,
   height: 350
 };

@@ -113,10 +113,36 @@ function scoreCandidate(candidate, bot, controller) {
   const lastVisit = controller.visits?.[candidate.key] || 0;
   const revisitPenalty = lastVisit ? Math.max(0, 24 - ((now - lastVisit) / REVISIT_WINDOW_MS) * 24) : 0;
   const ageBonus = lastVisit ? Math.min(18, (now - lastVisit) / 3000) : 18;
+  const memory = getMemoryScore(candidate, controller.memory, now);
   const distance = Math.hypot(candidate.x - bot.x, candidate.y - bot.y);
   const distancePenalty = Math.min(12, distance / 520);
-  const score = Math.max(1, Math.round(candidate.baseScore + ageBonus - revisitPenalty - distancePenalty));
-  return { ...candidate, score, distance: Math.round(distance), reason: `${candidate.reason} · ${score}점` };
+  const score = Math.max(1, Math.round(
+    candidate.baseScore + ageBonus + memory.bonus - memory.penalty - revisitPenalty - distancePenalty
+  ));
+  return {
+    ...candidate,
+    score,
+    distance: Math.round(distance),
+    reason: `${candidate.reason} · ${memory.reason} · ${score}점`
+  };
+}
+
+function getMemoryScore(candidate, memory, now) {
+  const targets = Array.isArray(memory?.targets) ? memory.targets : [];
+  const recent = Array.isArray(memory?.recent) ? memory.recent : [];
+  const count = targets.find((entry) => entry.target === candidate.label)?.count || 0;
+  const last = recent.find((entry) => entry.target === candidate.label);
+  if (!count) return { bonus: 8, penalty: 0, reason: "오늘 미관측 +8" };
+
+  const lastAt = Number(last?.at) || now;
+  const staleBonus = Math.min(12, Math.max(0, (now - lastAt) / (10 * 60 * 1000) * 12));
+  const repeatPenalty = Math.min(18, count * 4);
+  const staleReason = staleBonus >= 1 ? ` · 오래 안봄 +${Math.round(staleBonus)}` : "";
+  return {
+    bonus: staleBonus,
+    penalty: repeatPenalty,
+    reason: `오늘 ${count}회 기억 -${Math.round(repeatPenalty)}${staleReason}`
+  };
 }
 
 function leastRecentlyVisitedPatrol(controller) {
