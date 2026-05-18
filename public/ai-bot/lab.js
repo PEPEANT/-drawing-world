@@ -129,7 +129,7 @@ function renderBot(bot, created) {
   dom.labBody.classList.add("has-bot");
   dom.cortexStatus.textContent = "토대 온라인";
   dom.senseState.textContent = "활성";
-  dom.memoryState.textContent = bot?.ai?.target || "비어 있음";
+  dom.memoryState.textContent = getTargetText(bot);
   dom.intentState.textContent = bot?.ai?.intent || "대기";
   dom.actionState.textContent = getActionText(bot);
   dom.createButton.disabled = true;
@@ -160,6 +160,12 @@ function getActionText(bot) {
   if (bot?.ai?.mode === "walking") return "이동 중";
   if (bot?.ai?.mode === "observing") return "관찰 중";
   return "생성 완료";
+}
+
+function getTargetText(bot) {
+  const target = bot?.ai?.target || "비어 있음";
+  const score = Number(bot?.ai?.score);
+  return Number.isFinite(score) ? `${target} · ${score}점` : target;
 }
 
 function getBotStatusText(bot, created) {
