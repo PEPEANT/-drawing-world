@@ -8,6 +8,9 @@ const DATA_DIR = path.join(ROOT_DIR, "data");
 const DATA_FILE = path.join(DATA_DIR, "daily-snapshots.json");
 const MAX_SNAPSHOTS = 80;
 const MAX_POINTS_PER_STROKE = 700;
+const PREVIEW_STROKES = 18;
+const PREVIEW_POINTS = 26;
+const PREVIEW_SIZE = { width: 180, height: 112 };
 
 const store = loadStore();
 
@@ -59,7 +62,8 @@ function listDailySnapshots(limit = 40) {
     itemCount: snapshot.itemCount || snapshot.items?.length || 0,
     featuredCount: snapshot.featuredCount || snapshot.featured?.length || 0,
     locked: snapshot.locked !== false,
-    bounds: snapshot.bounds
+    bounds: snapshot.bounds,
+    preview: buildPreview(snapshot)
   }));
 }
 
@@ -138,6 +142,31 @@ function getBounds(strokes) {
   }
   if (!Number.isFinite(left)) return { x: 0, y: 0, width: 3200, height: 2200 };
   return { x: left, y: top, width: Math.max(1, right - left), height: Math.max(1, bottom - top) };
+}
+
+function buildPreview(snapshot) {
+  const bounds = snapshot.bounds || getBounds(snapshot.strokes || []);
+  const strokes = (snapshot.strokes || []).slice(-PREVIEW_STROKES);
+  if (!strokes.length) return null;
+  return {
+    width: PREVIEW_SIZE.width,
+    height: PREVIEW_SIZE.height,
+    strokes: strokes.map((stroke) => ({
+      color: stroke.color,
+      size: Math.max(2, Math.min(9, (Number(stroke.size) || 6) * 0.45)),
+      points: samplePreviewPoints(stroke.points || [], bounds)
+    }))
+  };
+}
+
+function samplePreviewPoints(points, bounds) {
+  const step = Math.max(1, Math.ceil(points.length / PREVIEW_POINTS));
+  const sampled = points.filter((_, index) => index % step === 0);
+  if (sampled[sampled.length - 1] !== points[points.length - 1]) sampled.push(points[points.length - 1]);
+  return sampled.map((point) => ({
+    x: Math.round(((point.x - bounds.x) / Math.max(1, bounds.width)) * PREVIEW_SIZE.width),
+    y: Math.round(((point.y - bounds.y) / Math.max(1, bounds.height)) * PREVIEW_SIZE.height)
+  }));
 }
 
 function loadStore() {

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>드로잉온라인</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="./styles/main.css?v=20260518-1">
+    <link rel="stylesheet" href="./styles/main.css?v=20260518-2">
   </head>
   <body class="lobby-open">
     <canvas id="world" aria-label="드로잉온라인 월드"></canvas>
@@ -228,22 +228,22 @@
         </section>
 
         <section class="room-list" aria-label="room list">
-          <div class="room-list-head">
-            <span>방 목록</span>
-            <span id="lobbyRoomStatus">불러오는 중</span>
-          </div>
+          <div class="room-list-head"><span>방 목록</span><span id="lobbyRoomStatus">불러오는 중</span></div>
           <button id="lobbyRoomCard" class="room-card" type="submit">
-            <span>
-              <strong>시뮬라크월드</strong>
-              <small>공용 그림 월드</small>
-            </span>
+            <span><strong>시뮬라크월드</strong><small>공용 그림 월드</small></span>
             <span id="lobbyRoomCount" class="room-count">0/50</span>
             <span class="room-enter">입장</span>
           </button>
         </section>
+
+        <section class="lobby-archive" aria-label="backed up drawings">
+          <div class="room-list-head"><span>백업된 지난 그림</span><a href="/archive" target="_blank" rel="noreferrer">전체 보기</a></div>
+          <div id="lobbyArchiveList" class="lobby-archive-list"></div>
+          <p id="lobbyArchiveHint" class="lobby-archive-hint">관리자 페이지에서 오늘 그림 보존을 누르면 JSON으로 직접 백업할 수 있어.</p>
+        </section>
       </form>
     </section>
 
-    <script type="module" src="./src/main.js?v=20260518-2"></script>
+    <script type="module" src="./src/main.js?v=20260518-3"></script>
   </body>
 </html>

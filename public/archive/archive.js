@@ -23,6 +23,7 @@ async function loadSnapshotList() {
     const response = await fetch("/api/archive");
     const data = await response.json();
     renderSnapshotList(Array.isArray(data.snapshots) ? data.snapshots : []);
+    openHashSnapshot();
   } catch {
     list.textContent = "서버 보존 목록을 불러오지 못했어.";
   }
@@ -49,12 +50,18 @@ function renderSnapshotList(snapshots) {
 
 async function loadServerSnapshot(id) {
   try {
+    location.hash = id;
     const response = await fetch(`/api/archive/${encodeURIComponent(id)}`);
     const data = await response.json();
     if (data.snapshot) setSnapshot(data.snapshot);
   } catch {
     meta.textContent = "그림을 불러오지 못했어.";
   }
+}
+
+function openHashSnapshot() {
+  const id = decodeURIComponent(location.hash.replace(/^#/, ""));
+  if (id && id !== activeId) loadServerSnapshot(id);
 }
 
 async function loadSnapshotFile() {

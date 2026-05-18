@@ -108,3 +108,64 @@ body:not(.lobby-open) .lobby,
 .room-card.is-full {
   opacity: 0.55;
 }
+
+.room-list-head a {
+  color: var(--accent);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.lobby-archive {
+  display: grid;
+  gap: 8px;
+}
+
+.lobby-archive-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lobby-archive-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.lobby-archive-card canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 180 / 112;
+  border-bottom: 1px solid var(--line);
+}
+
+.lobby-archive-card span {
+  display: block;
+  padding: 8px;
+}
+
+.lobby-archive-card strong,
+.lobby-archive-card small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lobby-archive-card small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.lobby-archive-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}

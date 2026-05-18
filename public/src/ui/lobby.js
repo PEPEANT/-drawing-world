@@ -4,6 +4,7 @@ import { savePlayerIdentity } from "../storage.js";
 import { clamp } from "../utils.js";
 import { ui } from "./dom.js";
 import { fillSkinArea } from "./skin-fill.js";
+import { initLobbyArchive } from "./lobby-archive.js";
 import { initRoomList } from "./room-list.js";
 import { loadSkinImageFile, saveSkinPng as saveSkinFile } from "./skin-files.js";
 import { SKIN_PRESETS, SKIN_SIZE, clearSkinContext } from "./skin-presets.js";
@@ -32,6 +33,7 @@ export function initLobby({ startGame }) {
   renderBrushSizes();
   loadSkin();
   initRoomList(ui);
+  initLobbyArchive(ui);
   ui.lobbyForm.addEventListener("submit", (event) => {
     event.preventDefault();
     player.name = ui.lobbyNameInput.value.trim().slice(0, 18) || player.name;
