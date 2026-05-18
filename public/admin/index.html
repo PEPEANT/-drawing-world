@@ -15,7 +15,8 @@
       </div>
       <nav class="admin-links">
         <a href="/archive" target="_blank" rel="noreferrer">지난 그림</a>
-        <a href="/ai">AI 관측실</a>
+        <a href="/ai">v1 AI 관측실</a>
+        <a href="/ai-bot">v2 봇 실험실</a>
         <a href="/">유저 페이지</a>
       </nav>
       <div class="status-line">
@@ -70,12 +71,20 @@
               <h2>접속 통계</h2>
               <span>이 시점부터 누적되는 플레이어 입장 기록이야.</span>
             </div>
-            <div class="analytics-tabs" aria-label="통계 기간">
-              <button class="active" type="button" data-analytics-range="daily">일간</button>
-              <button type="button" data-analytics-range="monthly">월간</button>
-              <button type="button" data-analytics-range="yearly">년간</button>
+            <div class="analytics-controls">
+              <div class="analytics-actions">
+                <button id="analyticsBackupButton" type="button">통계 백업</button>
+                <button id="analyticsRestoreButton" type="button">통계 복원</button>
+                <input id="analyticsRestoreInput" type="file" accept="application/json,.json" hidden>
+              </div>
+              <div class="analytics-tabs" aria-label="통계 기간">
+                <button class="active" type="button" data-analytics-range="daily">일간</button>
+                <button type="button" data-analytics-range="monthly">월간</button>
+                <button type="button" data-analytics-range="yearly">년간</button>
+              </div>
             </div>
           </div>
+          <p id="analyticsStatus" class="analytics-status"></p>
           <div class="analytics-summary">
             <div>
               <span>오늘 입장</span>

@@ -1,5 +1,6 @@
 const { WebSocketServer } = require("ws");
-const { buildAiState, publishAiAnnouncement } = require("./ai-observatory");
+const { publishAiMessage, sendAiState } = require("./admin-ai");
+const { restoreAnalytics, sendAnalyticsBackup } = require("./admin-analytics");
 const { buildAdminState } = require("./admin-state");
 const { banClient, formatBanReason, unbanClient } = require("./bans");
 const { normalizeBanDuration } = require("./ban-duration");
@@ -63,7 +64,7 @@ function handleAdminMessage(ws, raw) {
   }
 
   if (message.type === "aiAnnounce") {
-    publishAiMessage(ws, message);
+    publishAiMessage(ws, message, notifyAdminState);
     return;
   }
 
@@ -94,6 +95,16 @@ function handleAdminMessage(ws, raw) {
 
   if (message.type === "saveSnapshot") {
     saveRoomSnapshot(ws, message.room);
+    return;
+  }
+
+  if (message.type === "exportAnalytics") {
+    sendAnalyticsBackup(ws);
+    return;
+  }
+
+  if (message.type === "importAnalytics") {
+    restoreAnalytics(ws, message.backup, notifyAdminState);
     return;
   }
 
@@ -224,24 +235,6 @@ function sendAdminState(ws) {
     type: "state",
     state: buildAdminState(admins.size)
   });
-}
-
-function sendAiState(ws) {
-  send(ws, {
-    type: "aiState",
-    state: buildAiState()
-  });
-}
-
-function publishAiMessage(ws, message) {
-  const chatMessage = publishAiAnnouncement(message.room, message.text);
-  if (!chatMessage) {
-    send(ws, { type: "error", message: "AI 발표 내용을 확인하세요." });
-    return;
-  }
-  send(ws, { type: "aiPublished", message: chatMessage });
-  sendAiState(ws);
-  notifyAdminState();
 }
 
 module.exports = { attachAdminSocket, notifyAdminState };

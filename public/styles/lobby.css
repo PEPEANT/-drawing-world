@@ -137,10 +137,22 @@ body:not(.lobby-open) .lobby,
   text-decoration: none;
 }
 
-.lobby-archive-card canvas {
+.lobby-archive-empty-card {
+  overflow: hidden;
+  min-height: 92px;
+  border: 1px dashed #cfd8e6;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.lobby-archive-card canvas,
+.lobby-archive-empty-card canvas {
   display: block;
   width: 100%;
   aspect-ratio: 180 / 112;
+}
+
+.lobby-archive-card canvas {
   border-bottom: 1px solid var(--line);
 }
 

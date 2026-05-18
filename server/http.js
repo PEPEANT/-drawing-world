@@ -63,6 +63,7 @@ function resolvePublicPath(pathname) {
   if (pathname === "/admin") return "/admin/index.html";
   if (pathname === "/archive") return "/archive/index.html";
   if (pathname === "/ai") return "/ai/index.html";
+  if (pathname === "/ai-bot") return "/ai-bot/index.html";
   if (pathname.endsWith("/")) return `${pathname}index.html`;
   return pathname;
 }

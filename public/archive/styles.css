@@ -104,6 +104,19 @@ aside {
   text-align: left;
 }
 
+.snapshot-empty-card {
+  overflow: hidden;
+  border: 1px dashed #cfd8e6;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.snapshot-empty-card canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 260 / 120;
+}
+
 .snapshot-card strong,
 .snapshot-card small {
   display: block;

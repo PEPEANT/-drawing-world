@@ -18,21 +18,21 @@ loadSnapshotList();
 drawEmpty();
 
 async function loadSnapshotList() {
-  list.textContent = "불러오는 중...";
+  renderEmptyList();
   try {
     const response = await fetch("/api/archive");
     const data = await response.json();
     renderSnapshotList(Array.isArray(data.snapshots) ? data.snapshots : []);
     openHashSnapshot();
   } catch {
-    list.textContent = "서버 보존 목록을 불러오지 못했어.";
+    renderEmptyList();
   }
 }
 
 function renderSnapshotList(snapshots) {
   list.replaceChildren();
   if (!snapshots.length) {
-    list.textContent = "아직 서버에 남은 보존 그림이 없어. JSON 파일을 불러올 수 있어.";
+    renderEmptyList();
     return;
   }
   for (const snapshot of snapshots) {
@@ -46,6 +46,47 @@ function renderSnapshotList(snapshots) {
     button.addEventListener("click", () => loadServerSnapshot(snapshot.id));
     list.append(button);
   }
+}
+
+function renderEmptyList() {
+  list.replaceChildren();
+  for (let index = 0; index < 4; index += 1) {
+    const card = document.createElement("div");
+    const canvas = document.createElement("canvas");
+    card.className = "snapshot-empty-card";
+    card.setAttribute("aria-label", "보존 대기 슬롯");
+    canvas.width = 260;
+    canvas.height = 120;
+    drawMiniEmpty(canvas, index);
+    card.append(canvas);
+    list.append(card);
+  }
+}
+
+function drawMiniEmpty(canvas, index) {
+  const mini = canvas.getContext("2d");
+  mini.fillStyle = "#f8fafc";
+  mini.fillRect(0, 0, canvas.width, canvas.height);
+  mini.strokeStyle = "#e5eaf2";
+  mini.lineWidth = 1;
+  mini.beginPath();
+  for (let x = 0; x <= canvas.width; x += 52) {
+    mini.moveTo(x, 0);
+    mini.lineTo(x, canvas.height);
+  }
+  for (let y = 0; y <= canvas.height; y += 40) {
+    mini.moveTo(0, y);
+    mini.lineTo(canvas.width, y);
+  }
+  mini.stroke();
+  mini.strokeStyle = ["#d6dde9", "#dbe2ed", "#d2dae8", "#e0e6ef"][index % 4];
+  mini.lineWidth = 4;
+  mini.lineCap = "round";
+  mini.beginPath();
+  mini.moveTo(48, 76);
+  mini.bezierCurveTo(78, 42, 122, 96, 162, 58);
+  mini.bezierCurveTo(184, 38, 210, 50, 228, 34 + index * 4);
+  mini.stroke();
 }
 
 async function loadServerSnapshot(id) {

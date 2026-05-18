@@ -2,25 +2,47 @@ const MAX_LOBBY_SNAPSHOTS = 4;
 
 export async function initLobbyArchive(ui) {
   if (!ui.lobbyArchiveList) return;
-  ui.lobbyArchiveList.textContent = "불러오는 중...";
+  renderEmptySlots(ui);
   try {
     const response = await fetch("/api/archive");
     const data = await response.json();
     renderLobbyArchive(ui, (data.snapshots || []).slice(0, MAX_LOBBY_SNAPSHOTS));
   } catch {
-    ui.lobbyArchiveList.textContent = "아직 불러오지 못했어.";
+    renderEmptySlots(ui);
   }
 }
 
 function renderLobbyArchive(ui, snapshots) {
   ui.lobbyArchiveList.replaceChildren();
   if (!snapshots.length) {
-    ui.lobbyArchiveList.textContent = "아직 보존된 그림이 없어.";
+    renderEmptySlots(ui);
     return;
   }
-  for (const snapshot of snapshots) {
-    ui.lobbyArchiveList.append(createArchiveCard(snapshot));
+  ui.lobbyArchiveList.classList.remove("is-empty");
+  for (let index = 0; index < MAX_LOBBY_SNAPSHOTS; index += 1) {
+    const snapshot = snapshots[index];
+    ui.lobbyArchiveList.append(snapshot ? createArchiveCard(snapshot) : createEmptyCard(index));
   }
+}
+
+function renderEmptySlots(ui) {
+  ui.lobbyArchiveList.replaceChildren();
+  ui.lobbyArchiveList.classList.add("is-empty");
+  for (let index = 0; index < MAX_LOBBY_SNAPSHOTS; index += 1) {
+    ui.lobbyArchiveList.append(createEmptyCard(index));
+  }
+}
+
+function createEmptyCard(index) {
+  const card = document.createElement("div");
+  const canvas = document.createElement("canvas");
+  card.className = "lobby-archive-empty-card";
+  card.setAttribute("aria-label", "보존 대기 슬롯");
+  canvas.width = 180;
+  canvas.height = 112;
+  drawEmptyPreview(canvas, index);
+  card.append(canvas);
+  return card;
 }
 
 function createArchiveCard(snapshot) {
@@ -50,6 +72,29 @@ function drawPreview(canvas, preview) {
   for (const stroke of preview?.strokes || []) {
     drawStroke(ctx, stroke);
   }
+}
+
+function drawEmptyPreview(canvas, index) {
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid(ctx, canvas);
+  ctx.strokeStyle = ["#d6dde9", "#dbe2ed", "#d2dae8", "#e0e6ef"][index % 4];
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(34 + index * 3, 74);
+  ctx.bezierCurveTo(52, 52, 76, 90, 100, 60);
+  ctx.bezierCurveTo(116, 42, 134, 52, 148, 36 + index * 3);
+  ctx.stroke();
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#cbd5e1";
+  ctx.beginPath();
+  ctx.arc(44 + index * 6, 35, 3, 0, Math.PI * 2);
+  ctx.arc(132 - index * 5, 82, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
 }
 
 function drawGrid(ctx, canvas) {

@@ -11,7 +11,6 @@
   justify-content: space-between;
   gap: 12px;
   padding: 14px;
-  border-bottom: 1px solid var(--line);
 }
 
 .analytics-head h2 {
@@ -32,6 +31,22 @@
   border-radius: 8px;
 }
 
+.analytics-controls {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.analytics-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.analytics-actions button {
+  min-height: 32px;
+  padding: 0 10px;
+}
+
 .analytics-tabs button {
   min-height: 34px;
   border: 0;
@@ -48,7 +63,16 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  padding: 12px 14px 0;
+  padding: 10px 14px 0;
+}
+
+.analytics-status {
+  min-height: 18px;
+  margin: 0;
+  padding: 0 14px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .analytics-summary div {

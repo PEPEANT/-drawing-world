@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>v2 봇 실험실</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/ai-bot/styles.css?v=20260519-1">
+  </head>
+  <body>
+    <header class="lab-header">
+      <div>
+        <p>AI 시스템</p>
+        <h1>v2 봇 실험실</h1>
+      </div>
+      <nav>
+        <a href="/admin">관리자</a>
+        <a href="/ai">v1 관측실</a>
+        <a href="/">라이브 월드</a>
+      </nav>
+    </header>
+
+    <main class="lab-shell">
+      <section class="bot-stage" aria-label="bot stage">
+        <div class="grid-floor">
+          <div class="bot-avatar">
+            <span></span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="bot controls">
+        <div class="panel-head">
+          <p>observer-v2</p>
+          <h2>대기 중</h2>
+        </div>
+        <div class="control-grid">
+          <button type="button" disabled>AI 생성</button>
+          <button type="button" disabled>돌아다니기</button>
+          <button type="button" disabled>멈추기</button>
+          <button type="button" disabled>퇴장</button>
+        </div>
+        <div class="status-strip">
+          <span>room: lobby</span>
+          <span>bot: none</span>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

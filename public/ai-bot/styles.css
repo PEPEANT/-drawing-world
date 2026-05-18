@@ -1,0 +1,148 @@
+:root {
+  color: #111827;
+  background: #eef2f7;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.lab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #d7deea;
+  background: #ffffff;
+}
+
+.lab-header p,
+.lab-header h1,
+.panel-head p,
+.panel-head h2 {
+  margin: 0;
+}
+
+.lab-header p,
+.panel-head p,
+.status-strip {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.lab-header h1 {
+  font-size: 28px;
+}
+
+.lab-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lab-header a,
+.control-grid button {
+  min-height: 36px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 800;
+  line-height: 34px;
+  padding: 0 12px;
+  text-decoration: none;
+}
+
+.lab-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 14px;
+  padding: 14px;
+}
+
+.bot-stage,
+.control-panel {
+  overflow: hidden;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.grid-floor {
+  position: relative;
+  min-height: calc(100vh - 142px);
+  background:
+    linear-gradient(#e5eaf2 1px, transparent 1px),
+    linear-gradient(90deg, #e5eaf2 1px, transparent 1px),
+    #f8fafc;
+  background-size: 64px 64px;
+}
+
+.bot-avatar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+.bot-avatar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #111827;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #93c5fd, #f9a8d4);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+}
+
+.control-panel {
+  align-self: start;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.panel-head h2 {
+  margin-top: 4px;
+  font-size: 24px;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.control-grid button {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.status-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #e5eaf2;
+}
+
+@media (max-width: 860px) {
+  .lab-header,
+  .lab-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

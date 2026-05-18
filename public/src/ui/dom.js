@@ -66,7 +66,6 @@ export const ui = {
   lobbyRoomCount: document.querySelector("#lobbyRoomCount"),
   lobbyRoomStatus: document.querySelector("#lobbyRoomStatus"),
   lobbyArchiveList: document.querySelector("#lobbyArchiveList"),
-  lobbyArchiveHint: document.querySelector("#lobbyArchiveHint"),
   skinEditor: document.querySelector(".skin-editor"),
   skinCanvas: document.querySelector("#skinCanvas"),
   skinPreview: document.querySelector("#skinPreview"),

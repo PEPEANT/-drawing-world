@@ -1,4 +1,5 @@
 import { dom } from "./dom.js";
+import { sendAdmin } from "./socket.js";
 
 let currentRange = "daily";
 let latestAnalytics = null;
@@ -16,6 +17,17 @@ export function initAnalyticsPanel() {
     syncTabs();
     renderAnalytics(latestAnalytics);
   });
+
+  dom.analyticsBackupButton.addEventListener("click", () => {
+    dom.analyticsStatus.textContent = "백업 준비 중...";
+    sendAdmin({ type: "exportAnalytics" });
+  });
+
+  dom.analyticsRestoreButton.addEventListener("click", () => {
+    dom.analyticsRestoreInput.click();
+  });
+
+  dom.analyticsRestoreInput.addEventListener("change", restoreAnalyticsFile);
 }
 
 export function renderAnalytics(analytics) {
@@ -47,5 +59,35 @@ function renderChart(rows) {
 function syncTabs() {
   for (const button of dom.analyticsPanel.querySelectorAll("[data-analytics-range]")) {
     button.classList.toggle("active", button.dataset.analyticsRange === currentRange);
+  }
+}
+
+export function downloadAnalyticsBackup(backup) {
+  if (!backup?.analytics) return "통계 백업을 만들지 못했어.";
+  const day = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `drawing-online-analytics-${day}.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+  return "통계 백업 JSON 저장됨";
+}
+
+export function markAnalyticsRestored(backup) {
+  if (backup?.summary) renderAnalytics(backup.summary);
+  return "통계 복원됨";
+}
+
+async function restoreAnalyticsFile() {
+  const file = dom.analyticsRestoreInput.files?.[0];
+  if (!file) return;
+  dom.analyticsStatus.textContent = "통계 복원 중...";
+  try {
+    sendAdmin({ type: "importAnalytics", backup: JSON.parse(await file.text()) });
+  } catch {
+    dom.analyticsStatus.textContent = "JSON 파일을 읽지 못했어.";
+  } finally {
+    dom.analyticsRestoreInput.value = "";
   }
 }

@@ -1,5 +1,5 @@
 import { dom } from "./src/dom.js";
-import { initAnalyticsPanel, renderAnalytics } from "./src/analytics.js";
+import { downloadAnalyticsBackup, initAnalyticsPanel, markAnalyticsRestored, renderAnalytics } from "./src/analytics.js";
 import { downloadSnapshot } from "./src/snapshot.js";
 import { openPlayerRoom, setPreviewRoom } from "./src/preview.js";
 import { renderState } from "./src/render.js";
@@ -129,6 +129,15 @@ function startAdmin(key) {
     },
     onSnapshotError(message) {
       dom.snapshotMessage.textContent = message || "그림을 보존하지 못했어.";
+    },
+    onAnalyticsBackup(backup) {
+      dom.analyticsStatus.textContent = downloadAnalyticsBackup(backup);
+    },
+    onAnalyticsRestored(backup) {
+      dom.analyticsStatus.textContent = markAnalyticsRestored(backup);
+    },
+    onAnalyticsError(message) {
+      dom.analyticsStatus.textContent = message || "통계를 복원하지 못했어.";
     }
   });
 }

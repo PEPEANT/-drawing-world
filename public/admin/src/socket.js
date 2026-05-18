@@ -35,6 +35,21 @@ export function connectAdmin(key, handlers) {
 
     if (message.type === "snapshotError") {
       handlers.onSnapshotError?.(message.message);
+      return;
+    }
+
+    if (message.type === "analyticsBackup") {
+      handlers.onAnalyticsBackup?.(message.backup);
+      return;
+    }
+
+    if (message.type === "analyticsRestored") {
+      handlers.onAnalyticsRestored?.(message.backup);
+      return;
+    }
+
+    if (message.type === "analyticsError") {
+      handlers.onAnalyticsError?.(message.message);
     }
   });
 }
