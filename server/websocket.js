@@ -9,7 +9,7 @@ const { handleRadioPlay, handleRadioStop, releaseRadioOwner } = require("./radio
 const { removeOwnerItems } = require("./items");
 const { claimOwnerStrokes, hasActiveClient, safeOwner: safeClientId } = require("./ownership");
 const { parseRequestUrl } = require("./request-url");
-const { getRoom, removeRoomIfEmpty } = require("./rooms");
+const { countHumanPlayers, getRoom, removeRoomIfEmpty } = require("./rooms");
 const { deleteOwnStrokeIds, isOwnedBy } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const { buildFeaturedTop } = require("./featured");
@@ -59,7 +59,7 @@ function attachGameSocket(server) {
     ws.roomName = roomName;
     ws.isSpectator = isSpectator;
     ws.connectedAt = Date.now();
-    if (!isSpectator && room.players.size >= LIMITS.maxPlayersPerRoom) {
+    if (!isSpectator && countHumanPlayers(room) >= LIMITS.maxPlayersPerRoom) {
       send(ws, { type: "kicked", reason: "방이 가득 찼어." });
       ws.close();
       return;

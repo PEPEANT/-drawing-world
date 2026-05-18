@@ -76,6 +76,7 @@ function getPublicRooms() {
       name: "시뮬라크월드",
       slug: "lobby",
       players: lobby?.playerCount || 0,
+      bots: lobby?.botCount || 0,
       viewers: lobby?.viewers || 0,
       items: lobby?.items || 0,
       maxPlayers: LIMITS.maxPlayersPerRoom

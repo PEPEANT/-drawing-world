@@ -9,6 +9,9 @@ function applyVote(room, vote) {
   if (!room.players.has(vote.targetId)) {
     return { ok: false, reason: "대상 플레이어가 방에 없어." };
   }
+  if (room.players.get(vote.targetId)?.isBot) {
+    return { ok: false, reason: "AI 봇은 투표 대상이 아니야." };
+  }
 
   const votes = getVoteStore(room);
   const key = `${vote.voterId}:${vote.targetId}`;
@@ -30,6 +33,7 @@ function applyVote(room, vote) {
 function buildRanking(room) {
   const votes = getVoteStore(room);
   return Array.from(room.players.values())
+    .filter((player) => !player.isBot)
     .map((player) => {
       const score = getScore(votes, player.id);
       return {

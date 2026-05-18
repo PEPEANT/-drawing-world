@@ -26,6 +26,7 @@ function removeRoomIfEmpty(roomName) {
   if (
     room &&
     room.clients.size === 0 &&
+    countHumanPlayers(room) === 0 &&
     room.strokes.length === 0 &&
     room.items.length === 0 &&
     room.messages.length === 0
@@ -40,7 +41,8 @@ function listRooms() {
     clients: Array.from(room.clients).filter((client) => !client.isSpectator).length,
     viewers: Array.from(room.clients).filter((client) => client.isSpectator).length,
     players: Array.from(room.players.values()),
-    playerCount: room.players.size,
+    playerCount: countHumanPlayers(room),
+    botCount: countBots(room),
     strokes: room.strokes.length,
     moderationStrokes: buildStrokeModeration(room),
     featured: buildFeaturedTop(room),
@@ -49,7 +51,17 @@ function listRooms() {
   }));
 }
 
+function countHumanPlayers(room) {
+  return Array.from(room.players.values()).filter((player) => !player.isBot).length;
+}
+
+function countBots(room) {
+  return Array.from(room.players.values()).filter((player) => player.isBot).length;
+}
+
 module.exports = {
+  countBots,
+  countHumanPlayers,
   getRoom,
   listRooms,
   removeRoomIfEmpty,

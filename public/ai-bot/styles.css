@@ -13,7 +13,8 @@ body {
 }
 
 .lab-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -25,13 +26,15 @@ body {
 .lab-header p,
 .lab-header h1,
 .panel-head p,
-.panel-head h2 {
+.panel-head h2,
+.auth-panel p {
   margin: 0;
 }
 
 .lab-header p,
 .panel-head p,
-.status-strip {
+.status-strip,
+.status-line {
   color: #64748b;
   font-size: 13px;
 }
@@ -47,6 +50,7 @@ body {
 }
 
 .lab-header a,
+.auth-panel button,
 .control-grid button {
   min-height: 36px;
   border: 1px solid #d7deea;
@@ -60,6 +64,59 @@ body {
   text-decoration: none;
 }
 
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.status-dot.online {
+  background: #059669;
+}
+
+.status-dot.error {
+  background: #dc2626;
+}
+
+.auth-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 360px) auto minmax(120px, 1fr);
+  gap: 10px;
+  align-items: end;
+  width: min(1180px, calc(100vw - 28px));
+  margin: 14px auto 0;
+  padding: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.auth-panel label {
+  display: grid;
+  gap: 6px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.auth-panel input {
+  height: 38px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  padding: 0 10px;
+  font: inherit;
+}
+
+.auth-panel.hidden {
+  display: none;
+}
+
 .lab-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
@@ -69,6 +126,7 @@ body {
 
 .bot-stage,
 .control-panel {
+  position: relative;
   overflow: hidden;
   border: 1px solid #d7deea;
   border-radius: 8px;
@@ -123,6 +181,12 @@ body {
 }
 
 .control-grid button {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.control-grid button:disabled,
+.is-locked .control-grid button {
   color: #94a3b8;
   cursor: not-allowed;
 }
@@ -137,6 +201,7 @@ body {
 
 @media (max-width: 860px) {
   .lab-header,
+  .auth-panel,
   .lab-shell {
     grid-template-columns: 1fr;
   }
@@ -145,4 +210,5 @@ body {
     align-items: flex-start;
     flex-direction: column;
   }
+
 }

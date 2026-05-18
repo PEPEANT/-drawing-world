@@ -49,9 +49,10 @@ function renderRoom(room) {
 function renderRoomTitle(room) {
   const title = document.createElement("div");
   title.className = "room-title";
+  const botText = room.botCount ? ` · AI ${room.botCount}` : "";
   title.innerHTML = `
     <h2>${escapeHtml(room.name)}</h2>
-    <span>접속 ${room.clients} · 관전 ${room.viewers || 0} · 플레이어 ${room.playerCount} · 선 ${room.strokes} · 아이템 ${room.items || 0}</span>
+    <span>접속 ${room.clients} · 관전 ${room.viewers || 0} · 플레이어 ${room.playerCount}${botText} · 선 ${room.strokes} · 아이템 ${room.items || 0}</span>
   `;
   return title;
 }
@@ -93,11 +94,13 @@ function renderPlayerTable(room) {
 
 function renderPlayerRow(roomName, player) {
   const row = document.createElement("tr");
+  if (player.isBot) row.className = "is-bot";
   row.innerHTML = `
     <td>
       <span class="player-name">
         <span class="swatch" style="background:${escapeAttribute(player.color)}"></span>
         ${escapeHtml(player.name)}
+        ${player.isBot ? '<span class="bot-badge">AI</span>' : ""}
       </span>
     </td>
     <td>${Math.round(player.x)}, ${Math.round(player.y)}</td>
@@ -105,6 +108,14 @@ function renderPlayerRow(roomName, player) {
     <td>${formatTime(player.updatedAt)}</td>
     <td></td>
   `;
+
+  if (player.isBot) {
+    const locked = document.createElement("span");
+    locked.className = "bot-lock";
+    locked.textContent = "봇 실험실에서 관리";
+    row.lastElementChild.append(locked);
+    return row;
+  }
 
   const kickButton = createRoomButton("kick", roomName, "강퇴");
   kickButton.className = "kick-button";

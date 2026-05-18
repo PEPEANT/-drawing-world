@@ -8,6 +8,7 @@ const SCREENS = [
 ];
 
 const SCREEN = { width: 390, height: 240, radius: 10 };
+const HEART = "\u2665";
 
 export function drawGalleryScreens(ctx, view) {
   for (let index = 0; index < SCREENS.length; index += 1) {
@@ -31,7 +32,7 @@ function drawScreen(ctx, screen, entry, index) {
   ctx.fill();
 
   ctx.fillStyle = "#f8fafc";
-  roundRect(ctx, x + 12, y + 42, SCREEN.width - 24, SCREEN.height - 58, 6);
+  roundRect(ctx, x + 12, y + 46, SCREEN.width - 24, SCREEN.height - 86, 6);
   ctx.fill();
 
   ctx.fillStyle = "#f9fafb";
@@ -40,16 +41,16 @@ function drawScreen(ctx, screen, entry, index) {
   ctx.textBaseline = "middle";
   ctx.fillText(`TOP ${index + 1}`, x + 18, y + 23);
 
-  ctx.fillStyle = entry ? "#bfdbfe" : "#cbd5e1";
+  ctx.fillStyle = entry ? "#fecdd3" : "#64748b";
   ctx.font = "bold 14px ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "right";
-  ctx.fillText(entry ? `LIKE ${entry.likes || 0}` : "empty", x + SCREEN.width - 18, y + 23);
+  ctx.fillText(entry ? `${HEART} ${entry.likes || 0}` : "대기", x + SCREEN.width - 18, y + 23);
 
   const area = {
     x: x + 24,
-    y: y + 54,
+    y: y + 58,
     width: SCREEN.width - 48,
-    height: SCREEN.height - 84
+    height: SCREEN.height - 116
   };
 
   if (entry) {
@@ -107,23 +108,34 @@ function drawPreviewStroke(ctx, stroke, scale, dx, dy) {
 }
 
 function drawCaption(ctx, entry, area) {
-  ctx.fillStyle = "rgba(17, 24, 39, 0.78)";
-  ctx.fillRect(area.x, area.y + area.height + 4, area.width, 22);
+  const name = compactText(entry.artistName || "player", 18);
+  const likes = Number(entry.likes) || 0;
+  const y = area.y + area.height + 12;
+  ctx.fillStyle = "rgba(17, 24, 39, 0.88)";
+  roundRect(ctx, area.x, y, area.width, 34, 6);
+  ctx.fill();
+
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 12px ui-sans-serif, system-ui, sans-serif";
-  ctx.textAlign = "center";
+  ctx.font = "bold 14px ui-sans-serif, system-ui, sans-serif";
+  ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(`${entry.artistName || "player"} - ${entry.likes || 0}`, area.x + area.width / 2, area.y + area.height + 15);
+  ctx.fillText(name, area.x + 12, y + 17);
+
+  ctx.fillStyle = "#fecdd3";
+  ctx.font = "bold 13px ui-sans-serif, system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(`${HEART} ${likes}`, area.x + area.width - 12, y + 17);
 }
 
 function drawEmpty(ctx, area) {
   ctx.fillStyle = PAPER_COLOR;
   ctx.fillRect(area.x, area.y, area.width, area.height);
-  ctx.fillStyle = "#64748b";
-  ctx.font = "18px ui-sans-serif, system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("Waiting for likes", area.x + area.width / 2, area.y + area.height / 2);
+  ctx.strokeStyle = "#d8dee8";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 8]);
+  roundRect(ctx, area.x + 18, area.y + 18, area.width - 36, area.height - 36, 8);
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
 
 function drawStand(ctx, x, y) {
@@ -148,6 +160,11 @@ function normalizeBounds(bounds) {
 
 function safeColor(value) {
   return /^#[0-9a-f]{6}$/i.test(value) ? value : "#111827";
+}
+
+function compactText(value, maxLength) {
+  const text = String(value || "").trim() || "player";
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
 }
 
 function getUpdatePulse() {

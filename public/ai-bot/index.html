@@ -6,6 +6,7 @@
     <title>v2 봇 실험실</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/ai-bot/styles.css?v=20260519-1">
+    <link rel="stylesheet" href="/ai-bot/cortex.css?v=20260519-1">
   </head>
   <body>
     <header class="lab-header">
@@ -18,10 +19,44 @@
         <a href="/ai">v1 관측실</a>
         <a href="/">라이브 월드</a>
       </nav>
+      <div class="status-line">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">연결 대기</span>
+      </div>
     </header>
 
-    <main class="lab-shell">
+    <form id="authForm" class="auth-panel">
+      <label>
+        <span>관리자 키</span>
+        <input id="keyInput" type="password" autocomplete="current-password" placeholder="admin">
+      </label>
+      <button type="submit">접속</button>
+      <p id="authMessage"></p>
+    </form>
+
+    <main id="labBody" class="lab-shell is-locked">
       <section class="bot-stage" aria-label="bot stage">
+        <section class="cortex-panel" aria-label="ai cortex foundation">
+          <div class="cortex-head">
+            <div>
+              <p>지능 피질</p>
+              <h2>관측자 v2</h2>
+            </div>
+            <strong id="cortexStatus">토대 대기</strong>
+          </div>
+          <div class="cortex-map" aria-hidden="true">
+            <span class="node n1"></span><span class="node n2"></span><span class="node n3"></span><span class="node n4"></span>
+            <span class="node n5"></span><span class="node n6"></span><span class="node n7"></span><span class="node n8"></span>
+            <span class="node n9"></span><span class="node n10"></span><span class="node n11"></span><span class="node n12"></span>
+            <span class="link l1"></span><span class="link l2"></span><span class="link l3"></span><span class="link l4"></span>
+          </div>
+          <div class="cortex-states">
+            <span>감각 <strong id="senseState">대기</strong></span>
+            <span>기억 <strong id="memoryState">비어 있음</strong></span>
+            <span>의도 <strong id="intentState">준비</strong></span>
+            <span>행동 <strong id="actionState">잠김</strong></span>
+          </div>
+        </section>
         <div class="grid-floor">
           <div class="bot-avatar">
             <span></span>
@@ -32,19 +67,21 @@
       <aside class="control-panel" aria-label="bot controls">
         <div class="panel-head">
           <p>observer-v2</p>
-          <h2>대기 중</h2>
+          <h2 id="botTitle">대기 중</h2>
         </div>
         <div class="control-grid">
-          <button type="button" disabled>AI 생성</button>
-          <button type="button" disabled>돌아다니기</button>
-          <button type="button" disabled>멈추기</button>
-          <button type="button" disabled>퇴장</button>
+          <button id="createBotButton" type="button" disabled>AI 생성</button>
+          <button id="walkBotButton" type="button" disabled>돌아다니기</button>
+          <button id="stopBotButton" type="button" disabled>멈추기</button>
+          <button id="leaveBotButton" type="button" disabled>퇴장</button>
         </div>
         <div class="status-strip">
-          <span>room: lobby</span>
-          <span>bot: none</span>
+          <span id="botRoom">room: lobby</span>
+          <span id="botState">bot: none</span>
         </div>
       </aside>
     </main>
+
+    <script type="module" src="/ai-bot/lab.js?v=20260519-1"></script>
   </body>
 </html>

@@ -22,6 +22,7 @@ export function drawPlayer(ctx, entity) {
 
   ctx.scale(entity.facing === -1 ? -1 : 1, 1 / squash);
   ctx.translate(0, -walk);
+  if (entity.isBot) drawBotMarker(ctx, size);
   drawName(ctx, entity, size);
   drawVoteBubble(ctx, entity, size);
   drawChatBubble(ctx, entity, size);
@@ -44,6 +45,31 @@ function drawFallbackAvatar(ctx, size, color) {
   ctx.fillRect(6, -6, 4, 4);
   ctx.fillStyle = "#111827";
   ctx.fillRect(-6, 7, 12, 3);
+}
+
+function drawBotMarker(ctx, size) {
+  const pulse = 0.55 + Math.sin(Date.now() / 420) * 0.18;
+  const radius = size / 2 + 7 / state.camera.zoom;
+  ctx.save();
+  ctx.globalAlpha = pulse;
+  ctx.strokeStyle = "#22d3ee";
+  ctx.lineWidth = 2 / state.camera.zoom;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  const badgeY = -size / 2 - 18 / state.camera.zoom;
+  const badgeWidth = 24 / state.camera.zoom;
+  const badgeHeight = 15 / state.camera.zoom;
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = "#eef2ff";
+  roundRect(ctx, -badgeWidth / 2, badgeY, badgeWidth, badgeHeight, 6 / state.camera.zoom);
+  ctx.fillStyle = "#4338ca";
+  ctx.font = `${9 / state.camera.zoom}px ui-sans-serif, system-ui, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("AI", 0, badgeY + badgeHeight / 2);
+  ctx.restore();
 }
 
 function drawVoteBubble(ctx, entity, size) {

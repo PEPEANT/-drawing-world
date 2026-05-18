@@ -1,5 +1,6 @@
 const { WebSocketServer } = require("ws");
 const { publishAiMessage, sendAiState } = require("./admin-ai");
+const { handleAiBotAdminMessage } = require("./admin-ai-bot");
 const { restoreAnalytics, sendAnalyticsBackup } = require("./admin-analytics");
 const { buildAdminState } = require("./admin-state");
 const { banClient, formatBanReason, unbanClient } = require("./bans");
@@ -68,6 +69,8 @@ function handleAdminMessage(ws, raw) {
     return;
   }
 
+  if (handleAiBotAdminMessage(ws, message, notifyAdminState)) return;
+
   if (message.type === "kick") {
     kickPlayer(message.room, message.id);
     return;
@@ -121,7 +124,7 @@ function handleAdminMessage(ws, raw) {
 
 function banPlayer(roomName, playerId, options) {
   const room = rooms.get(sanitizeRoomName(roomName));
-  if (!room || typeof playerId !== "string") return;
+  if (!room || typeof playerId !== "string" || room.players.get(playerId)?.isBot) return;
   const durationMs = normalizeBanDuration(options);
 
   for (const client of room.clients) {
@@ -165,7 +168,7 @@ function saveRoomSnapshot(ws, roomName) {
 
 function kickPlayer(roomName, playerId) {
   const room = rooms.get(sanitizeRoomName(roomName));
-  if (!room || typeof playerId !== "string") return;
+  if (!room || typeof playerId !== "string" || room.players.get(playerId)?.isBot) return;
 
   for (const client of room.clients) {
     if (client.id === playerId) {
@@ -179,7 +182,7 @@ function kickPlayer(roomName, playerId) {
 function warnPlayer(roomName, playerId, text) {
   const room = rooms.get(sanitizeRoomName(roomName));
   const warning = safeText(text, 160) || "운영 규칙을 지켜주세요.";
-  if (!room || typeof playerId !== "string") return;
+  if (!room || typeof playerId !== "string" || room.players.get(playerId)?.isBot) return;
 
   for (const client of room.clients) {
     if (client.id === playerId) {
@@ -191,7 +194,7 @@ function warnPlayer(roomName, playerId, text) {
 
 function clearPlayerStrokes(roomName, playerId) {
   const room = rooms.get(sanitizeRoomName(roomName));
-  if (!room || typeof playerId !== "string") return;
+  if (!room || typeof playerId !== "string" || player?.isBot) return;
   const player = room.players.get(playerId);
   if (!clearPlayerStrokeData(room, playerId, player?.clientId)) return;
   removeFeaturedForTarget(room, playerId);

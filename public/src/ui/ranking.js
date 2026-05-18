@@ -76,6 +76,7 @@ function findRemotePlayer(point) {
   let best = null;
   let bestDistance = PLAYER.voteRadius;
   for (const player of state.remotePlayers.values()) {
+    if (player.isBot) continue;
     const distance = Math.hypot(player.x - point.x, player.y - point.y);
     if (distance < bestDistance) {
       best = player;

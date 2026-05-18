@@ -20,8 +20,9 @@ async function refreshRoomCard(ui) {
 
 function updateRoomCard(ui, room) {
   const players = room?.players ?? 0;
+  const bots = room?.bots ?? 0;
   const maxPlayers = room?.maxPlayers ?? 50;
-  ui.lobbyRoomCount.textContent = `${players}/${maxPlayers}`;
+  ui.lobbyRoomCount.textContent = `${players}/${maxPlayers}${bots ? ` · AI ${bots}` : ""}`;
   ui.lobbyRoomStatus.textContent = room ? "온라인" : "오프라인 가능";
   ui.lobbyRoomCard.disabled = players >= maxPlayers;
   ui.lobbyRoomCard.classList.toggle("is-full", players >= maxPlayers);
