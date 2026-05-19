@@ -2,6 +2,7 @@ const { buildAnalyticsState } = require("./analytics");
 const { listBans } = require("./bans");
 const { ADMIN_KEY_IS_DEFAULT } = require("./config");
 const { buildFeaturedArchive } = require("./featured");
+const { getFullBackupStatus } = require("./full-backup");
 const { listRooms } = require("./rooms");
 
 function buildAdminState(adminCount) {
@@ -16,6 +17,7 @@ function buildAdminState(adminCount) {
       adminKeyDefault: ADMIN_KEY_IS_DEFAULT
     },
     analytics: buildAnalyticsState(),
+    fullBackup: getFullBackupStatus(),
     bans: listBans(),
     featured: buildFeaturedArchive(),
     rooms: roomList

@@ -67,6 +67,18 @@ function listDailySnapshots(limit = 40) {
   }));
 }
 
+function exportDailyArchive() {
+  return cloneJson(store);
+}
+
+function restoreDailyArchive(source) {
+  const incoming = normalizeStore(source);
+  if (!incoming.snapshots.length) return false;
+  store.snapshots = incoming.snapshots;
+  saveStore();
+  return true;
+}
+
 function getDailySnapshot(id) {
   return store.snapshots.find((snapshot) => snapshot.id === id) || null;
 }
@@ -171,16 +183,27 @@ function samplePreviewPoints(points, bounds) {
 
 function loadStore() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    return { snapshots: Array.isArray(data.snapshots) ? data.snapshots : [] };
+    return normalizeStore(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
   } catch {
     return { snapshots: [] };
   }
 }
 
+function normalizeStore(source) {
+  return {
+    snapshots: (Array.isArray(source?.snapshots) ? source.snapshots : [])
+      .filter((snapshot) => snapshot?.id && Array.isArray(snapshot.strokes))
+      .slice(0, MAX_SNAPSHOTS)
+  };
+}
+
 function saveStore() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function displayRoomName(roomName) {
@@ -193,6 +216,8 @@ function getDayKey(now = Date.now()) {
 
 module.exports = {
   createDailySnapshot,
+  exportDailyArchive,
   getDailySnapshot,
-  listDailySnapshots
+  listDailySnapshots,
+  restoreDailyArchive
 };

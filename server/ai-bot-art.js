@@ -16,12 +16,13 @@ function planAiArtwork(room, bot, options = {}) {
   const style = normalizeStyle(options.style);
   const requestedShape = normalizeShape(options.shape);
   const requestedCharacter = normalizeCharacter(options.character);
+  const source = normalizeSource(options.source);
   const prompt = buildPrompt(room, bot, topic, options.prompt, requestedShape, requestedCharacter);
   const seed = buildSeed(room, bot, prompt, style, requestedShape, requestedCharacter);
   const shape = topic === "shape" ? resolveShape(requestedShape, seed) : "";
   const character = topic === "character" ? requestedCharacter : "";
-  const center = getDrawingCenter(bot, seed);
-  const strokes = buildArtworkStrokes({ bot, center, prompt, style, seed, topic, shape, character });
+  const center = normalizeCenter(options.center) || getDrawingCenter(bot, seed);
+  const strokes = buildArtworkStrokes({ bot, center, prompt, style, seed, topic, shape, character, source });
   const reason = buildReason(topic, bot, shape, character);
   const artworkId = `ai-art-${seed.toString(16)}`;
 
@@ -38,7 +39,7 @@ function planAiArtwork(room, bot, options = {}) {
       shape,
       character,
       prompt,
-      source: SOURCE,
+      source,
       authorType: AUTHOR_TYPE,
       seed,
       reason,
@@ -79,7 +80,7 @@ function drawAiArtwork(room, bot, options = {}) {
   };
 }
 
-function buildArtworkStrokes({ bot, center, prompt, style, seed, topic, shape, character }) {
+function buildArtworkStrokes({ bot, center, prompt, style, seed, topic, shape, character, source }) {
   const palette = getPalette(style, seed);
   const points = buildTemplatePoints(topic, center, seed, shape, character);
   return points.map((entry, index) => ({
@@ -100,7 +101,7 @@ function buildArtworkStrokes({ bot, center, prompt, style, seed, topic, shape, c
     order: 0,
     isBotArtwork: true,
     authorType: AUTHOR_TYPE,
-    source: SOURCE,
+    source,
     prompt,
     shape: topic === "shape" ? shape : "",
     character: topic === "character" ? character : ""
@@ -328,6 +329,21 @@ function normalizeShape(value) {
 
 function normalizeCharacter(value) {
   return ["basic", "bot", "sleepy"].includes(value) ? value : "basic";
+}
+
+function normalizeCenter(value) {
+  if (!value || typeof value !== "object") return null;
+  const x = Number(value.x);
+  const y = Number(value.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  return {
+    x: clamp(Math.round(x), 360, WORLD.width - 360),
+    y: clamp(Math.round(y), 420, WORLD.height - 320)
+  };
+}
+
+function normalizeSource(value) {
+  return ["admin_manual", "user_click"].includes(value) ? value : SOURCE;
 }
 
 function resolveShape(value, seed) {

@@ -50,6 +50,26 @@ export function connectAdmin(key, handlers) {
 
     if (message.type === "analyticsError") {
       handlers.onAnalyticsError?.(message.message);
+      return;
+    }
+
+    if (message.type === "fullBackupExported") {
+      handlers.onFullBackupExported?.(message.backup);
+      return;
+    }
+
+    if (message.type === "fullBackupSaved") {
+      handlers.onFullBackupSaved?.(message);
+      return;
+    }
+
+    if (message.type === "fullBackupRestored") {
+      handlers.onFullBackupRestored?.(message.result);
+      return;
+    }
+
+    if (message.type === "fullBackupError") {
+      handlers.onFullBackupError?.(message.message);
     }
   });
 }

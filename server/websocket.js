@@ -14,6 +14,7 @@ const { deleteOwnStrokeIds, isOwnedBy } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const { buildFeaturedTop } = require("./featured");
 const { wakeAiBotIfSleeping } = require("./ai-bot-brain");
+const { focusAiBotOnHumanEntry } = require("./ai-bot-entry-focus");
 const { handleAiBotInteraction, releaseAiBotUser } = require("./ai-bot-interaction");
 const {
   broadcastFeaturedRemoval,
@@ -156,6 +157,7 @@ function handleDeleteStrokes(ws, room, message) {
 }
 
 function handleHello(ws, room, message) {
+  const wasHumanEmpty = countHumanPlayers(room) === 0;
   const player = normalizePlayer(message.player || {}, ws.id);
   ws.clientId = safeClientId(message.player?.clientId) || ws.clientId;
   const activeBan = getActiveBan(ws.clientId);
@@ -172,7 +174,8 @@ function handleHello(ws, room, message) {
   broadcast(room, { type: "playerJoin", player }, ws);
   const claimed = claimOwnerStrokes(room, player.clientId, ws.id);
   if (claimed) broadcast(room, { type: "claimStrokes", owner: player.clientId, author: ws.id }, undefined);
-  wakeAiBotIfSleeping(room);
+  if (wasHumanEmpty) focusAiBotOnHumanEntry(room, player);
+  else wakeAiBotIfSleeping(room);
   broadcast(room, { type: "ranking", ranking: buildRanking(room) }, undefined);
   notifyAdminState();
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>드로잉온라인 관리자</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/admin/admin.css?v=20260518-4">
+    <link rel="stylesheet" href="/admin/admin.css?v=20260519-2">
   </head>
   <body>
     <header class="admin-header">
@@ -68,6 +68,20 @@
           </div>
         </div>
 
+        <section class="full-backup-panel" aria-label="전체 데이터 백업">
+          <div>
+            <h2>전체 데이터 백업</h2>
+            <p>AI 기억, AI 대화, 접속 통계, TOP 그림 기록, 지난 그림 백업을 하나의 JSON으로 묶어.</p>
+            <span id="fullBackupStatus">자동 백업 상태 확인 중</span>
+          </div>
+          <div class="full-backup-actions">
+            <button id="fullBackupDownloadButton" type="button">전체 백업 다운로드</button>
+            <button id="serverBackupButton" type="button">서버 내부 백업</button>
+            <button id="fullBackupRestoreButton" type="button">전체 백업 복원</button>
+            <input id="fullBackupRestoreInput" type="file" accept="application/json,.json" hidden>
+          </div>
+        </section>
+
         <section id="analyticsPanel" class="analytics-panel hidden" aria-label="접속 통계">
           <div class="analytics-head">
             <div>
@@ -129,6 +143,6 @@
       <div class="empty">아직 열린 방이 없어.</div>
     </template>
 
-    <script type="module" src="/admin/admin.js?v=20260518-4"></script>
+    <script type="module" src="/admin/admin.js?v=20260519-2"></script>
   </body>
 </html>

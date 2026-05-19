@@ -67,6 +67,10 @@ function getDialogueEvents(roomName) {
   return ensureRoomEvents(safeRoom(roomName)).map(cloneEvent);
 }
 
+function clearDialogueCache() {
+  dialogueByRoom.clear();
+}
+
 function ensureRoomEvents(room) {
   if (!room) return [];
   if (!dialogueByRoom.has(room)) {
@@ -77,6 +81,9 @@ function ensureRoomEvents(room) {
 
 function classifyIntent(text) {
   const lower = String(text || "").toLowerCase();
+  if (lower.includes("그려줘") || lower.includes("그림 그려") || lower.includes("ai 그림")) {
+    return intent("request_ai_draw", 95, "AI봇 그림 생성을 요청함", "start_ai_draw");
+  }
   if (lower.includes("멈춰") || lower.includes("멈추") || lower.includes("정지") || lower.includes("stop")) {
     return intent("request_stop", 70, "관리자가 AI봇 정지를 요청함", "stop");
   }
@@ -219,6 +226,7 @@ function safeActor(value, speakerType) {
 }
 
 module.exports = {
+  clearDialogueCache,
   getAiDialogueSummary,
   getDialogueEvents,
   recordDialogueEvent

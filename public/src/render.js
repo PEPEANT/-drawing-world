@@ -1,4 +1,5 @@
 import { GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
+import { drawAiArtBadges } from "./ai-art-badges.js";
 import { drawBillboard } from "./billboard.js";
 import { drawGalleryScreens } from "./gallery-screens.js";
 import { drawItems } from "./item-render.js";
@@ -38,6 +39,7 @@ export function draw() {
   drawGalleryScreens(ctx, view);
 
   drawLayeredStrokes(ctx, drawStroke, view);
+  drawAiArtBadges(ctx, view);
   drawItems(ctx, view);
   smoothRemotePlayers();
 

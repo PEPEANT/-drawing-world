@@ -51,6 +51,18 @@ function getAiMemorySummary(roomName, now = Date.now()) {
   return summarizeDay(day, store.rooms[room].days[day]);
 }
 
+function exportAiMemoryStore() {
+  return cloneJson(store);
+}
+
+function restoreAiMemoryStore(source) {
+  const incoming = normalizeStore(source);
+  store.version = incoming.version;
+  store.rooms = incoming.rooms;
+  saveStore();
+  return true;
+}
+
 function decorateAiBotMemory(bot, roomName) {
   if (!bot) return bot;
   setAiState(bot, { memory: getAiMemorySummary(roomName) }, roomName);
@@ -116,16 +128,23 @@ function trimDays(roomMemory) {
 
 function loadStore() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    return { version: 1, rooms: normalizeRooms(data.rooms) };
+    return normalizeStore(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
   } catch {
     return { version: 1, rooms: {} };
   }
 }
 
+function normalizeStore(source) {
+  return { version: 1, rooms: normalizeRooms(source?.rooms) };
+}
+
 function saveStore() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function normalizeRooms(rooms) {
@@ -316,6 +335,8 @@ function safeScore(value) {
 
 module.exports = {
   decorateAiBotMemory,
+  exportAiMemoryStore,
   getAiMemorySummary,
-  recordAiObservation
+  recordAiObservation,
+  restoreAiMemoryStore
 };

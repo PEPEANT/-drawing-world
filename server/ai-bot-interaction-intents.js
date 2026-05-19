@@ -8,7 +8,8 @@ const INTENTS = {
   request_next_idea: { text: "다음 아이디어", reply: "작은 배경을 얹어볼래?", targetMode: "user_art", nextAction: "suggest_next_idea" },
   request_color_tip: { text: "색 추천", reply: "색 하나 더 얹어볼래?", targetMode: "user_art", nextAction: "give_color_tip" },
   request_composition_tip: { text: "구도 조언", reply: "중앙을 조금 비워봐.", targetMode: "user_art", nextAction: "give_composition_tip" },
-  request_encouragement: { text: "어렵다", reply: "큰 형태부터 잡자.", targetMode: "user_art", nextAction: "encourage_drawing" }
+  request_encouragement: { text: "어렵다", reply: "큰 형태부터 잡자.", targetMode: "user_art", nextAction: "encourage_drawing" },
+  request_ai_draw: { text: "AI 그림 그려줘", reply: "작게 그려볼게.", targetMode: "point", nextAction: "start_ai_draw" }
 };
 
 function safeIntent(value) {
@@ -26,6 +27,7 @@ function intentScore(nextAction) {
     give_color_tip: 70,
     give_composition_tip: 70,
     encourage_drawing: 65,
+    start_ai_draw: 95,
     start_conversation: 70,
     reply_greeting: 20
   }[nextAction] || 30;
@@ -42,7 +44,8 @@ function getIntentLabel(intent) {
     request_next_idea: "다음 아이디어",
     request_color_tip: "색 조언",
     request_composition_tip: "구도 조언",
-    request_encouragement: "그림 격려"
+    request_encouragement: "그림 격려",
+    request_ai_draw: "AI 그림 요청"
   }[intent] || "유저 요청";
 }
 

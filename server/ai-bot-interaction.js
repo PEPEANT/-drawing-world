@@ -2,6 +2,8 @@ const { buildArtCoachResponse, findRecentUserArtTarget } = require("./ai-bot-art
 const { getAiDialogueSummary, recordDialogueEvent } = require("./ai-bot-conversation");
 const { getAiDrawingSession } = require("./ai-bot-draw-session");
 const { publishAiBotSpeech } = require("./ai-bot-dialogue");
+const { checkAiInteractionCooldown, markAiInteractionCooldown } = require("./ai-bot-interaction-cooldown");
+const { prepareDrawRequest, runDrawInteraction } = require("./ai-bot-interaction-draw");
 const { startAiBotWalk } = require("./ai-bot-brain");
 const { INTENTS, getIntentLabel, intentScore, isAdviceIntent, safeIntent } = require("./ai-bot-interaction-intents");
 const { recordAiEvent, setAiState } = require("./ai-bot-state");
@@ -29,6 +31,13 @@ function handleAiBotInteraction(ws, room, message) {
   if (!user || user.isBot) return true;
   const request = buildRequest(ws, user, message);
   prepareRequest(room, request);
+  const cooldown = checkAiInteractionCooldown(room.name, request);
+  if (!cooldown.ok) {
+    recordAiEvent(room.name, "cooldown", cooldown.message);
+    send(ws, { type: "aiBotInteractResult", ok: false, result: "cooldown", message: cooldown.message });
+    return true;
+  }
+  markAiInteractionCooldown(room.name, request);
   const state = getInteraction(room);
   pruneExpiredLock(room, bot, state);
 
@@ -88,6 +97,10 @@ function speakInteraction(room, bot, request, ws = null, result = "spoken") {
   }
 
   recordAiEvent(room.name, "talk_receive", event?.memoryNote || request.text);
+  if (request.drawRequest) {
+    runDrawInteraction(room, bot, request, ws, serializeInteraction(state), LOCK_MS, event);
+    return;
+  }
   maybeMoveForRequest(room, bot, request, event);
   publishAiBotSpeech(room, bot, request.reply);
   setAiState(bot, {
@@ -228,6 +241,7 @@ function maybeMoveForRequest(room, bot, request, event) {
 }
 
 function prepareRequest(room, request) {
+  if (request.intent === "request_ai_draw") return prepareDrawRequest(request);
   if (isAdviceIntent(request.intent)) {
     const advice = buildArtCoachResponse(room, request, request.intent);
     request.reply = advice.reply;

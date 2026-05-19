@@ -10,7 +10,8 @@ const INTENT_TEXT = {
   ask_popular_art: "인기 그림 알려줘",
   request_art_advice: "조언해줘",
   request_next_idea: "뭐 그릴까",
-  request_color_tip: "색 추천"
+  request_color_tip: "색 추천",
+  request_ai_draw: "AI 그림 그려줘"
 };
 
 let bound = false;
@@ -59,7 +60,7 @@ function openMenu(clientX, clientY, botName) {
   if (!ui.aiBotMenu) return;
   if (ui.aiBotMenuStatus) ui.aiBotMenuStatus.textContent = botName;
   ui.aiBotMenu.style.left = `${Math.min(window.innerWidth - 244, clientX + 12)}px`;
-  ui.aiBotMenu.style.top = `${Math.min(window.innerHeight - 286, clientY + 12)}px`;
+  ui.aiBotMenu.style.top = `${Math.min(window.innerHeight - 326, clientY + 12)}px`;
   ui.aiBotMenu.classList.remove("hidden");
 }
 

@@ -1,4 +1,3 @@
-const crypto = require("node:crypto");
 const { LIMITS } = require("./config");
 const { broadcast } = require("./protocol");
 const { safeText } = require("./validation");
@@ -94,18 +93,14 @@ function publishAiBotSpeech(room, bot, text) {
   const safe = safeText(text, LIMITS.maxChatLength);
   if (!room || !bot || !safe) return null;
   const message = {
-    id: crypto.randomUUID(),
     author: bot.id,
     name: bot.name || "AI봇",
     color: bot.color || BOT_COLOR,
     text: safe,
-    at: Date.now()
+    at: Date.now(),
+    isBot: true
   };
-  room.messages.push(message);
-  if (room.messages.length > LIMITS.maxChatHistory) {
-    room.messages.splice(0, room.messages.length - LIMITS.maxChatHistory);
-  }
-  broadcast(room, { type: "chat", message }, undefined);
+  broadcast(room, { type: "aiBotSpeech", message }, undefined);
   recordAiEvent(room.name, "speech", safe);
   return message;
 }
@@ -136,6 +131,7 @@ function buildReply(room, bot, text, event, options = {}) {
   }
   if (event?.detectedIntent === "observe_user_art") return "그림 보러 갈게.";
   if (event?.detectedIntent === "ask_popular_art") return "TOP 쪽을 볼게.";
+  if (event?.detectedIntent === "request_ai_draw") return "AI 그림 탭에서 시작해줘.";
   if (event?.detectedIntent === "request_memory") {
     const total = Number(ai.memory?.total) || 0;
     return `기억 ${total}개야.`;
@@ -175,6 +171,7 @@ function getIntentLabel(event) {
     request_color_tip: "색 조언",
     request_composition_tip: "구도 조언",
     request_encouragement: "그림 격려",
+    request_ai_draw: "AI 그림 요청",
     unknown: "대화 기록"
   }[event?.detectedIntent] || "대화 기록";
 }

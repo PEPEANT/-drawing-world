@@ -63,6 +63,14 @@ function exportConversationStore(roomName = "") {
   };
 }
 
+function restoreConversationStore(source) {
+  const incoming = normalizeStore(source);
+  store.schemaVersion = SCHEMA_VERSION;
+  store.rooms = incoming.rooms;
+  saveStore();
+  return true;
+}
+
 function getRoomStore(room) {
   if (!store.rooms[room]) store.rooms[room] = { days: {} };
   if (!store.rooms[room].days) store.rooms[room].days = {};
@@ -96,11 +104,14 @@ function summarizeDay(day, dayStore) {
 
 function loadStore() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    return { schemaVersion: SCHEMA_VERSION, rooms: normalizeRooms(data.rooms) };
+    return normalizeStore(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
   } catch {
     return { schemaVersion: SCHEMA_VERSION, rooms: {} };
   }
+}
+
+function normalizeStore(source) {
+  return { schemaVersion: SCHEMA_VERSION, rooms: normalizeRooms(source?.rooms) };
 }
 
 function saveStore() {
@@ -244,5 +255,6 @@ module.exports = {
   flushConversationStore,
   getConversationSummary,
   getRecentConversationEvents,
-  recordConversationEvent
+  recordConversationEvent,
+  restoreConversationStore
 };

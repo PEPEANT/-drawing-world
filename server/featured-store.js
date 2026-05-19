@@ -33,6 +33,18 @@ function listArchive(limit = 36) {
   return store.archive.slice(0, limit);
 }
 
+function exportFeaturedStore() {
+  return cloneJson(store);
+}
+
+function restoreFeaturedStore(source) {
+  const incoming = normalizeStore(source);
+  store.archive = incoming.archive;
+  store.active = incoming.active;
+  saveStore();
+  return true;
+}
+
 function loadActiveRoom(roomName) {
   const key = safeRoomKey(roomName);
   return key ? store.active[key] || null : null;
@@ -60,19 +72,43 @@ function deleteActiveRoom(roomName) {
 
 function loadStore() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    return {
-      archive: Array.isArray(data.archive) ? data.archive : [],
-      active: data.active && typeof data.active === "object" ? data.active : {}
-    };
+    return normalizeStore(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
   } catch {
     return { archive: [], active: {} };
   }
 }
 
+function normalizeStore(source) {
+  return {
+    archive: (Array.isArray(source?.archive) ? source.archive : []).slice(0, MAX_ARCHIVE),
+    active: normalizeActive(source?.active)
+  };
+}
+
+function normalizeActive(active) {
+  const normalized = {};
+  for (const [roomName, state] of Object.entries(active || {})) {
+    const key = safeRoomKey(roomName);
+    if (!key) continue;
+    const candidates = serializeCandidates(state?.candidates || []);
+    if (candidates.length) {
+      normalized[key] = {
+        day: state.day,
+        savedAt: Number(state.savedAt) || Date.now(),
+        candidates
+      };
+    }
+  }
+  return normalized;
+}
+
 function saveStore() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function serializeCandidates(candidates) {
@@ -102,7 +138,9 @@ function safeRoomKey(value) {
 module.exports = {
   addArchiveEntries,
   deleteActiveRoom,
+  exportFeaturedStore,
   listArchive,
   loadActiveRoom,
+  restoreFeaturedStore,
   saveActiveRoom
 };

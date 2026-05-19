@@ -8,6 +8,7 @@ const { normalizeBanDuration } = require("./ban-duration");
 const { ADMIN_KEY } = require("./config");
 const { createDailySnapshot } = require("./daily-archive");
 const { buildFeaturedTop, clearFeaturedRoom, finalizeRoomWinners, removeFeaturedForTarget } = require("./featured");
+const { createFullBackup, restoreFullBackup, saveServerBackup } = require("./full-backup");
 const { broadcast, send } = require("./protocol");
 const { getRoom, rooms } = require("./rooms");
 const { clearPlayerStrokes: clearPlayerStrokeData, deleteAdminStrokeIds } = require("./strokes");
@@ -108,6 +109,28 @@ function handleAdminMessage(ws, raw) {
 
   if (message.type === "importAnalytics") {
     restoreAnalytics(ws, message.backup, notifyAdminState);
+    return;
+  }
+
+  if (message.type === "exportFullBackup") {
+    const backup = createFullBackup("manual");
+    send(ws, { type: "fullBackupExported", backup });
+    return;
+  }
+
+  if (message.type === "saveServerFullBackup") {
+    const result = saveServerBackup("manual");
+    send(ws, { type: "fullBackupSaved", fileName: result.fileName, summary: result.backup.summary });
+    notifyAdminState();
+    return;
+  }
+
+  if (message.type === "importFullBackup") {
+    const result = restoreFullBackup(message.backup);
+    send(ws, result.ok
+      ? { type: "fullBackupRestored", result }
+      : { type: "fullBackupError", message: result.message });
+    if (result.ok) notifyAdminState();
     return;
   }
 

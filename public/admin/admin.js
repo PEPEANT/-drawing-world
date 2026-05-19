@@ -1,5 +1,13 @@
 import { dom } from "./src/dom.js";
 import { downloadAnalyticsBackup, initAnalyticsPanel, markAnalyticsRestored, renderAnalytics } from "./src/analytics.js";
+import {
+  downloadFullBackup,
+  initFullBackupPanel,
+  markFullBackupRestored,
+  markServerBackupSaved,
+  renderFullBackupStatus,
+  setFullBackupStatus
+} from "./src/full-backup.js";
 import { downloadSnapshot } from "./src/snapshot.js";
 import { openPlayerRoom, setPreviewRoom } from "./src/preview.js";
 import { renderState } from "./src/render.js";
@@ -9,6 +17,7 @@ let adminKey = new URLSearchParams(location.search).get("key") || localStorage.g
 
 dom.keyInput.value = adminKey;
 initAnalyticsPanel();
+initFullBackupPanel();
 
 dom.authForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -124,6 +133,7 @@ function startAdmin(key) {
       renderSecurityWarning(state.security);
       renderState(state);
       renderAnalytics(state.analytics);
+      renderFullBackupStatus(state.fullBackup);
     },
     onSnapshotSaved(snapshot) {
       dom.snapshotMessage.textContent = downloadSnapshot(snapshot);
@@ -139,6 +149,18 @@ function startAdmin(key) {
     },
     onAnalyticsError(message) {
       dom.analyticsStatus.textContent = message || "통계를 복원하지 못했어.";
+    },
+    onFullBackupExported(backup) {
+      downloadFullBackup(backup);
+    },
+    onFullBackupSaved(message) {
+      markServerBackupSaved(message);
+    },
+    onFullBackupRestored(result) {
+      markFullBackupRestored(result);
+    },
+    onFullBackupError(message) {
+      setFullBackupStatus(message || "전체 백업을 처리하지 못했어.");
     }
   });
 }

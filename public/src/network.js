@@ -221,7 +221,13 @@ function handleSocketMessage(message) {
   }
 
   if (message.type === "aiBotInteractResult") {
+    if (message.ok === true && message.result === "spoken") return;
     addSystemMessage(message.message || "AI봇에게 요청을 보냈어.");
+    return;
+  }
+
+  if (message.type === "aiBotSpeech" && message.message) {
+    addChatBubble(message.message);
     return;
   }
 
@@ -265,6 +271,10 @@ function handleSocketMessage(message) {
   }
 
   if (message.type === "chat" && message.message) {
+    if (message.message.isBot === true || message.message.name === "AI봇") {
+      addChatBubble(message.message);
+      return;
+    }
     addChatMessage(message.message);
     addChatBubble(message.message);
   }

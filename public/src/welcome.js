@@ -9,7 +9,7 @@ export function handleWelcome(message, send) {
 
   const serverStrokes = Array.isArray(message.strokes) ? message.strokes : [];
   replaceItems(message.items);
-  replaceChatMessages(message.messages);
+  replaceChatMessages((message.messages || []).filter((entry) => entry?.isBot !== true && entry?.name !== "AI봇"));
   renderRanking(message.ranking);
   state.featured = Array.isArray(message.featured) ? message.featured : [];
   replaceStrokes(serverStrokes);

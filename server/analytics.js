@@ -42,12 +42,26 @@ function createAnalyticsBackup() {
   };
 }
 
+function exportAnalyticsData() {
+  return cloneData(data);
+}
+
 function restoreAnalyticsBackup(backup) {
   const incoming = normalizeData(backup?.analytics || backup);
   if (!hasAnalyticsData(incoming)) return null;
   mergeData(data, incoming);
   saveData();
   return createAnalyticsBackup();
+}
+
+function replaceAnalyticsData(source) {
+  const incoming = normalizeData(source?.analytics || source);
+  if (!hasAnalyticsData(incoming)) return false;
+  data.days = incoming.days;
+  data.months = incoming.months;
+  data.years = incoming.years;
+  saveData();
+  return true;
 }
 
 function buildSeries(now, count, unit) {
@@ -170,6 +184,8 @@ function cloneData(source) {
 module.exports = {
   buildAnalyticsState,
   createAnalyticsBackup,
+  exportAnalyticsData,
+  replaceAnalyticsData,
   restoreAnalyticsBackup,
   recordPlayerSession
 };

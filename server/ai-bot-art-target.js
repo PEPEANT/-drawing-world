@@ -5,22 +5,10 @@ const OBSERVE_OFFSET = 110;
 
 function findRecentUserArtTarget(room, userRef = {}) {
   if (!room || !Array.isArray(room.strokes)) return null;
-  const userStrokes = collectRecentUserStrokes(room.strokes, userRef);
-  if (!userStrokes.length) return null;
+  const cluster = collectRecentUserArtCluster(room.strokes, userRef);
+  if (!cluster.length) return null;
 
-  const anchor = getStrokeCenter(userStrokes[0]);
-  if (!anchor) return null;
-
-  const cluster = [];
-  for (const stroke of userStrokes) {
-    const center = getStrokeCenter(stroke);
-    if (!center) continue;
-    if (Math.hypot(center.x - anchor.x, center.y - anchor.y) <= CLUSTER_RADIUS) {
-      cluster.push(stroke);
-    }
-  }
-
-  const target = summarizeStrokes(cluster.length ? cluster : [userStrokes[0]]);
+  const target = summarizeStrokes(cluster);
   if (!target) return null;
 
   const observePoint = buildObservePoint(target.center, target.bounds);
@@ -33,7 +21,7 @@ function findRecentUserArtTarget(room, userRef = {}) {
     bounds: target.bounds,
     strokeCount: target.strokeCount,
     pointCount: target.pointCount,
-    latestStrokeId: userStrokes[0]?.id || "",
+    latestStrokeId: cluster[0]?.id || "",
     intent: "유저 그림 관찰",
     score: 100,
     reason: `최근 그림 묶음 ${target.strokeCount}개 선 기준`,
@@ -55,7 +43,7 @@ function buildArtCoachResponse(room, userRef = {}, intent = "request_art_advice"
 function getRecentArtMeta(room, userRef = {}) {
   if (!room || !Array.isArray(room.strokes)) return emptyMeta();
   const hasUser = Boolean(userRef.userId || userRef.playerId);
-  const strokes = hasUser ? collectRecentUserStrokes(room.strokes, userRef) : collectRecentArtStrokes(room.strokes);
+  const strokes = hasUser ? collectRecentUserArtCluster(room.strokes, userRef) : collectRecentArtStrokes(room.strokes);
   const summary = summarizeStrokes(strokes);
   if (!summary) return emptyMeta();
   const width = Math.max(0, summary.bounds.right - summary.bounds.left);
@@ -69,6 +57,18 @@ function getRecentArtMeta(room, userRef = {}) {
     height: Math.round(height),
     latestStrokeId: strokes[0]?.id || ""
   };
+}
+
+function collectRecentUserArtCluster(strokes, userRef) {
+  const userStrokes = collectRecentUserStrokes(strokes, userRef);
+  if (!userStrokes.length) return [];
+  const anchor = getStrokeCenter(userStrokes[0]);
+  if (!anchor) return [userStrokes[0]];
+  const cluster = userStrokes.filter((stroke) => {
+    const center = getStrokeCenter(stroke);
+    return center && Math.hypot(center.x - anchor.x, center.y - anchor.y) <= CLUSTER_RADIUS;
+  });
+  return cluster.length ? cluster : [userStrokes[0]];
 }
 
 function collectRecentUserStrokes(strokes, userRef) {
@@ -88,7 +88,7 @@ function collectRecentArtStrokes(strokes) {
 }
 
 function isUserStroke(stroke, ownerId, playerId) {
-  if (!stroke || stroke.tool === "eraser") return false;
+  if (!stroke || stroke.tool === "eraser" || stroke.isBotArtwork) return false;
   return (ownerId && stroke.owner === ownerId) || (playerId && stroke.author === playerId);
 }
 
