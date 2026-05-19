@@ -69,19 +69,21 @@ function resolvePublicPath(pathname) {
 }
 
 function getPublicRooms() {
-  const lobby = listRooms().find((room) => room.name === "lobby");
-  return [
-    {
-      id: "lobby",
-      name: "시뮬라크월드",
-      slug: "lobby",
-      players: lobby?.playerCount || 0,
-      bots: lobby?.botCount || 0,
-      viewers: lobby?.viewers || 0,
-      items: lobby?.items || 0,
+  return listRooms()
+    .filter((room) => !room.hidden)
+    .map((room) => ({
+      id: room.name,
+      name: room.displayName || room.name,
+      slug: room.name,
+      description: room.description || "",
+      players: room.playerCount || 0,
+      bots: room.botCount || 0,
+      viewers: room.viewers || 0,
+      items: room.items || 0,
+      strokes: room.strokes || 0,
+      locked: Boolean(room.locked),
       maxPlayers: LIMITS.maxPlayersPerRoom
-    }
-  ];
+    }));
 }
 
 function handleAudioUpload(req, res) {

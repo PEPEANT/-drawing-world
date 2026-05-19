@@ -60,6 +60,13 @@ body:not(.lobby-open) .lobby,
   gap: 8px;
 }
 
+.room-card-list {
+  display: grid;
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
 .room-list-head {
   display: flex;
   justify-content: space-between;
@@ -79,6 +86,11 @@ body:not(.lobby-open) .lobby,
   min-height: 58px;
   padding: 10px 12px;
   text-align: left;
+}
+
+.room-card.active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
 .room-card strong,
@@ -107,6 +119,10 @@ body:not(.lobby-open) .lobby,
 
 .room-card.is-full {
   opacity: 0.55;
+}
+
+.room-card.is-locked {
+  opacity: 0.62;
 }
 
 .room-list-head a {

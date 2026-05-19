@@ -6,6 +6,7 @@ const { exportConversationStore, restoreConversationStore } = require("./ai-bot-
 const { buildAnalyticsState, exportAnalyticsData, replaceAnalyticsData } = require("./analytics");
 const { exportDailyArchive, restoreDailyArchive } = require("./daily-archive");
 const { exportFeaturedStore, restoreFeaturedStore } = require("./featured-store");
+const { exportRoomRegistry, restoreRoomRegistry } = require("./room-registry");
 const { ROOT_DIR } = require("./config");
 
 const BACKUP_VERSION = 1;
@@ -30,7 +31,8 @@ function createFullBackup(reason = "manual") {
       aiConversations: exportConversationStore(),
       analytics: exportAnalyticsData(),
       featured: exportFeaturedStore(),
-      dailySnapshots: exportDailyArchive()
+      dailySnapshots: exportDailyArchive(),
+      rooms: exportRoomRegistry()
     }
   };
   backup.summary = summarizeBackup(backup);
@@ -47,7 +49,8 @@ function restoreFullBackup(backup) {
     aiConversations: restoreConversationStore(normalized.data.aiConversations),
     analytics: replaceAnalyticsData(normalized.data.analytics),
     featured: restoreFeaturedStore(normalized.data.featured),
-    dailySnapshots: restoreDailyArchive(normalized.data.dailySnapshots)
+    dailySnapshots: restoreDailyArchive(normalized.data.dailySnapshots),
+    rooms: restoreRoomRegistry(normalized.data.rooms)
   };
   clearDialogueCache();
   return {
@@ -133,7 +136,8 @@ function normalizeBackup(backup) {
       aiConversations: backup.data.aiConversations || { schemaVersion: 1, rooms: {} },
       analytics: backup.data.analytics || { days: {}, months: {}, years: {} },
       featured: backup.data.featured || { archive: [], active: {} },
-      dailySnapshots: backup.data.dailySnapshots || { snapshots: [] }
+      dailySnapshots: backup.data.dailySnapshots || { snapshots: [] },
+      rooms: backup.data.rooms || { schemaVersion: 1, rooms: {} }
     }
   };
 }
@@ -148,6 +152,7 @@ function summarizeBackup(backup) {
     analyticsDays: Object.keys(data.analytics?.days || {}).length,
     featuredArchive: Array.isArray(data.featured?.archive) ? data.featured.archive.length : 0,
     dailySnapshots: Array.isArray(data.dailySnapshots?.snapshots) ? data.dailySnapshots.snapshots.length : 0,
+    rooms: Object.keys(data.rooms?.rooms || {}).length,
     analyticsSummary: buildAnalyticsState()
   };
 }

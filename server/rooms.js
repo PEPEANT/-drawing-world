@@ -1,6 +1,7 @@
 const { sanitizeRoomName } = require("./validation");
 const { buildStrokeModeration } = require("./stroke-moderation");
 const { buildFeaturedTop } = require("./featured");
+const { getRoomMeta, listRoomMetas } = require("./room-registry");
 
 const rooms = new Map();
 
@@ -37,19 +38,38 @@ function removeRoomIfEmpty(roomName) {
 }
 
 function listRooms() {
-  return Array.from(rooms.values()).map((room) => ({
-    name: room.name,
-    clients: Array.from(room.clients).filter((client) => !client.isSpectator).length,
-    viewers: Array.from(room.clients).filter((client) => client.isSpectator).length,
-    players: Array.from(room.players.values()),
-    playerCount: countHumanPlayers(room),
-    botCount: countBots(room),
-    strokes: room.strokes.length,
-    moderationStrokes: buildStrokeModeration(room),
-    featured: buildFeaturedTop(room),
-    items: room.items.length,
-    messages: room.messages.length
-  }));
+  const output = [];
+  const seen = new Set();
+  for (const meta of listRoomMetas()) {
+    seen.add(meta.slug);
+    output.push(buildRoomState(rooms.get(meta.slug), meta, true));
+  }
+  for (const room of rooms.values()) {
+    if (seen.has(room.name)) continue;
+    output.push(buildRoomState(room, getRoomMeta(room.name), false));
+  }
+  return output;
+}
+
+function buildRoomState(room, meta, configured) {
+  return {
+    name: meta.slug,
+    displayName: meta.name,
+    description: meta.description,
+    hidden: meta.hidden,
+    locked: meta.locked,
+    configured,
+    clients: room ? Array.from(room.clients).filter((client) => !client.isSpectator).length : 0,
+    viewers: room ? Array.from(room.clients).filter((client) => client.isSpectator).length : 0,
+    players: room ? Array.from(room.players.values()) : [],
+    playerCount: room ? countHumanPlayers(room) : 0,
+    botCount: room ? countBots(room) : 0,
+    strokes: room ? room.strokes.length : 0,
+    moderationStrokes: room ? buildStrokeModeration(room) : [],
+    featured: room ? buildFeaturedTop(room) : [],
+    items: room ? room.items.length : 0,
+    messages: room ? room.messages.length : 0
+  };
 }
 
 function countHumanPlayers(room) {

@@ -1,4 +1,4 @@
-import { DEFAULT_ROOM, getRoomName, PALETTE } from "../config.js";
+import { getRoomName, PALETTE } from "../config.js";
 import { player, state } from "../state.js";
 import { savePlayerIdentity } from "../storage.js";
 import { clamp } from "../utils.js";
@@ -41,10 +41,11 @@ export function initLobby({ startGame }) {
     player.skin = ui.skinCanvas.toDataURL("image/png");
     savePlayerIdentity(player);
 
-    if (getRoomName() !== DEFAULT_ROOM) {
-      location.href = `/?room=${encodeURIComponent(DEFAULT_ROOM)}`;
-      return;
+    const selectedRoom = ui.lobbyForm.dataset.room || getRoomName();
+    if (getRoomName() !== selectedRoom) {
+      history.replaceState(null, "", `/?room=${encodeURIComponent(selectedRoom)}`);
     }
+    ui.roomName.textContent = `room: ${getRoomName()}`;
 
     state.gameStarted = true;
     document.body.classList.remove("lobby-open");

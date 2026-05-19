@@ -68,6 +68,27 @@
           </div>
         </div>
 
+        <form id="roomCreateForm" class="room-manager" aria-label="방 만들기">
+          <div>
+            <h2>방 관리</h2>
+            <p>그림이 많아질 때는 방을 나눠서 렉과 운영 부담을 줄여.</p>
+          </div>
+          <label>
+            <span>주소 이름</span>
+            <input id="roomSlugInput" type="text" maxlength="32" placeholder="gallery-1">
+          </label>
+          <label>
+            <span>표시 이름</span>
+            <input id="roomDisplayInput" type="text" maxlength="32" placeholder="초카구야 갤러리">
+          </label>
+          <label>
+            <span>설명</span>
+            <input id="roomDescriptionInput" type="text" maxlength="64" placeholder="오늘의 그림방">
+          </label>
+          <button id="roomCreateButton" type="submit">방 만들기</button>
+          <p id="roomManagerMessage"></p>
+        </form>
+
         <section class="full-backup-panel" aria-label="전체 데이터 백업">
           <div>
             <h2>전체 데이터 백업</h2>

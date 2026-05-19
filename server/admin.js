@@ -11,6 +11,7 @@ const { buildFeaturedTop, clearFeaturedRoom, finalizeRoomWinners, removeFeatured
 const { createFullBackup, restoreFullBackup, saveServerBackup } = require("./full-backup");
 const { broadcast, send } = require("./protocol");
 const { getRoom, rooms } = require("./rooms");
+const { createManagedRoom, updateManagedRoom } = require("./room-registry");
 const { clearPlayerStrokes: clearPlayerStrokeData, deleteAdminStrokeIds } = require("./strokes");
 const { safeText, sanitizeRoomName } = require("./validation");
 
@@ -71,6 +72,28 @@ function handleAdminMessage(ws, raw) {
   }
 
   if (handleAiBotAdminMessage(ws, message, notifyAdminState)) return;
+
+  if (message.type === "createRoom") {
+    createManagedRoom({
+      slug: message.slug,
+      name: message.name,
+      displayName: message.displayName,
+      description: message.description
+    });
+    notifyAdminState();
+    return;
+  }
+
+  if (message.type === "updateRoomMeta") {
+    updateManagedRoom(message.room, {
+      displayName: message.displayName,
+      description: message.description,
+      hidden: message.hidden,
+      locked: message.locked
+    });
+    notifyAdminState();
+    return;
+  }
 
   if (message.type === "kick") {
     kickPlayer(message.room, message.id);

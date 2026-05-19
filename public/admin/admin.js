@@ -39,6 +39,22 @@ dom.snapshotButton.addEventListener("click", () => {
   sendAdmin({ type: "saveSnapshot", room: currentRoom() });
 });
 
+dom.roomCreateForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const slug = dom.roomSlugInput.value.trim();
+  const displayName = dom.roomDisplayInput.value.trim();
+  const description = dom.roomDescriptionInput.value.trim();
+  if (!slug && !displayName) {
+    dom.roomManagerMessage.textContent = "주소 이름이나 표시 이름을 입력해줘.";
+    return;
+  }
+  sendAdmin({ type: "createRoom", slug, displayName, description });
+  dom.roomManagerMessage.textContent = "방을 만들었어.";
+  dom.roomSlugInput.value = "";
+  dom.roomDisplayInput.value = "";
+  dom.roomDescriptionInput.value = "";
+});
+
 dom.rooms.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button) return;
@@ -58,6 +74,23 @@ dom.rooms.addEventListener("click", (event) => {
     if (window.confirm(`'${room}' 방의 그림을 모두 지울까?`)) {
       sendAdmin({ type: "clearRoom", room });
     }
+    return;
+  }
+
+  if (button.dataset.action === "renameRoom") {
+    const current = button.dataset.displayName || room;
+    const displayName = window.prompt("새 표시 이름", current);
+    if (displayName) sendAdmin({ type: "updateRoomMeta", room, displayName });
+    return;
+  }
+
+  if (button.dataset.action === "toggleHidden") {
+    sendAdmin({ type: "updateRoomMeta", room, hidden: button.dataset.hidden !== "true" });
+    return;
+  }
+
+  if (button.dataset.action === "toggleLocked") {
+    sendAdmin({ type: "updateRoomMeta", room, locked: button.dataset.locked !== "true" });
     return;
   }
 

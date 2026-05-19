@@ -10,6 +10,7 @@ const { removeOwnerItems } = require("./items");
 const { claimOwnerStrokes, hasActiveClient, safeOwner: safeClientId } = require("./ownership");
 const { parseRequestUrl } = require("./request-url");
 const { countHumanPlayers, getRoom, removeRoomIfEmpty } = require("./rooms");
+const { isRoomLocked } = require("./room-registry");
 const { deleteOwnStrokeIds, isOwnedBy } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const { buildFeaturedTop } = require("./featured");
@@ -48,18 +49,24 @@ function attachGameSocket(server) {
   wss.on("connection", (ws, req) => {
     const url = parseRequestUrl(req);
     const roomName = sanitizeRoomName(url.searchParams.get("room"));
-    const room = getRoom(roomName);
-    resetRoomIfNeeded(room);
     const id = crypto.randomUUID();
     const isSpectator = url.searchParams.get("spectator") === "1";
     const clientId = safeClientId(url.searchParams.get("clientId"));
     const activeBan = getActiveBan(clientId);
 
+    if (!isSpectator && isRoomLocked(roomName)) {
+      send(ws, { type: "kicked", reason: "지금은 잠긴 방이에요." });
+      ws.close(4004, "room locked");
+      return;
+    }
     if (!isSpectator && activeBan) {
       send(ws, { type: "kicked", reason: formatBanReason(activeBan) });
       ws.close(4003, "banned");
       return;
     }
+
+    const room = getRoom(roomName);
+    resetRoomIfNeeded(room);
     if (!isSpectator && hasActiveClient(room, clientId)) {
       send(ws, { type: "kicked", reason: "이미 같은 브라우저가 이 방에 접속 중이에요." });
       ws.close(4008, "duplicate client");

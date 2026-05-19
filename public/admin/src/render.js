@@ -50,9 +50,15 @@ function renderRoomTitle(room) {
   const title = document.createElement("div");
   title.className = "room-title";
   const botText = room.botCount ? ` · AI ${room.botCount}` : "";
+  const badges = [
+    room.hidden ? '<span class="room-badge">숨김</span>' : "",
+    room.locked ? '<span class="room-badge danger">잠김</span>' : "",
+    !room.configured ? '<span class="room-badge">임시</span>' : ""
+  ].filter(Boolean).join("");
   title.innerHTML = `
-    <h2>${escapeHtml(room.name)}</h2>
-    <span>접속 ${room.clients} · 관전 ${room.viewers || 0} · 플레이어 ${room.playerCount}${botText} · 선 ${room.strokes} · 아이템 ${room.items || 0}</span>
+    <h2>${escapeHtml(room.displayName || room.name)}</h2>
+    ${badges}
+    <span>${escapeHtml(room.name)} · 접속 ${room.clients} · 관전 ${room.viewers || 0} · 플레이어 ${room.playerCount}${botText} · 선 ${room.strokes} · 아이템 ${room.items || 0}</span>
   `;
   return title;
 }
@@ -63,8 +69,16 @@ function renderRoomActions(room) {
   actions.append(
     createRoomButton("view", room.name, "보기"),
     createRoomButton("join", room.name, "플레이어로 접속"),
-    createRoomButton("clear", room.name, "그림 초기화")
+    createRoomButton("renameRoom", room.name, "이름 변경")
   );
+  if (room.name !== "lobby") {
+    actions.append(
+      createToggleButton("toggleHidden", room.name, room.hidden, "숨김", "공개"),
+      createToggleButton("toggleLocked", room.name, room.locked, "잠금", "해제")
+    );
+  }
+  actions.append(createRoomButton("clear", room.name, "그림 초기화"));
+  actions.querySelector('[data-action="renameRoom"]').dataset.displayName = room.displayName || room.name;
   return actions;
 }
 
@@ -179,6 +193,14 @@ function createRoomButton(action, room, text) {
   button.dataset.action = action;
   button.dataset.room = room;
   button.textContent = text;
+  return button;
+}
+
+function createToggleButton(action, room, active, onText, offText) {
+  const button = createRoomButton(action, room, active ? offText : onText);
+  button.dataset.hidden = action === "toggleHidden" ? String(active) : "";
+  button.dataset.locked = action === "toggleLocked" ? String(active) : "";
+  if (active) button.classList.add("is-active");
   return button;
 }
 

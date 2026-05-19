@@ -65,6 +65,57 @@
   color: var(--accent);
 }
 
+.room-manager {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(120px, 0.8fr)) auto;
+  gap: 10px;
+  align-items: end;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.room-manager h2,
+.room-manager p {
+  margin: 0;
+}
+
+.room-manager h2 {
+  font-size: 17px;
+}
+
+.room-manager p,
+.room-manager span,
+#roomManagerMessage {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.room-manager label {
+  display: grid;
+  gap: 5px;
+}
+
+.room-manager input {
+  height: 34px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.room-manager button {
+  padding: 0 12px;
+  color: var(--accent);
+}
+
+#roomManagerMessage {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .rooms {
   display: grid;
   gap: 12px;
@@ -146,6 +197,23 @@
   font-size: 18px;
 }
 
+.room-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 21px;
+  padding: 0 7px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.room-badge.danger {
+  border-color: #fecaca;
+  color: var(--danger);
+}
+
 .room-title span {
   color: var(--muted);
   font-size: 13px;
@@ -192,6 +260,19 @@
 
 .room-actions button[data-action="join"] {
   color: var(--good);
+}
+
+.room-actions button[data-action="renameRoom"] {
+  color: var(--accent);
+}
+
+.room-actions button[data-action="toggleHidden"],
+.room-actions button[data-action="toggleLocked"] {
+  color: #b45309;
+}
+
+.room-actions button.is-active {
+  background: #fff7ed;
 }
 
 .empty {
