@@ -57,6 +57,16 @@ dom.roomCreateForm.addEventListener("submit", (event) => {
 
 dom.rooms.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-action]");
+  const watchRow = event.target.closest("tr[data-action='watchPlayer']");
+
+  if (!button && watchRow) {
+    setPreviewRoom(watchRow.dataset.room, {
+      focusId: watchRow.dataset.id,
+      focusName: watchRow.dataset.name
+    });
+    return;
+  }
+
   if (!button) return;
 
   const room = button.dataset.room;

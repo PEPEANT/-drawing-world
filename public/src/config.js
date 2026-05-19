@@ -54,3 +54,8 @@ export function isSpectatorMode() {
   const params = new URLSearchParams(location.search);
   return params.get("spectator") === "1";
 }
+
+export function getSpectatorFocusId() {
+  const params = new URLSearchParams(location.search);
+  return (params.get("focus") || "").trim().slice(0, 80);
+}

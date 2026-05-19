@@ -25,6 +25,14 @@
   background: #f8fafc;
 }
 
+.player-table tr.is-watchable {
+  cursor: pointer;
+}
+
+.player-table tr.is-watchable:hover td {
+  background: #eff6ff;
+}
+
 .player-name {
   display: inline-flex;
   align-items: center;

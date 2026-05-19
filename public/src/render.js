@@ -1,4 +1,4 @@
-import { GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
+import { getSpectatorFocusId, GRID_COLOR, PAPER_COLOR, WORLD } from "./config.js";
 import { drawAiArtBadges } from "./ai-art-badges.js";
 import { drawBillboard } from "./billboard.js";
 import { drawGalleryScreens } from "./gallery-screens.js";
@@ -69,6 +69,10 @@ export function updateCamera() {
 
 function getCameraFocus() {
   if (!state.isSpectator) return player;
+  const focusId = getSpectatorFocusId();
+  if (focusId && state.remotePlayers.has(focusId)) {
+    return state.remotePlayers.get(focusId);
+  }
   const firstRemote = state.remotePlayers.values().next().value;
   return firstRemote || { x: WORLD.width / 2, y: WORLD.height / 2 };
 }

@@ -109,6 +109,11 @@ function renderPlayerTable(room) {
 function renderPlayerRow(roomName, player) {
   const row = document.createElement("tr");
   if (player.isBot) row.className = "is-bot";
+  row.classList.add("is-watchable");
+  row.dataset.action = "watchPlayer";
+  row.dataset.room = roomName;
+  row.dataset.id = player.id;
+  row.dataset.name = player.name || (player.isBot ? "AI봇" : "플레이어");
   row.innerHTML = `
     <td>
       <span class="player-name">
@@ -126,7 +131,7 @@ function renderPlayerRow(roomName, player) {
   if (player.isBot) {
     const locked = document.createElement("span");
     locked.className = "bot-lock";
-    locked.textContent = "봇 실험실에서 관리";
+    locked.textContent = "클릭하면 관전";
     row.lastElementChild.append(locked);
     return row;
   }
