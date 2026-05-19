@@ -3,6 +3,7 @@ import { eraseOwnStrokes } from "../eraser.js";
 import { recordStrokeAdd, recordStrokeSplit } from "../history.js";
 import { saveLocalStrokes } from "../storage.js";
 import { ui } from "../ui/dom.js";
+import { handleAiBotPointer } from "../ui/ai-bot-menu.js";
 import { handleItemPointer } from "../ui/item-panel.js";
 import { handleVotePointer } from "../ui/ranking.js";
 import { canvas, clampPoint, screenToWorld } from "../render.js";
@@ -15,6 +16,10 @@ export function bindPointer({ send }) {
     state.activePointerId = event.pointerId;
     canvas.setPointerCapture(state.activePointerId);
     const point = toStrokePoint(event);
+    if (handleAiBotPointer(point, event, send)) {
+      cancelPointer();
+      return;
+    }
     if (handleVotePointer(point, event)) {
       cancelPointer();
       return;

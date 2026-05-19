@@ -7,9 +7,11 @@ export function drawPlayer(ctx, entity) {
   const size = PLAYER.size;
   const walk = entity.moving ? Math.sin(Date.now() / 120) * 2.2 : 0;
   const squash = entity.moving ? 1 + Math.abs(Math.sin(Date.now() / 120)) * 0.035 : 1;
+  const x = Number.isFinite(entity.renderX) ? entity.renderX : entity.x;
+  const y = Number.isFinite(entity.renderY) ? entity.renderY : entity.y;
 
   ctx.save();
-  ctx.translate(entity.x, entity.y + walk);
+  ctx.translate(x, y + walk);
   ctx.scale(entity.facing === -1 ? -1 : 1, squash);
 
   const image = getSkinImage(entity.skin);
@@ -22,7 +24,10 @@ export function drawPlayer(ctx, entity) {
 
   ctx.scale(entity.facing === -1 ? -1 : 1, 1 / squash);
   ctx.translate(0, -walk);
-  if (entity.isBot) drawBotMarker(ctx, size);
+  if (entity.isBot) {
+    drawBotMarker(ctx, size);
+    if (entity.ai?.mode === "sleeping") drawBotSleepMarker(ctx, size);
+  }
   drawName(ctx, entity, size);
   drawVoteBubble(ctx, entity, size);
   drawChatBubble(ctx, entity, size);
@@ -69,6 +74,17 @@ function drawBotMarker(ctx, size) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("AI", 0, badgeY + badgeHeight / 2);
+  ctx.restore();
+}
+
+function drawBotSleepMarker(ctx, size) {
+  const offset = Math.sin(Date.now() / 520) * 3 / state.camera.zoom;
+  ctx.save();
+  ctx.fillStyle = "#64748b";
+  ctx.font = `${12 / state.camera.zoom}px ui-sans-serif, system-ui, sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Zz", size / 2 + 7 / state.camera.zoom, -size / 2 - 4 / state.camera.zoom + offset);
   ctx.restore();
 }
 

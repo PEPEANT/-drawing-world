@@ -3,14 +3,18 @@ const { isOwnedBy } = require("./strokes");
 
 function applyVote(room, vote) {
   const value = vote.value === -1 ? -1 : 1;
-  if (!vote.voterId || !vote.targetId || vote.voterId === vote.targetId) {
+  if (!vote.voterId || !vote.targetId || vote.voterPlayerId === vote.targetId) {
     return { ok: false, reason: "다른 플레이어에게만 투표할 수 있어." };
   }
-  if (!room.players.has(vote.targetId)) {
+  const target = room.players.get(vote.targetId);
+  if (!target) {
     return { ok: false, reason: "대상 플레이어가 방에 없어." };
   }
-  if (room.players.get(vote.targetId)?.isBot) {
+  if (target.isBot) {
     return { ok: false, reason: "AI 봇은 투표 대상이 아니야." };
+  }
+  if (target.clientId && target.clientId === vote.voterId) {
+    return { ok: false, reason: "자기 자신에게는 투표할 수 없어." };
   }
 
   const votes = getVoteStore(room);

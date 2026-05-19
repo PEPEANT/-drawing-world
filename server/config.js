@@ -3,7 +3,9 @@ const path = require("node:path");
 const ROOT_DIR = path.join(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 const PORT = Number(process.env.PORT || 3000);
-const ADMIN_KEY = process.env.ADMIN_KEY || "admin";
+const ADMIN_KEY_SOURCE = typeof process.env.ADMIN_KEY === "string" ? process.env.ADMIN_KEY.trim() : "";
+const ADMIN_KEY = ADMIN_KEY_SOURCE || "admin";
+const ADMIN_KEY_IS_DEFAULT = !ADMIN_KEY_SOURCE;
 
 const LIMITS = {
   maxPlayersPerRoom: 50,
@@ -30,6 +32,7 @@ const mimeTypes = {
 
 module.exports = {
   ADMIN_KEY,
+  ADMIN_KEY_IS_DEFAULT,
   LIMITS,
   PORT,
   PUBLIC_DIR,

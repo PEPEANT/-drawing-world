@@ -1,0 +1,227 @@
+.bot-motion-sim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bot-world-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.bot-world-stroke {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.72;
+}
+
+.bot-world-stroke.is-ai-art {
+  opacity: 0.92;
+  filter: drop-shadow(0 3px 7px rgba(37, 99, 235, 0.18));
+}
+
+.bot-world-player circle {
+  fill: #2563eb;
+  stroke: #2563eb;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 4px 8px rgba(37, 99, 235, 0.35));
+}
+
+.bot-world-player text {
+  fill: #0f172a;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 3;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.range-ring,
+.prediction-line,
+.direction-arrow,
+.next-point,
+.predicted-point {
+  position: absolute;
+  left: var(--bot-stage-x, 50%);
+  top: var(--bot-stage-y, 52%);
+  pointer-events: none;
+}
+
+.range-ring {
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.range-ring::after {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.range-sense {
+  width: var(--sense-range-size, 166px);
+  height: var(--sense-range-size, 166px);
+  border: 1px solid rgba(14, 165, 233, 0.34);
+  background: rgba(14, 165, 233, 0.045);
+}
+
+.range-sense::after {
+  content: "감각";
+  color: #0284c7;
+}
+
+.range-talk {
+  width: var(--talk-range-size, 116px);
+  height: var(--talk-range-size, 116px);
+  border: 1px dashed rgba(37, 99, 235, 0.42);
+}
+
+.range-talk::after {
+  content: "대화";
+  color: #2563eb;
+}
+
+.range-avoid {
+  width: var(--avoid-range-size, 62px);
+  height: var(--avoid-range-size, 62px);
+  border: 1px solid rgba(244, 63, 94, 0.34);
+  background: rgba(244, 63, 94, 0.045);
+}
+
+.range-avoid::after {
+  content: "회피";
+  color: #e11d48;
+}
+
+.prediction-line,
+.direction-arrow {
+  width: var(--route-length, 0px);
+  height: 0;
+  transform: rotate(var(--route-angle, 0deg));
+  transform-origin: 0 50%;
+  opacity: 0;
+  transition: width 0.45s linear, transform 0.45s linear, opacity 0.2s ease;
+}
+
+.prediction-line {
+  border-top: 2px dashed rgba(37, 99, 235, 0.48);
+}
+
+.direction-arrow {
+  width: var(--predict-length, 0px);
+  border-top: 3px solid rgba(14, 165, 233, 0.8);
+  filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.34));
+}
+
+.direction-arrow::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  border-top: 3px solid rgba(14, 165, 233, 0.9);
+  border-right: 3px solid rgba(14, 165, 233, 0.9);
+  transform: rotate(45deg);
+}
+
+.next-point,
+.predicted-point {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: left 0.45s linear, top 0.45s linear, opacity 0.2s ease;
+}
+
+.next-point {
+  left: calc(var(--bot-stage-x, 50%) + var(--next-dx, 0px));
+  top: calc(var(--bot-stage-y, 52%) + var(--next-dy, 0px));
+  border: 2px solid rgba(37, 99, 235, 0.9);
+  background: #ffffff;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.08);
+}
+
+.predicted-point {
+  left: calc(var(--bot-stage-x, 50%) + var(--predict-dx, 0px));
+  top: calc(var(--bot-stage-y, 52%) + var(--predict-dy, 0px));
+  border: 2px solid rgba(14, 165, 233, 0.8);
+  background: rgba(14, 165, 233, 0.15);
+}
+
+.next-point b,
+.predicted-point b {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  color: #1e293b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.has-prediction .prediction-line,
+.has-prediction .direction-arrow,
+.has-prediction .next-point,
+.has-prediction .predicted-point {
+  opacity: 1;
+}
+
+.bot-track-hud {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 720px;
+}
+
+.bot-track-hud span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  border: 1px solid rgba(203, 213, 225, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 8px 10px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.bot-track-hud b {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.bot-track-hud strong {
+  overflow: hidden;
+  color: #111827;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .bot-track-hud {
+    grid-template-columns: 1fr;
+    max-width: 260px;
+  }
+}

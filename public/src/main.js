@@ -2,7 +2,7 @@ import { addChatBubble, addChatMessage, closeChat, openChat, toggleChat } from "
 import { bindKeyboard, updatePlayer } from "./input/keyboard.js";
 import { bindMobileControls } from "./input/mobile-controls.js";
 import { bindPointer } from "./input/pointer.js";
-import { connect, send, sendPlayerUpdate } from "./network.js";
+import { connect, send, sendPlayerIdentity, sendPlayerUpdate } from "./network.js";
 import { draw, resize, updateCamera, canvas } from "./render.js";
 import { initLobby } from "./ui/lobby.js";
 import { initCanvasCursor, updateToolCursor } from "./ui/cursor.js";
@@ -28,6 +28,7 @@ function init() {
   replaceStrokes(shouldUseOfflineCache() ? loadLocalStrokes() : []);
 
   initHud({
+    sendPlayerIdentity,
     sendPlayerUpdate,
     setTool,
     toggleTool

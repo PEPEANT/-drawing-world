@@ -104,7 +104,8 @@ body {
 }
 
 .auth-panel input,
-.talk-panel input {
+.talk-panel input,
+.talk-panel select {
   height: 38px;
   border: 1px solid #d7deea;
   border-radius: 8px;
@@ -132,23 +133,61 @@ body {
   background: #ffffff;
 }
 
+.stage-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 10px 0;
+  background: #ffffff;
+}
+
+.stage-tabs button {
+  min-height: 34px;
+  border: 1px solid #d7deea;
+  border-radius: 8px 8px 0 0;
+  background: #f8fafc;
+  color: #64748b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.stage-tabs button.active {
+  border-bottom-color: #ffffff;
+  background: #ffffff;
+  color: #2563eb;
+}
+
+.stage-view[hidden] {
+  display: none;
+}
+
 .grid-floor {
   position: relative;
-  min-height: calc(100vh - 142px);
+  overflow: hidden;
+  min-height: calc(100vh - 187px);
   background:
     linear-gradient(#e5eaf2 1px, transparent 1px),
     linear-gradient(90deg, #e5eaf2 1px, transparent 1px),
     #f8fafc;
   background-size: 64px 64px;
+  background-position:
+    var(--bot-grid-x, 0px) var(--bot-grid-y, 0px),
+    var(--bot-grid-x, 0px) var(--bot-grid-y, 0px),
+    0 0;
+  transition: background-position 0.45s linear;
 }
 
 .bot-avatar {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: var(--bot-stage-x, 50%);
+  top: var(--bot-stage-y, 50%);
+  z-index: 4;
   width: 56px;
   height: 56px;
   transform: translate(-50%, -50%);
+  transition: left 0.45s linear, top 0.45s linear;
 }
 
 .bot-avatar img {
@@ -158,6 +197,55 @@ body {
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 14px 20px rgba(15, 23, 42, 0.22));
+  transform: scaleX(var(--bot-stage-facing, 1));
+}
+
+.bot-avatar img[hidden] {
+  display: none;
+}
+
+.stage-view.is-sleeping .bot-avatar {
+  transform: translate(-50%, -50%) rotate(-8deg);
+}
+
+.stage-view.is-sleeping .bot-avatar img {
+  filter: grayscale(0.35) drop-shadow(0 10px 16px rgba(15, 23, 42, 0.18));
+  opacity: 0.78;
+}
+
+.stage-view.is-sleeping .bot-avatar::after {
+  content: "Zz";
+  position: absolute;
+  right: -18px;
+  top: -18px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 3px 7px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  animation: sleepFloat 1.8s ease-in-out infinite;
+}
+
+.stage-view.is-waking .bot-avatar::after {
+  content: "ON";
+  position: absolute;
+  right: -20px;
+  top: -18px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 7px;
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+}
+
+@keyframes sleepFloat {
+  0%, 100% { transform: translateY(0); opacity: 0.65; }
+  50% { transform: translateY(-6px); opacity: 1; }
 }
 
 .control-panel {
@@ -172,6 +260,66 @@ body {
   font-size: 24px;
 }
 
+.bot-skin-picker {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #e5eaf2;
+}
+
+.skin-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.skin-picker-head strong {
+  color: #111827;
+  font-size: 12px;
+}
+
+.bot-skin-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.bot-skin-choice {
+  display: grid;
+  min-height: 70px;
+  place-items: center;
+  gap: 4px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.bot-skin-choice canvas,
+.bot-skin-choice img {
+  width: 34px;
+  height: 34px;
+  image-rendering: pixelated;
+}
+
+.bot-skin-choice.is-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.bot-skin-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
 .control-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -182,6 +330,10 @@ body {
 .talk-panel button {
   color: #2563eb;
   cursor: pointer;
+}
+
+.control-grid .wide-action {
+  grid-column: 1 / -1;
 }
 
 .control-grid button:disabled,

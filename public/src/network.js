@@ -18,10 +18,12 @@ import { setOnline } from "./ui/hud.js";
 import { renderRanking } from "./ui/ranking.js";
 import { addFeaturedFeedback, addVoteFeedback } from "./vote-feedback.js";
 import { handleWelcome } from "./welcome.js";
+import { upsertRemotePlayer } from "./remote-motion.js";
 
 let ws = null, reconnectAllowed = true;
 let kickReason = "";
-let lastPlayerPayload = "";
+let lastMovePayload = "";
+let lastIdentityPayload = "";
 
 export function connect() {
   if (!("WebSocket" in window) || location.protocol === "file:") {
@@ -77,20 +79,30 @@ export function send(payload) {
 export function sendPlayerUpdate(force = false, now = performance.now()) {
   if (state.isSpectator || !state.online || !ws || ws.readyState !== WebSocket.OPEN) return;
   const payload = {
-    name: player.name,
-    clientId: player.clientId,
-    color: player.color,
-    skin: player.skin,
     facing: player.facing,
     moving: player.moving,
     x: Math.round(player.x * 10) / 10,
     y: Math.round(player.y * 10) / 10
   };
   const serialized = JSON.stringify(payload);
-  const changed = serialized !== lastPlayerPayload;
+  const changed = serialized !== lastMovePayload;
   if (!force && now - state.lastPositionSent < (changed ? 80 : 1800)) return;
-  state.lastPositionSent = now; lastPlayerPayload = serialized;
-  send({ type: "playerUpdate", player: payload });
+  state.lastPositionSent = now; lastMovePayload = serialized;
+  send({ type: "playerMove", player: payload });
+}
+
+export function sendPlayerIdentity(force = false) {
+  if (state.isSpectator || !state.online || !ws || ws.readyState !== WebSocket.OPEN) return;
+  const payload = {
+    name: player.name,
+    clientId: player.clientId,
+    color: player.color,
+    skin: player.skin
+  };
+  const serialized = JSON.stringify(payload);
+  if (!force && serialized === lastIdentityPayload) return;
+  lastIdentityPayload = serialized;
+  send({ type: "playerIdentity", player: payload });
 }
 
 function handleSocketMessage(message) {
@@ -106,9 +118,14 @@ function handleSocketMessage(message) {
     return;
   }
 
-  if (message.type === "playerJoin" || message.type === "playerUpdate") {
+  if (
+    message.type === "playerJoin" ||
+    message.type === "playerUpdate" ||
+    message.type === "playerMove" ||
+    message.type === "playerIdentity"
+  ) {
     if (message.player && message.player.id !== state.socketId) {
-      state.remotePlayers.set(message.player.id, message.player);
+      upsertRemotePlayer(message.player, state.socketId);
     }
     return;
   }
@@ -200,6 +217,11 @@ function handleSocketMessage(message) {
 
   if (message.type === "voteFeedback") {
     addVoteFeedback(message.feedback);
+    return;
+  }
+
+  if (message.type === "aiBotInteractResult") {
+    addSystemMessage(message.message || "AI봇에게 요청을 보냈어.");
     return;
   }
 

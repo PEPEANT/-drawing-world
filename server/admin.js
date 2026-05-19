@@ -194,8 +194,9 @@ function warnPlayer(roomName, playerId, text) {
 
 function clearPlayerStrokes(roomName, playerId) {
   const room = rooms.get(sanitizeRoomName(roomName));
-  if (!room || typeof playerId !== "string" || player?.isBot) return;
+  if (!room || typeof playerId !== "string") return;
   const player = room.players.get(playerId);
+  if (player?.isBot) return;
   if (!clearPlayerStrokeData(room, playerId, player?.clientId)) return;
   removeFeaturedForTarget(room, playerId);
   broadcast(room, {

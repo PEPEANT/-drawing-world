@@ -2,6 +2,7 @@ import { getOwnStrokes, player, replaceItems, replaceStrokes, setSocketId, state
 import { saveLocalStrokes } from "./storage.js";
 import { addSystemMessage, replaceChatMessages } from "./ui/chat.js";
 import { renderRanking } from "./ui/ranking.js";
+import { resetRemotePlayers } from "./remote-motion.js";
 
 export function handleWelcome(message, send) {
   setSocketId(message.id);
@@ -14,12 +15,7 @@ export function handleWelcome(message, send) {
   replaceStrokes(serverStrokes);
   saveLocalStrokes(getOwnStrokes());
 
-  state.remotePlayers = new Map();
-  for (const remotePlayer of message.players || []) {
-    if (remotePlayer.id !== state.socketId) {
-      state.remotePlayers.set(remotePlayer.id, remotePlayer);
-    }
-  }
+  resetRemotePlayers(message.players, state.socketId);
 
   if (state.isSpectator) {
     addSystemMessage(`관전 모드로 '${message.room}' 방을 보고 있어.`);

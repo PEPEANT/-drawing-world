@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const MAX_SKIN_LENGTH = 20000;
 
 function sanitizeRoomName(value) {
   if (typeof value !== "string") return "lobby";
@@ -54,10 +55,31 @@ function normalizePlayer(data, id) {
   };
 }
 
+function normalizePlayerIdentity(data, id, existing = {}) {
+  const skin = safeSkin(data.skin);
+  return {
+    ...existing,
+    id,
+    name: safeText(data.name, 24) || existing.name || `guest-${id.slice(0, 4)}`,
+    color: /^#[0-9a-f]{6}$/i.test(data.color) ? data.color : existing.color || "#2563eb",
+    skin: skin || existing.skin || ""
+  };
+}
+
+function normalizePlayerMovement(data, existing) {
+  return {
+    ...existing,
+    x: isFiniteNumber(data.x) ? data.x : existing.x,
+    y: isFiniteNumber(data.y) ? data.y : existing.y,
+    facing: data.facing === -1 ? -1 : 1,
+    moving: data.moving === true
+  };
+}
+
 function safeSkin(value) {
   if (typeof value !== "string") return "";
   if (!value.startsWith("data:image/png;base64,")) return "";
-  return value.length <= 7000 ? value : "";
+  return value.length <= MAX_SKIN_LENGTH ? value : "";
 }
 
 function normalizeStroke(data, id, owner) {
@@ -111,6 +133,8 @@ function normalizeItem(data, id) {
 module.exports = {
   normalizeItem,
   normalizePlayer,
+  normalizePlayerIdentity,
+  normalizePlayerMovement,
   normalizeStroke,
   safeLayerId,
   safeText,

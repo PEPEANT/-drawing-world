@@ -4,7 +4,7 @@ import { savePlayerIdentity } from "../storage.js";
 import { updateToolCursor } from "./cursor.js";
 import { ui } from "./dom.js";
 
-export function initHud({ sendPlayerUpdate, toggleTool }) {
+export function initHud({ sendPlayerIdentity, toggleTool }) {
   document.title = APP_NAME;
   document.querySelector("[data-brand-name]").textContent = APP_NAME;
 
@@ -16,7 +16,7 @@ export function initHud({ sendPlayerUpdate, toggleTool }) {
     player.color = ui.colorInput.value;
     savePlayerIdentity(player);
     updateToolCursor();
-    sendPlayerUpdate(true);
+    sendPlayerIdentity(true);
   });
 
   ui.sizeInput.addEventListener("input", () => {

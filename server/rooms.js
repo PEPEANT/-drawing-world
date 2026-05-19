@@ -27,6 +27,7 @@ function removeRoomIfEmpty(roomName) {
     room &&
     room.clients.size === 0 &&
     countHumanPlayers(room) === 0 &&
+    countBots(room) === 0 &&
     room.strokes.length === 0 &&
     room.items.length === 0 &&
     room.messages.length === 0

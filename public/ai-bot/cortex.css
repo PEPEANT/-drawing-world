@@ -1,13 +1,7 @@
 .cortex-panel {
-  position: absolute;
-  z-index: 2;
-  left: 18px;
-  top: 18px;
-  width: min(430px, calc(100% - 36px));
-  border: 1px solid rgba(215, 222, 234, 0.9);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+  min-height: calc(100vh - 187px);
+  padding-top: 8px;
+  background: #ffffff;
 }
 
 .cortex-head,
@@ -42,76 +36,72 @@
   padding: 6px 9px;
 }
 
-.cortex-map {
-  position: relative;
-  height: 150px;
-  margin: 0 12px;
-  border-block: 1px solid #e5eaf2;
-  background:
-    radial-gradient(circle at 26% 38%, rgba(14, 165, 233, 0.08), transparent 26%),
-    radial-gradient(circle at 72% 62%, rgba(236, 72, 153, 0.08), transparent 28%),
-    #f8fafc;
+.cortex-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.node,
-.link {
-  position: absolute;
-  display: block;
-}
-
-.node {
-  width: 10px;
-  height: 10px;
-  border: 2px solid #94a3b8;
-  border-radius: 999px;
+.cortex-head-actions button,
+.cortex-modal-panel button {
+  min-height: 32px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
   background: #ffffff;
+  color: #2563eb;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 10px;
+  cursor: pointer;
 }
 
-.has-bot .node:nth-of-type(2n + 1) {
-  border-color: #06b6d4;
-  background: #cffafe;
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.45);
+.cortex-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 12px 10px;
 }
 
-.has-bot .node:nth-of-type(3n) {
-  border-color: #ec4899;
-  background: #fce7f3;
+.cortex-summary span {
+  min-height: 54px;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 7px;
 }
 
-.link {
-  height: 2px;
-  border-radius: 999px;
-  background: #cbd5e1;
-  transform-origin: left center;
+.cortex-summary b,
+.cortex-summary strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.has-bot .link {
-  background: linear-gradient(90deg, #06b6d4, #ec4899);
+.cortex-summary b {
+  color: #64748b;
+  font-size: 11px;
 }
 
-.n1 { left: 10%; top: 22%; }
-.n2 { left: 23%; top: 58%; }
-.n3 { left: 34%; top: 30%; }
-.n4 { left: 44%; top: 70%; }
-.n5 { left: 54%; top: 24%; }
-.n6 { left: 63%; top: 55%; }
-.n7 { left: 76%; top: 34%; }
-.n8 { left: 88%; top: 66%; }
-.n9 { left: 16%; top: 76%; }
-.n10 { left: 70%; top: 78%; }
-.n11 { left: 82%; top: 14%; }
-.n12 { left: 48%; top: 46%; }
-
-.l1 { left: 12%; top: 28%; width: 120px; transform: rotate(24deg); }
-.l2 { left: 34%; top: 38%; width: 150px; transform: rotate(-11deg); }
-.l3 { left: 46%; top: 68%; width: 130px; transform: rotate(-26deg); }
-.l4 { left: 18%; top: 78%; width: 210px; transform: rotate(-8deg); }
+.cortex-summary strong {
+  margin-top: 4px;
+  color: #111827;
+  font-size: 12px;
+}
 
 .cortex-layers {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   color: #64748b;
   font-size: 12px;
+}
+
+.route-status {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 12px 10px;
 }
 
 .cortex-layers span {
@@ -122,23 +112,66 @@
   padding: 8px;
 }
 
+.route-status span {
+  min-height: 52px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+  padding: 8px;
+}
+
 .cortex-layers b,
-.cortex-layers strong {
+.cortex-layers strong,
+.route-status b,
+.route-status strong {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cortex-layers b {
+.cortex-layers b,
+.route-status b {
   color: #64748b;
   font-size: 11px;
 }
 
-.cortex-layers strong {
+.cortex-layers strong,
+.route-status strong {
   margin-top: 3px;
   color: #111827;
   font-size: 13px;
+}
+
+.attention-list {
+  display: grid;
+  gap: 5px;
+  max-height: 96px;
+  overflow: auto;
+  margin: 0;
+  padding: 0 12px 10px;
+  list-style: none;
+}
+
+.attention-list li {
+  border-left: 3px solid #38bdf8;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 6px 8px;
+}
+
+.attention-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+}
+
+.attention-item small {
+  grid-column: 1 / -1;
+  color: #64748b;
 }
 
 .has-bot .cortex-layers span {
@@ -155,7 +188,15 @@
 }
 
 @media (max-width: 860px) {
+  .cortex-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .cortex-layers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .route-status {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

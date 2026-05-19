@@ -4,6 +4,7 @@ import { drawGalleryScreens } from "./gallery-screens.js";
 import { drawItems } from "./item-render.js";
 import { drawLayeredStrokes } from "./layer-render.js";
 import { drawPlayer } from "./player-render.js";
+import { smoothRemotePlayers } from "./remote-motion.js";
 import { player, state } from "./state.js";
 import { drawStroke } from "./stroke-render.js";
 import { clamp } from "./utils.js";
@@ -38,11 +39,13 @@ export function draw() {
 
   drawLayeredStrokes(ctx, drawStroke, view);
   drawItems(ctx, view);
+  smoothRemotePlayers();
 
   if (!state.isSpectator) {
     drawPlayer(ctx, player);
   }
   for (const remotePlayer of state.remotePlayers.values()) {
+    if (!isPlayerVisible(remotePlayer, view)) continue;
     drawPlayer(ctx, remotePlayer);
   }
 
@@ -141,4 +144,14 @@ function drawMiniStatus() {
     18,
     state.viewport.height - 28
   );
+}
+
+function isPlayerVisible(entity, view) {
+  const x = Number.isFinite(entity.renderX) ? entity.renderX : entity.x;
+  const y = Number.isFinite(entity.renderY) ? entity.renderY : entity.y;
+  const margin = 170 / state.camera.zoom;
+  return x >= view.left - margin &&
+    x <= view.right + margin &&
+    y >= view.top - margin &&
+    y <= view.bottom + margin;
 }

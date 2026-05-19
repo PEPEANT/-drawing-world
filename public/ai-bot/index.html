@@ -3,17 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI봇 실험실</title>
+    <title>AI 관리실</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/ai-bot/styles.css?v=20260519-2">
-    <link rel="stylesheet" href="/ai-bot/cortex.css?v=20260519-2">
-    <link rel="stylesheet" href="/ai-bot/dialog.css?v=20260519-2">
+    <link rel="stylesheet" href="/ai-bot/styles.css?v=20260519-5">
+    <link rel="stylesheet" href="/ai-bot/cortex.css?v=20260519-3">
+    <link rel="stylesheet" href="/ai-bot/neural.css?v=20260519-1">
+    <link rel="stylesheet" href="/ai-bot/dialog.css?v=20260519-5">
+    <link rel="stylesheet" href="/ai-bot/debug.css?v=20260519-1">
+    <link rel="stylesheet" href="/ai-bot/draw.css?v=20260519-2">
+    <link rel="stylesheet" href="/ai-bot/motion.css?v=20260519-3">
   </head>
   <body>
     <header class="lab-header">
       <div>
-        <p>AI 실험실</p>
-        <h1>AI봇 실험실</h1>
+        <p>AI 운영</p>
+        <h1>AI 관리실</h1>
       </div>
       <nav>
         <a href="/admin">관리자</a>
@@ -37,19 +41,231 @@
 
     <main id="labBody" class="lab-shell is-locked">
       <section class="bot-stage" aria-label="AI봇 무대">
-        <section class="cortex-panel" aria-label="AI봇 지능 피질">
+        <div class="stage-tabs" role="tablist" aria-label="AI봇 화면 전환">
+          <button id="botViewTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="botView">AI봇 화면</button>
+          <button id="interactionViewTab" type="button" role="tab" aria-selected="false" aria-controls="interactionView">상호작용 콘솔</button>
+          <button id="cortexViewTab" type="button" role="tab" aria-selected="false" aria-controls="cortexView">지능 피질</button>
+          <button id="observatoryViewTab" type="button" role="tab" aria-selected="false" aria-controls="observatoryView">관측 로그</button>
+          <button id="drawViewTab" type="button" role="tab" aria-selected="false" aria-controls="drawView">AI 그림</button>
+        </div>
+
+        <section id="botView" class="stage-view is-active" role="tabpanel" aria-labelledby="botViewTab">
+          <div class="grid-floor">
+            <svg id="botWorldLayer" class="bot-world-layer" aria-hidden="true"></svg>
+            <div class="bot-motion-sim" aria-hidden="true">
+              <span class="range-ring range-sense"></span>
+              <span class="range-ring range-talk"></span>
+              <span class="range-ring range-avoid"></span>
+              <span id="botPredictionLine" class="prediction-line"></span>
+              <span id="botDirectionArrow" class="direction-arrow"></span>
+              <span id="botPredictedPoint" class="predicted-point"><b>예상</b></span>
+              <span id="botNextPoint" class="next-point"><b>다음</b></span>
+            </div>
+            <div class="bot-track-hud" aria-label="AI봇 추적 상태">
+              <span><b>추적</b><strong id="botTrackMode">대기</strong></span>
+              <span><b>좌표</b><strong id="botCoordLabel">-</strong></span>
+              <span><b>다음</b><strong id="botNextLabel">-</strong></span>
+            </div>
+            <div id="botSpeech" class="bot-speech" hidden></div>
+            <div id="botAvatar" class="bot-avatar">
+              <img id="botSkin" alt="AI봇 스킨" hidden>
+              <span class="bot-ring"></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="interactionView" class="interaction-panel stage-view" role="tabpanel" aria-labelledby="interactionViewTab" hidden>
+          <div class="interaction-head">
+            <div>
+              <p>Human-in-the-loop</p>
+              <h2>상호작용 콘솔</h2>
+            </div>
+            <strong id="interactionStatus">운영 대기</strong>
+          </div>
+          <div class="interaction-grid">
+            <form id="talkForm" class="talk-panel interaction-card">
+              <div class="interaction-targets" aria-label="상호작용 대상">
+                <label for="interactionTarget">대상</label>
+                <select id="interactionTarget">
+                  <option value="world">전체 월드</option>
+                  <option value="nearby">근처 유저</option>
+                  <option value="recent_author">최근 그림 작성자</option>
+                  <option value="specific_user">특정 유저</option>
+                </select>
+                <input id="interactionTargetUser" type="text" maxlength="48" placeholder="특정 유저 ID 또는 이름">
+              </div>
+              <label for="talkInput">AI봇 반응</label>
+              <div class="choice-grid" aria-label="AI봇 반응 선택지">
+                <button type="button" data-choice="안녕" disabled>안녕</button>
+                <button type="button" data-choice="지금 뭐 하고 있어?" disabled>뭐 하고 있어?</button>
+                <button type="button" data-choice="인기 그림 알려줘" disabled>인기 그림</button>
+                <button type="button" data-choice="산책해봐" data-action="walk" disabled>산책해봐</button>
+                <button type="button" data-choice="내 그림 봐줘" disabled>내 그림 봐줘</button>
+                <button type="button" data-choice="멈춰" data-action="stop" disabled>멈춰</button>
+                <button type="button" data-choice="오늘 기억 말해줘" disabled>오늘 기억</button>
+                <button type="button" data-choice="조언해줘" disabled>그림 조언</button>
+                <button type="button" data-choice="뭐 그릴까" disabled>다음 아이디어</button>
+                <button type="button" data-choice="색 추천" disabled>색 추천</button>
+                <button type="button" data-choice="구도 조언" disabled>구도 조언</button>
+                <button type="button" data-choice="어렵다" disabled>격려</button>
+              </div>
+              <div class="talk-input-row">
+                <input id="talkInput" type="text" maxlength="120" placeholder="예: 저 유저 그림 보러 갈게.">
+                <button id="talkButton" type="submit" disabled>실행</button>
+              </div>
+              <p id="talkReply">AI봇이 생성되면 월드 말풍선/채팅으로 상호작용해.</p>
+            </form>
+            <section class="interaction-card">
+              <div class="interaction-card-head">
+                <span>대화 기록</span>
+                <strong>최근 20개</strong>
+              </div>
+              <ol id="talkLog" class="talk-log">
+                <li>최근 상호작용이 여기에 쌓여.</li>
+              </ol>
+            </section>
+            <section class="interaction-card wide-card">
+              <div class="interaction-card-head">
+                <span>상호작용 데이터</span>
+                <strong>AI 기억 입력</strong>
+              </div>
+              <div class="dialogue-data" aria-label="AI봇 상호작용 데이터">
+                <span><b>의도</b><strong id="dialogueIntent">대기</strong></span>
+                <span><b>관심</b><strong id="dialogueScore">0점</strong></span>
+                <span><b>대상</b><strong id="dialogueTarget">전체 월드</strong></span>
+                <span><b>결과</b><strong id="dialogueResult">대기</strong></span>
+                <span><b>대화 잠금</b><strong id="dialogueLock">없음</strong></span>
+                <span><b>대기열</b><strong id="dialogueQueue">0명</strong></span>
+                <span><b>기억 요약</b><strong id="dialogueNote">없음</strong></span>
+                <span><b>다음 행동</b><strong id="dialogueAction">대기</strong></span>
+                <span><b>누적</b><strong id="dialogueTotal">0개</strong></span>
+                <span><b>TOP 의도</b><strong id="dialogueTopIntents">없음</strong></span>
+                <span><b>저장 이벤트</b><strong id="conversationEventCount">0개</strong></span>
+                <span><b>마지막 저장</b><strong id="conversationSavedAt">아직 없음</strong></span>
+                <span><b>저장 TOP</b><strong id="conversationTopIntents">없음</strong></span>
+              </div>
+              <div class="talk-input-row">
+                <button id="conversationSaveButton" type="button" disabled>상호작용 저장</button>
+                <button id="conversationExportButton" type="button" disabled>JSON 내보내기</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="cortexView" class="cortex-panel stage-view" role="tabpanel" aria-labelledby="cortexViewTab" hidden>
           <div class="cortex-head">
             <div>
               <p>지능 피질</p>
               <h2>AI봇</h2>
             </div>
-            <strong id="cortexStatus">토대 대기</strong>
+            <div class="cortex-head-actions">
+              <strong id="cortexStatus">토대 대기</strong>
+              <button id="cortexExpandButton" type="button">확대 보기</button>
+            </div>
           </div>
-          <div class="cortex-map" aria-hidden="true">
-            <span class="node n1"></span><span class="node n2"></span><span class="node n3"></span><span class="node n4"></span>
-            <span class="node n5"></span><span class="node n6"></span><span class="node n7"></span><span class="node n8"></span>
-            <span class="node n9"></span><span class="node n10"></span><span class="node n11"></span><span class="node n12"></span>
-            <span class="link l1"></span><span class="link l2"></span><span class="link l3"></span><span class="link l4"></span>
+          <div class="cortex-summary" aria-label="AI봇 상태 요약">
+            <span><b>상태</b><strong id="summaryStatus">대기</strong></span>
+            <span><b>위치</b><strong id="summaryPosition">room: lobby</strong></span>
+            <span><b>현재 행동</b><strong id="summaryAction">잠김</strong></span>
+            <span><b>마지막 발화</b><strong id="summarySpeech">...</strong></span>
+            <span><b>선제 대화</b><strong id="summaryCooldown">대기</strong></span>
+          </div>
+          <div id="neuralHome"></div>
+          <div id="neuralDemo" class="neural-demo" aria-label="AI봇 의사결정 신경망 시각화">
+            <div class="neural-title-row">
+              <div>
+                <p>AI봇 의사결정 신경망</p>
+                <h3>감각 입력에서 행동 출력까지</h3>
+              </div>
+              <span id="neuralStateBadge">대기</span>
+            </div>
+            <svg class="neural-svg" viewBox="0 0 1120 430" role="img" aria-label="AI봇 신경망">
+              <defs>
+                <filter id="neuralGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="5" result="blur"></feGaussianBlur>
+                  <feMerge>
+                    <feMergeNode in="blur"></feMergeNode>
+                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                  </feMerge>
+                </filter>
+              </defs>
+              <text x="150" y="34" class="neural-layer-title" text-anchor="middle">INPUT</text>
+              <text x="560" y="34" class="neural-layer-title" text-anchor="middle">CORTEX</text>
+              <text x="970" y="34" class="neural-layer-title" text-anchor="middle">OUTPUT</text>
+
+              <g class="neural-synapses">
+                <path data-synapse="player-sense" d="M 150 88 C 260 88, 300 118, 420 118"></path>
+                <path data-synapse="art-sense" d="M 150 150 C 260 150, 300 118, 420 118"></path>
+                <path data-synapse="likes-attention" d="M 150 212 C 270 212, 300 206, 420 206"></path>
+                <path data-synapse="chat-attention" d="M 150 274 C 270 274, 300 206, 420 206"></path>
+                <path data-synapse="chat-memory" d="M 150 274 C 270 274, 300 294, 420 294"></path>
+                <path data-synapse="top-attention" d="M 150 336 C 270 336, 300 206, 420 206"></path>
+                <path data-synapse="sense-attention" d="M 452 118 C 505 118, 500 206, 420 206"></path>
+                <path data-synapse="attention-intent" d="M 452 206 C 560 206, 600 158, 700 158"></path>
+                <path data-synapse="memory-intent" d="M 452 294 C 560 294, 600 158, 700 158"></path>
+                <path data-synapse="intent-route" d="M 730 158 C 785 158, 785 282, 700 282"></path>
+                <path data-synapse="intent-speech" d="M 730 158 C 830 158, 850 150, 970 150"></path>
+                <path data-synapse="intent-observe" d="M 730 158 C 830 158, 850 212, 970 212"></path>
+                <path data-synapse="intent-user-art" d="M 730 158 C 830 158, 850 274, 970 274"></path>
+                <path data-synapse="route-move" d="M 730 282 C 830 282, 850 88, 970 88"></path>
+                <path data-synapse="intent-stop" d="M 730 158 C 830 158, 850 336, 970 336"></path>
+              </g>
+
+              <g data-neuron="player" class="neural-node input" transform="translate(150 88)">
+                <circle r="14"></circle><text x="-24" y="5" text-anchor="end">플레이어 감지</text>
+              </g>
+              <g data-neuron="art" class="neural-node input" transform="translate(150 150)">
+                <circle r="14"></circle><text x="-24" y="5" text-anchor="end">그림 감지</text>
+              </g>
+              <g data-neuron="likes" class="neural-node input" transform="translate(150 212)">
+                <circle r="14"></circle><text x="-24" y="5" text-anchor="end">좋아요 변화</text>
+              </g>
+              <g data-neuron="chat" class="neural-node input" transform="translate(150 274)">
+                <circle r="14"></circle><text x="-24" y="5" text-anchor="end">채팅 요청</text>
+              </g>
+              <g data-neuron="top" class="neural-node input" transform="translate(150 336)">
+                <circle r="14"></circle><text x="-24" y="5" text-anchor="end">TOP 변화</text>
+              </g>
+
+              <g data-neuron="sense" class="neural-node cortex" transform="translate(420 118)">
+                <circle r="18"></circle><text x="0" y="-32" text-anchor="middle">감각망</text>
+              </g>
+              <g data-neuron="attention" class="neural-node cortex" transform="translate(420 206)">
+                <circle r="20"></circle><text x="0" y="-36" text-anchor="middle">관심망</text><text id="attentionScoreLabel" x="0" y="44" text-anchor="middle">0점</text>
+              </g>
+              <g data-neuron="memory" class="neural-node cortex" transform="translate(420 294)">
+                <circle r="18"></circle><text x="0" y="40" text-anchor="middle">기억망</text>
+              </g>
+              <g data-neuron="intent" class="neural-node cortex" transform="translate(700 158)">
+                <circle r="24"></circle><text x="0" y="-44" text-anchor="middle">의도망</text><text id="intentLabel" x="0" y="52" text-anchor="middle">대기</text>
+              </g>
+              <g data-neuron="route" class="neural-node cortex" transform="translate(700 282)">
+                <circle r="18"></circle><text x="0" y="42" text-anchor="middle">경로망</text>
+              </g>
+
+              <g data-neuron="move" class="neural-node output" transform="translate(970 88)">
+                <circle r="14"></circle><text x="24" y="5">이동</text>
+              </g>
+              <g data-neuron="speech" class="neural-node output" transform="translate(970 150)">
+                <circle r="14"></circle><text x="24" y="5">말풍선</text>
+              </g>
+              <g data-neuron="observe" class="neural-node output" transform="translate(970 212)">
+                <circle r="14"></circle><text x="24" y="5">관찰</text>
+              </g>
+              <g data-neuron="user-art" class="neural-node output" transform="translate(970 274)">
+                <circle r="14"></circle><text x="24" y="5">유저 그림 보기</text>
+              </g>
+              <g data-neuron="stop" class="neural-node output" transform="translate(970 336)">
+                <circle r="14"></circle><text x="24" y="5">멈춤</text>
+              </g>
+            </svg>
+            <div class="neural-side-status">
+              <span><b>활성 입력</b><strong id="neuralInput">대기</strong></span>
+              <span><b>관심 점수</b><strong id="neuralAttention">0점</strong></span>
+              <span><b>기억 조회</b><strong id="neuralMemory">비어 있음</strong></span>
+              <span><b>출력 행동</b><strong id="neuralAction">대기</strong></span>
+            </div>
+            <p id="neuralReason" class="neural-reason">AI봇을 생성하면 감각 입력이 신경망에 연결돼.</p>
           </div>
           <div class="cortex-layers">
             <span><b>감각망</b><strong id="senseState">대기</strong></span>
@@ -57,16 +273,95 @@
             <span><b>의도핵</b><strong id="intentState">준비</strong></span>
             <span><b>행동회로</b><strong id="actionState">잠김</strong></span>
           </div>
+          <div class="route-status" aria-label="AI봇 경로 상태">
+            <span><b>목적</b><strong id="routePurpose">대기</strong></span>
+            <span><b>경로</b><strong id="routeName">없음</strong></span>
+            <span><b>웨이포인트</b><strong id="routeWaypoint">-</strong></span>
+            <span><b>다음 지점</b><strong id="routeNext">-</strong></span>
+          </div>
+          <ol id="attentionList" class="attention-list" aria-label="AI봇 관심 점수">
+            <li>관심 점수 대기 중</li>
+          </ol>
           <p id="cortexDetail" class="cortex-detail">AI봇을 생성하면 감각, 기억, 의도, 행동 회로가 연결돼.</p>
         </section>
 
-        <div class="grid-floor">
-          <div id="botSpeech" class="bot-speech">...</div>
-          <div id="botAvatar" class="bot-avatar">
-            <img id="botSkin" alt="AI봇 스킨" hidden>
-            <span class="bot-ring"></span>
+        <section id="observatoryView" class="observatory-panel stage-view" role="tabpanel" aria-labelledby="observatoryViewTab" hidden>
+          <div class="observatory-head">
+            <div>
+              <p>관측 로그</p>
+              <h2>AI Runtime</h2>
+            </div>
+            <strong>디버그 스냅샷</strong>
           </div>
-        </div>
+          <div class="debug-panel is-stage">
+            <div class="debug-head">
+              <span>개발자 스냅샷</span>
+              <strong>Single State View</strong>
+            </div>
+            <pre id="debugSnapshot" class="debug-snapshot">AI봇 상태 수신 대기 중</pre>
+            <div class="debug-lists">
+              <div>
+                <span class="debug-list-title">불변 조건</span>
+                <ol id="debugInvariantList" class="debug-list" aria-label="AI 불변 조건">
+                  <li>대기</li>
+                </ol>
+              </div>
+              <div>
+                <span class="debug-list-title">표준 이벤트</span>
+                <ol id="debugEventList" class="debug-list" aria-label="AI 표준 이벤트">
+                  <li>최근 AI 이벤트 없음</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="drawView" class="draw-panel stage-view" role="tabpanel" aria-labelledby="drawViewTab" hidden>
+          <div class="draw-head">
+            <div>
+              <p>AI 그림 v0</p>
+              <h2>관리자 수동 실행</h2>
+            </div>
+            <strong id="drawStatus">대기 중</strong>
+          </div>
+          <div class="draw-grid">
+            <form id="drawForm" class="draw-form">
+              <select id="drawTopic" hidden><option value="shape">도형 연습</option><option value="memory">오늘 기억</option><option value="top">TOP 영감</option><option value="character">캐릭터</option><option value="custom">직접 입력</option></select>
+              <select id="drawShape" hidden><option value="random">랜덤</option><option value="circle">동그라미</option><option value="square">네모</option><option value="triangle">세모</option><option value="star">별</option></select>
+              <select id="drawCharacter" hidden><option value="basic">기본 캐릭터</option><option value="bot">로봇</option><option value="sleepy">잠자는 캐릭터</option></select>
+              <select id="drawStyle" hidden><option value="simple">단순 선화</option><option value="pixel">픽셀 기하학</option><option value="doodle">낙서 감성</option></select>
+              <input id="drawPrompt" type="hidden" value="">
+              <div class="draw-picker"><span>그림 종류</span><div class="draw-button-grid draw-topic-grid">
+                <button type="button" class="is-selected" data-draw-topic="shape">도형 연습</button><button type="button" data-draw-topic="memory">월드 기억</button><button type="button" data-draw-topic="top">TOP 영감</button><button type="button" data-draw-topic="character">캐릭터</button><button type="button" disabled>상징 준비</button>
+              </div></div>
+              <div class="draw-picker"><span>도형</span><div class="draw-button-grid">
+                <button type="button" class="is-selected" data-draw-shape="random">랜덤</button><button type="button" data-draw-shape="circle">동그라미</button><button type="button" data-draw-shape="square">네모</button><button type="button" data-draw-shape="triangle">세모</button><button type="button" data-draw-shape="star">별</button>
+              </div></div>
+              <div class="draw-picker"><span>캐릭터</span><div class="draw-button-grid">
+                <button type="button" class="is-selected" data-draw-character="basic">기본</button><button type="button" data-draw-character="bot">로봇</button><button type="button" data-draw-character="sleepy">잠자는 캐릭터</button>
+              </div></div>
+              <div class="draw-picker"><span>스타일</span><div class="draw-button-grid">
+                <button type="button" class="is-selected" data-draw-style="simple">단순 선화</button><button type="button" data-draw-style="pixel">픽셀 기하학</button><button type="button" data-draw-style="doodle">낙서 감성</button>
+              </div></div>
+              <div class="draw-actions">
+                <button id="drawPreviewButton" type="submit" disabled>미리보기 생성</button>
+                <button id="drawButton" type="button" disabled>천천히 그리기 시작</button>
+                <button id="drawCancelButton" type="button" disabled>취소</button>
+              </div>
+              <p id="drawProgress" class="draw-progress">AI봇을 생성하면 도형부터 천천히 그려볼 수 있어.</p>
+            </form>
+            <div class="draw-preview" aria-label="AI 그림 결과">
+              <div class="draw-preview-canvas">
+                <canvas id="drawPreview" width="320" height="220"></canvas>
+              </div>
+              <dl class="draw-result">
+                <div><dt>작품</dt><dd id="drawResultTitle">아직 없음</dd></div>
+                <div><dt>이유</dt><dd id="drawResultReason">관리자가 실행하면 월드에 AI봇 작품으로 등록돼.</dd></div>
+                <div><dt>방식</dt><dd id="drawResultSource">admin_manual</dd></div>
+              </dl>
+            </div>
+          </div>
+        </section>
       </section>
 
       <aside class="control-panel" aria-label="AI봇 조작">
@@ -74,24 +369,38 @@
           <p>AI봇</p>
           <h2 id="botTitle">대기 중</h2>
         </div>
+        <div class="bot-skin-picker" aria-label="AI봇 스킨 선택">
+          <div class="skin-picker-head">
+            <span>스킨 선택</span>
+            <strong id="botSkinHint">생성 전 적용</strong>
+          </div>
+          <div id="botSkinChoices" class="bot-skin-choices"></div>
+        </div>
         <div class="control-grid">
           <button id="createBotButton" type="button" disabled>AI 생성</button>
           <button id="walkBotButton" type="button" disabled>돌아다니기</button>
           <button id="stopBotButton" type="button" disabled>멈추기</button>
           <button id="leaveBotButton" type="button" disabled>퇴장</button>
+          <button id="proactiveBotButton" class="wide-action" type="button" disabled>먼저 말 걸기</button>
+          <button id="routeTopButton" type="button" disabled>TOP으로 보내기</button>
+          <button id="routePatrolButton" type="button" disabled>순찰 시작</button>
         </div>
         <div class="status-strip">
           <span id="botRoom">room: lobby</span>
           <span id="botState">bot: none</span>
         </div>
-        <form id="talkForm" class="talk-panel">
-          <label for="talkInput">AI봇에게 말하기</label>
-          <div>
-            <input id="talkInput" type="text" maxlength="120" placeholder="예: 지금 뭘 보고 있어?">
-            <button id="talkButton" type="submit" disabled>보내기</button>
+        <div class="interaction-shortcut">
+          <strong>상호작용 콘솔</strong>
+          <span>AI봇 발화와 반자동 운영 데이터는 왼쪽 탭에서 관리해.</span>
+        </div>        <div class="event-panel">
+          <div class="event-head">
+            <span>최근 이벤트</span>
+            <strong>상태판</strong>
           </div>
-          <p id="talkReply">AI봇이 생성되면 월드 채팅으로 대답해.</p>
-        </form>
+          <ol id="eventLog" class="event-log">
+            <li>최근 이벤트가 여기에 쌓여.</li>
+          </ol>
+        </div>
         <div class="memory-panel">
           <div class="memory-head">
             <span>오늘 기억</span>
@@ -103,7 +412,16 @@
         </div>
       </aside>
     </main>
-
-    <script type="module" src="/ai-bot/lab.js?v=20260519-2"></script>
+    <div id="cortexModal" class="cortex-modal" hidden>
+      <div class="cortex-modal-backdrop" data-cortex-close></div>
+      <section class="cortex-modal-panel" aria-label="AI봇 신경망 확대 보기">
+        <header>
+          <div><p>AI봇 의사결정 신경망</p><h2>투자자 데모 보기</h2></div>
+          <button id="cortexCloseButton" type="button">닫기</button>
+        </header>
+        <div id="cortexModalBody" class="cortex-modal-body"></div>
+      </section>
+    </div>
+    <script type="module" src="/ai-bot/lab.js?v=20260519-17"></script>
   </body>
 </html>

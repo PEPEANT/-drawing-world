@@ -1,0 +1,262 @@
+.neural-demo {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  margin: 0 12px 10px;
+  padding: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 42% 50%, rgba(255, 255, 255, 0.92), transparent 48%),
+    radial-gradient(circle at 22% 36%, rgba(14, 165, 233, 0.11), transparent 30%),
+    radial-gradient(circle at 76% 58%, rgba(16, 185, 129, 0.10), transparent 30%),
+    linear-gradient(180deg, #ffffff, #f8fafc);
+  overflow: hidden;
+}
+
+.neural-title-row,
+.neural-side-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.neural-title-row p,
+.neural-title-row h3 {
+  margin: 0;
+}
+
+.neural-title-row p {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.neural-title-row h3 {
+  margin-top: 2px;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+#neuralStateBadge {
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.neural-svg {
+  width: 100%;
+  min-height: 300px;
+  border-block: 1px solid #e5eaf2;
+}
+
+.neural-layer-title {
+  fill: #94a3b8;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.neural-synapses path {
+  fill: none;
+  stroke: #d7deea;
+  stroke-width: 2;
+  opacity: 0.7;
+}
+
+.neural-synapses path.is-active {
+  stroke: #2563eb;
+  stroke-width: 4;
+  stroke-dasharray: 10 12;
+  opacity: 1;
+  animation: neural-flow 0.85s linear infinite;
+}
+
+.neural-synapses path.is-output {
+  stroke: #10b981;
+}
+
+.neural-synapses path.is-route {
+  stroke: #f59e0b;
+}
+
+@keyframes neural-flow {
+  from { stroke-dashoffset: 44; }
+  to { stroke-dashoffset: 0; }
+}
+
+.neural-node circle {
+  fill: #ffffff;
+  stroke: #cbd5e1;
+  stroke-width: 3;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+.neural-node text {
+  fill: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.neural-node text + text,
+#attentionScoreLabel,
+#intentLabel {
+  fill: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.neural-node.is-active circle {
+  stroke-width: 5;
+  filter: url(#neuralGlow);
+}
+
+.neural-node.is-active.input circle {
+  stroke: #0ea5e9;
+}
+
+.neural-node.is-active.cortex circle {
+  stroke: #8b5cf6;
+}
+
+.neural-node.is-active.output circle {
+  stroke: #10b981;
+}
+
+.neural-node.is-active text {
+  fill: #0f172a;
+}
+
+.neural-side-status {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.neural-side-status span {
+  min-height: 54px;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 8px;
+}
+
+.neural-side-status b,
+.neural-side-status strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neural-side-status b {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.neural-side-status strong {
+  margin-top: 4px;
+  color: #111827;
+  font-size: 13px;
+}
+
+.neural-reason {
+  margin: 0;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+
+.cortex-modal[hidden] {
+  display: none;
+}
+
+.cortex-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+}
+
+.cortex-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.52);
+}
+
+.cortex-modal-panel {
+  position: relative;
+  width: min(1180px, calc(100vw - 40px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border: 1px solid #d7deea;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+}
+
+.cortex-modal-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e5eaf2;
+}
+
+.cortex-modal-panel p,
+.cortex-modal-panel h2 {
+  margin: 0;
+}
+
+.cortex-modal-panel p {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cortex-modal-panel h2 {
+  margin-top: 2px;
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.cortex-modal-body {
+  padding: 18px;
+}
+
+.cortex-modal-body .neural-demo {
+  margin: 0;
+}
+
+.cortex-modal-body .neural-svg {
+  min-height: 430px;
+}
+
+.cortex-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 860px) {
+  .neural-side-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .neural-svg {
+    min-height: 240px;
+  }
+
+  .cortex-modal {
+    padding: 12px;
+  }
+}

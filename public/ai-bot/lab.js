@@ -1,39 +1,41 @@
+import { setupChoiceButtons } from "./choice-buttons.js";
+import {
+  appendStateEvent as appendBotStateEvent,
+  renderBotView,
+  renderNoBotView,
+  setBotControls,
+  setBotState as setBotStateText,
+  setConnectionStatus
+} from "./bot-view.js";
+import {
+  renderCortexSummary
+} from "./cortex-view.js";
+import { setupCortexModal } from "./cortex-modal.js";
+import { renderDebugSnapshot } from "./debug-snapshot.js";
+import { renderDrawProgress, renderDrawResult, setDrawStatus, setupDrawArt } from "./draw-art.js";
+import { appendBotEvent } from "./event-log.js";
+import { dom } from "./lab-dom.js";
+import { renderMemory } from "./memory-view.js";
+import { getSelectedBotSkin, setupBotSkinSelector } from "./skin-select.js";
+import { setupStageTabs } from "./stage-tabs.js";
+import { appendTalkLog, getTalkSummaries, rememberTalkNote, rememberTalkSummary } from "./talk-log.js";
+
 const ROOM = "lobby";
-const dom = {
-  authForm: document.querySelector("#authForm"),
-  keyInput: document.querySelector("#keyInput"),
-  authMessage: document.querySelector("#authMessage"),
-  labBody: document.querySelector("#labBody"),
-  statusDot: document.querySelector("#statusDot"),
-  statusText: document.querySelector("#statusText"),
-  createButton: document.querySelector("#createBotButton"),
-  walkButton: document.querySelector("#walkBotButton"),
-  stopButton: document.querySelector("#stopBotButton"),
-  leaveButton: document.querySelector("#leaveBotButton"),
-  talkForm: document.querySelector("#talkForm"),
-  talkInput: document.querySelector("#talkInput"),
-  talkButton: document.querySelector("#talkButton"),
-  talkReply: document.querySelector("#talkReply"),
-  botTitle: document.querySelector("#botTitle"),
-  botRoom: document.querySelector("#botRoom"),
-  botState: document.querySelector("#botState"),
-  botSkin: document.querySelector("#botSkin"),
-  botSpeech: document.querySelector("#botSpeech"),
-  memoryCount: document.querySelector("#memoryCount"),
-  memoryList: document.querySelector("#memoryList"),
-  cortexStatus: document.querySelector("#cortexStatus"),
-  cortexDetail: document.querySelector("#cortexDetail"),
-  senseState: document.querySelector("#senseState"),
-  memoryState: document.querySelector("#memoryState"),
-  intentState: document.querySelector("#intentState"),
-  actionState: document.querySelector("#actionState")
+const PROACTIVE_COOLDOWN_MS = 45 * 1000;
+const STATE_POLL_MS = 450;
+const viewState = {
+  emptyStatusText: "대기 중",
+  currentBot: null,
+  currentContext: null,
+  lastTalkAt: 0,
+  lastUserText: "",
+  lastStateEventKey: ""
 };
 let socket = null;
 let stateTimer = null;
 const savedKey = localStorage.getItem("sdw:admin-key") || "";
 const queryKey = new URLSearchParams(location.search).get("key") || "";
 dom.keyInput.value = queryKey || savedKey;
-
 dom.authForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const key = dom.keyInput.value.trim();
@@ -44,35 +46,124 @@ dom.authForm.addEventListener("submit", (event) => {
   localStorage.setItem("sdw:admin-key", key);
   connect(key);
 });
+setupStageTabs(dom);
+setupCortexModal(dom);
+setupBotSkinSelector(dom);
+renderDebugSnapshot(dom, null);
+setupDrawArt(dom, {
+  onPreview: ({ topic, style, shape, character, prompt }) => {
+    if (!viewState.currentBot) return;
+    setDrawStatus(dom, "미리보기 생성 중");
+    appendBotEvent("AI 그림 미리보기 요청");
+    send({ type: "aiBotDrawPlan", room: ROOM, topic, style, shape, character, prompt });
+  },
+  onStart: ({ topic, style, shape, character, prompt }) => {
+    if (!viewState.currentBot) return;
+    setDrawStatus(dom, "천천히 그리는 중");
+    appendBotEvent("AI 그림 천천히 그리기 시작");
+    send({ type: "aiBotDrawStart", room: ROOM, topic, style, shape, character, prompt });
+  },
+  onCancel: () => {
+    if (!viewState.currentBot) return;
+    setDrawStatus(dom, "취소 요청 중");
+    appendBotEvent("AI 그림 취소 요청");
+    send({ type: "aiBotDrawCancel", room: ROOM });
+  }
+});
 dom.createButton.addEventListener("click", () => {
-  send({ type: "aiBotCreate", room: ROOM });
+  send({ type: "aiBotCreate", room: ROOM, skin: getSelectedBotSkin() });
+  appendBotEvent("AI 생성 요청");
   setBotState("AI봇 생성 요청 중");
 });
 dom.walkButton.addEventListener("click", () => {
-  send({ type: "aiBotWalk", room: ROOM });
+  send({ type: "aiBotWalk", room: ROOM, skin: getSelectedBotSkin() });
+  appendBotEvent("이동 요청");
   setBotState("관측 이동 요청 중");
 });
 dom.stopButton.addEventListener("click", () => {
   send({ type: "aiBotStop", room: ROOM });
+  appendBotEvent("정지 요청");
   setBotState("멈춤 요청 중");
 });
-
 dom.leaveButton.addEventListener("click", () => {
   send({ type: "aiBotRemove", room: ROOM });
+  appendBotEvent("퇴장 요청");
   setBotState("퇴장 요청 중");
 });
-
+dom.proactiveButton.addEventListener("click", () => {
+  send({ type: "aiBotProactive", room: ROOM });
+  appendBotEvent("먼저 말 걸기 요청");
+  setBotState("먼저 말 걸기 요청 중");
+});
+dom.routeTopButton.addEventListener("click", () => {
+  send({ type: "aiBotRoute", room: ROOM, route: "top", skin: getSelectedBotSkin() });
+  appendBotEvent("TOP 경로 요청");
+  setBotState("TOP 경로 요청 중");
+});
+dom.routePatrolButton.addEventListener("click", () => {
+  send({ type: "aiBotRoute", room: ROOM, route: "patrol", skin: getSelectedBotSkin() });
+  appendBotEvent("순찰 경로 요청");
+  setBotState("순찰 경로 요청 중");
+});
+dom.conversationSaveButton?.addEventListener("click", () => {
+  send({ type: "aiBotConversationSave", room: ROOM });
+  appendBotEvent("상호작용 저장 요청");
+});
+dom.conversationExportButton?.addEventListener("click", () => {
+  send({ type: "aiBotConversationExport", room: ROOM });
+  appendBotEvent("상호작용 JSON 내보내기 요청");
+});
 dom.talkForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const text = dom.talkInput.value.trim();
-  if (!text) return;
-  dom.talkInput.value = "";
-  dom.talkReply.textContent = "AI봇이 생각하는 중...";
-  send({ type: "aiBotTalk", room: ROOM, text });
+  submitTalk(dom.talkInput.value.trim(), "input");
 });
-
+setupChoiceButtons(({ action, text }) => {
+  if (action === "walk") {
+    send({ type: "aiBotWalk", room: ROOM, skin: getSelectedBotSkin() });
+    setBotState("관측 이동 요청 중");
+  }
+  if (action === "stop") {
+    send({ type: "aiBotStop", room: ROOM });
+    setBotState("멈춤 요청 중");
+  }
+  submitTalk(text, "choice");
+});
 if (dom.keyInput.value) connect(dom.keyInput.value);
+function submitTalk(text, source = "input") {
+  if (!text || !viewState.currentBot) return;
+  const interaction = buildInteractionTarget();
+  dom.talkInput.value = "";
+  dom.talkReply.textContent = "AI봇 상호작용 실행 중...";
+  if (dom.interactionStatus) dom.interactionStatus.textContent = "상호작용 기록 중";
+  viewState.lastTalkAt = Date.now();
+  viewState.lastUserText = text;
+  appendTalkLog("user", text);
+  appendBotEvent(`나: ${text}`);
+  rememberTalkSummary(text, viewState.currentBot);
+  renderMemory(dom, viewState.currentBot?.ai?.memory);
+  renderCortexSummary(dom, viewState.currentBot, viewState.currentContext, {
+    lastTalkAt: viewState.lastTalkAt,
+    lastUserText: viewState.lastUserText,
+    talkCount: getTalkSummaries().length,
+    cooldownMs: PROACTIVE_COOLDOWN_MS
+  });
+  send({
+    type: "aiBotTalk",
+    room: ROOM,
+    text,
+    source,
+    targetMode: interaction.targetMode,
+    targetUserId: interaction.targetUserId,
+    operator: "admin"
+  });
+}
 
+function buildInteractionTarget() {
+  return {
+    targetMode: dom.interactionTarget?.value || "world",
+    targetUserId: dom.interactionTargetUser?.value.trim() || ""
+  };
+}
 function connect(key) {
   if (socket) socket.close();
   setStatus("연결 중", "pending");
@@ -83,9 +174,9 @@ function connect(key) {
     dom.labBody.classList.remove("is-locked");
     dom.createButton.disabled = false;
     dom.cortexStatus.textContent = "토대 연결됨";
-    setStatus("AI봇 실험실 연결됨", "online");
+    setStatus("AI 관리실 연결됨", "online");
     requestBotState();
-    stateTimer = window.setInterval(requestBotState, 1600);
+    stateTimer = window.setInterval(requestBotState, STATE_POLL_MS);
   });
   socket.addEventListener("close", () => {
     if (stateTimer) window.clearInterval(stateTimer);
@@ -96,7 +187,6 @@ function connect(key) {
   });
   socket.addEventListener("message", handleMessage);
 }
-
 function handleMessage(event) {
   let message;
   try {
@@ -109,140 +199,193 @@ function handleMessage(event) {
     return;
   }
   if (message.type === "aiBotCreated" || message.type === "aiBotWalking") {
-    renderBot(message.bot, message.created);
+    renderBot(message.bot, message.created, message.context);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(message.type === "aiBotWalking" ? "이동 시작" : (message.created ? "AI 생성됨" : "이미 생성됨"));
     return;
   }
-  if (message.type === "aiBotStopped" || message.type === "aiBotState") {
-    message.bot ? renderBot(message.bot, false) : renderNoBot();
+  if (message.type === "aiBotRouted") {
+    renderBot(message.bot, message.created, message.context);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(message.route === "top" ? "TOP 경로 시작" : "순찰 경로 시작");
+    return;
+  }
+  if (message.type === "aiBotStopped") {
+    message.bot ? renderBot(message.bot, false, message.context) : renderNoBot();
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent("정지");
+    return;
+  }
+  if (message.type === "aiBotState") {
+    if (!message.bot) viewState.currentContext = message.context || null;
+    message.bot ? renderBot(message.bot, false, message.context) : renderNoBot();
+    renderDebugSnapshot(dom, message.debug);
+    if (message.bot) appendStateEvent(message.bot);
     return;
   }
   if (message.type === "aiBotTalked") {
     dom.talkReply.textContent = message.reply || "AI봇이 조용히 고개를 끄덕였어.";
-    if (message.bot) renderBot(message.bot, false);
+    viewState.lastTalkAt = Date.now();
+    appendTalkLog("bot", dom.talkReply.textContent);
+    appendBotEvent(`AI봇: ${dom.talkReply.textContent}`);
+    if (dom.interactionStatus) dom.interactionStatus.textContent = message.result || "spoken";
+    if (message.bot) renderBot(message.bot, false, message.context);
+    renderDebugSnapshot(dom, message.debug);
     return;
   }
-  if (message.type === "aiBotRemoved") renderNoBot();
+  if (message.type === "aiBotProactiveTalked") {
+    const reply = message.reply || "AI봇이 아직 말을 고르는 중이야.";
+    dom.talkReply.textContent = reply;
+    if (message.spoken) {
+      appendTalkLog("bot", reply);
+      rememberTalkNote("AI봇이 먼저 말을 걸었다");
+      appendBotEvent(`AI봇 선제 발화: ${reply}`);
+    } else {
+      appendBotEvent(reply);
+    }
+    if (message.bot) renderBot(message.bot, false, message.context);
+    renderMemory(dom, message.bot?.ai?.memory || viewState.currentBot?.ai?.memory);
+    renderCortexSummary(dom, message.bot || viewState.currentBot, message.context || viewState.currentContext, {
+      lastTalkAt: viewState.lastTalkAt,
+      lastUserText: viewState.lastUserText,
+      talkCount: getTalkSummaries().length,
+      cooldownMs: PROACTIVE_COOLDOWN_MS
+    });
+    setBotState(message.spoken ? "AI봇이 먼저 말함" : reply);
+    renderDebugSnapshot(dom, message.debug);
+    return;
+  }
+  if (message.type === "aiBotConversationSaved") {
+    renderConversationStorage(message.summary || message.context?.conversation);
+    appendBotEvent("상호작용 저장 완료");
+    if (dom.interactionStatus) dom.interactionStatus.textContent = "저장 완료";
+    return;
+  }
+  if (message.type === "aiBotConversationExported") {
+    renderConversationStorage(message.summary || message.context?.conversation);
+    downloadConversationJson(message.data);
+    appendBotEvent("상호작용 JSON 내보내기 완료");
+    if (dom.interactionStatus) dom.interactionStatus.textContent = "내보내기 완료";
+    return;
+  }
+  if (message.type === "aiBotBusy") {
+    const reason = message.reason || "AI봇이 지금 다른 행동 중이야.";
+    if (message.bot) renderBot(message.bot, false, message.context);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(reason);
+    setBotState(reason);
+    setDrawStatus(dom, reason);
+    return;
+  }
+  if (message.type === "aiBotDrawn") {
+    if (message.bot) renderBot(message.bot, false, message.context);
+    renderDrawResult(dom, message.artwork, message.reason);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(message.ok ? "AI 그림 월드 등록 완료" : (message.reason || "AI 그림 생성 실패"));
+    setBotState(message.ok ? "AI 그림 등록 완료" : (message.reason || "AI 그림 생성 실패"));
+    return;
+  }
+  if (message.type === "aiBotDrawPlanned") {
+    renderDrawResult(dom, message.artwork, message.reason);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(message.ok ? "AI 그림 미리보기 생성" : (message.reason || "AI 그림 미리보기 실패"));
+    setDrawStatus(dom, message.ok ? "미리보기 완료" : (message.reason || "미리보기 실패"));
+    return;
+  }
+  if (message.type === "aiBotDrawStarted") {
+    if (message.bot) renderBot(message.bot, false, message.context);
+    renderDrawResult(dom, message.artwork, message.reason);
+    renderDrawProgress(dom, message.bot?.ai?.draw);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(message.ok ? "AI 그림 그리기 시작" : (message.reason || "AI 그림 시작 실패"));
+    setDrawStatus(dom, message.ok ? "천천히 그리는 중" : (message.reason || "시작 실패"));
+    return;
+  }
+  if (message.type === "aiBotDrawCancelled") {
+    if (message.bot) renderBot(message.bot, false, message.context);
+    renderDrawProgress(dom, message.bot?.ai?.draw);
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent(message.ok ? "AI 그림 취소됨" : (message.reason || "AI 그림 취소 실패"));
+    setDrawStatus(dom, message.ok ? "취소됨" : (message.reason || "취소 실패"));
+    return;
+  }
+  if (message.type === "aiBotRemoved") {
+    viewState.emptyStatusText = "퇴장 완료";
+    viewState.currentContext = message.context || null;
+    renderNoBot();
+    renderDebugSnapshot(dom, message.debug);
+    appendBotEvent("퇴장 완료");
+  }
+}
+function renderBot(bot, created, context = viewState.currentContext) {
+  renderBotView(dom, ROOM, bot, created, context, viewState, PROACTIVE_COOLDOWN_MS);
+  renderConversationStorage(context?.conversation || bot?.ai?.dialogue?.saved);
+  renderDrawProgress(dom, bot?.ai?.draw);
+  const drawStatus = bot?.ai?.draw?.status;
+  if (drawStatus === "drawing") setDrawStatus(dom, "천천히 그리는 중");
+  if (drawStatus === "done") setDrawStatus(dom, "완료");
+  if (drawStatus === "cancelled") setDrawStatus(dom, "취소됨");
 }
 
-function renderBot(bot, created) {
-  const ai = bot?.ai || {};
-  dom.botTitle.textContent = bot?.name || "AI봇";
-  dom.botRoom.textContent = `room: ${ROOM}`;
-  dom.botState.textContent = getBotStateText(bot, created);
-  dom.labBody.classList.add("has-bot");
-  dom.cortexStatus.textContent = "토대 온라인";
-  dom.senseState.textContent = ai.mode === "idle" ? "대기" : "활성";
-  dom.memoryState.textContent = getTargetText(bot);
-  dom.intentState.textContent = ai.intent || "대기";
-  dom.actionState.textContent = getActionText(bot);
-  dom.cortexDetail.textContent = ai.reason || "AI봇이 월드 상태를 읽고 다음 관측 지점을 고르고 있어.";
-  dom.botSkin.src = bot?.skin || "";
-  dom.botSkin.hidden = !bot?.skin;
-  setSpeech(ai.speech || getMoodText(bot));
-  setControls(true, ai.mode);
-  renderMemory(ai.memory);
-  setBotState(getBotStatusText(bot, created));
-}
-
-function renderNoBot() {
-  dom.botTitle.textContent = "대기 중";
-  dom.botRoom.textContent = `room: ${ROOM}`;
-  dom.botState.textContent = "bot: 없음";
-  dom.labBody.classList.remove("has-bot");
-  dom.cortexStatus.textContent = "토대 연결됨";
-  dom.senseState.textContent = "대기";
-  dom.memoryState.textContent = "비어 있음";
-  dom.intentState.textContent = "준비";
-  dom.actionState.textContent = "잠김";
-  dom.cortexDetail.textContent = "AI봇을 생성하면 감각, 기억, 의도, 행동 회로가 연결돼.";
-  dom.botSkin.removeAttribute("src");
-  dom.botSkin.hidden = true;
-  setSpeech("...");
-  setControls(false);
-  renderMemory(null);
-  setBotState("대기 중");
+function renderNoBot(statusText = viewState.emptyStatusText, context = viewState.currentContext) {
+  renderNoBotView(dom, ROOM, statusText, viewState);
+  viewState.currentContext = context || null;
+  renderConversationStorage(context?.conversation);
+  renderDrawProgress(dom, null);
 }
 
 function setControls(hasBot, mode = "idle") {
-  dom.createButton.disabled = hasBot;
-  dom.walkButton.disabled = !hasBot || mode === "walking";
-  dom.stopButton.disabled = !hasBot || mode !== "walking";
-  dom.leaveButton.disabled = !hasBot;
-  dom.talkButton.disabled = !hasBot;
+  setBotControls(dom, hasBot, mode, viewState, PROACTIVE_COOLDOWN_MS);
+  if (dom.conversationSaveButton) dom.conversationSaveButton.disabled = !socket || socket.readyState !== WebSocket.OPEN;
+  if (dom.conversationExportButton) dom.conversationExportButton.disabled = !socket || socket.readyState !== WebSocket.OPEN;
 }
 
-function getActionText(bot) {
-  if (bot?.ai?.mode === "walking") return "이동 중";
-  if (bot?.ai?.mode === "observing") return "관찰 중";
-  return "생성 완료";
-}
-
-function getTargetText(bot) {
-  const target = bot?.ai?.target || "비어 있음";
-  const score = Number(bot?.ai?.score);
-  return Number.isFinite(score) ? `${target} · ${score}점` : target;
-}
-
-function renderMemory(memory) {
-  const total = Number(memory?.total) || 0;
-  dom.memoryCount.textContent = `${total}회`;
-  const recent = Array.isArray(memory?.recent) ? memory.recent : [];
-  if (!recent.length) {
-    dom.memoryList.replaceChildren(createMemoryItem("아직 기록 없음"));
-    return;
-  }
-  dom.memoryList.replaceChildren(...recent.slice(0, 4).map((entry) => (
-    createMemoryItem(`${formatTime(entry.at)} ${entry.target} · ${entry.score || 0}점`)
-  )));
-}
-
-function createMemoryItem(text) {
-  const item = document.createElement("li");
-  item.textContent = text;
-  return item;
-}
-
-function formatTime(value) {
-  if (!Number.isFinite(value)) return "--:--";
-  return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
-}
-
-function getBotStatusText(bot, created) {
-  if (bot?.ai?.mode === "walking") return "관측 이동 중";
-  if (bot?.ai?.mode === "observing") return "관찰 중";
-  return created ? "생성됨" : "이미 생성됨";
-}
-
-function getBotStateText(bot, created) {
-  if (bot?.ai?.mode === "walking") return "bot: walking";
-  if (bot?.ai?.mode === "observing") return "bot: observing";
-  return created ? "bot: created" : "bot: online";
-}
-
-function getMoodText(bot) {
-  if (bot?.ai?.mode === "walking") return "이동하면서 주변 그림을 찾는 중이야.";
-  if (bot?.ai?.mode === "observing") return "방금 장면을 기억에 저장했어.";
-  return "대기 중이야. 말을 걸어도 돼.";
-}
-
-function setSpeech(text) {
-  dom.botSpeech.textContent = text || "...";
+function appendStateEvent(bot) {
+  viewState.lastStateEventKey = appendBotStateEvent(bot, viewState.lastStateEventKey, appendBotEvent);
 }
 
 function setBotState(text) {
-  dom.statusText.textContent = text;
+  setBotStateText(dom, text);
 }
 
 function setStatus(text, mode) {
-  dom.statusText.textContent = text;
-  dom.statusDot.className = `status-dot ${mode === "online" ? "online" : mode === "error" ? "error" : ""}`;
+  setConnectionStatus(dom, text, mode);
 }
-
 function send(payload) {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(payload));
 }
-
 function requestBotState() {
   send({ type: "aiBotState", room: ROOM });
+}
+
+function renderConversationStorage(summary) {
+  if (!summary) return;
+  if (dom.conversationEventCount) dom.conversationEventCount.textContent = `${Number(summary.totalEvents) || 0}개`;
+  if (dom.conversationSavedAt) dom.conversationSavedAt.textContent = formatStorageTime(summary.latestSavedAt);
+  if (dom.conversationTopIntents) dom.conversationTopIntents.textContent = formatStats(summary.topIntents);
+  if (dom.conversationSaveButton) dom.conversationSaveButton.disabled = !socket || socket.readyState !== WebSocket.OPEN;
+  if (dom.conversationExportButton) dom.conversationExportButton.disabled = !socket || socket.readyState !== WebSocket.OPEN;
+}
+
+function downloadConversationJson(data) {
+  if (!data) return;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `ai-bot-conversations-${ROOM}.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function formatStorageTime(value) {
+  const time = Number(value);
+  if (!Number.isFinite(time) || time <= 0) return "아직 없음";
+  return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(time));
+}
+
+function formatStats(stats) {
+  return Array.isArray(stats) && stats.length
+    ? stats.slice(0, 3).map((entry) => `${entry.key} ${entry.count}`).join(", ")
+    : "없음";
 }

@@ -16,7 +16,7 @@
       <nav class="admin-links">
         <a href="/archive" target="_blank" rel="noreferrer">지난 그림</a>
         <a href="/ai">v1 AI 관측실</a>
-        <a href="/ai-bot">AI봇 실험실</a>
+        <a href="/ai-bot">AI 관리실</a>
         <a href="/">유저 페이지</a>
       </nav>
       <div class="status-line">
@@ -37,6 +37,9 @@
       </form>
 
       <section id="dashboard" class="dashboard hidden" aria-label="운영 현황">
+        <div id="securityWarning" class="security-warning hidden">
+          관리자 키가 기본값 admin이야. 배포 전에 ADMIN_KEY 환경변수를 꼭 바꿔줘.
+        </div>
         <div class="metrics">
           <button id="clientMetricButton" class="metric-button" type="button">
             <span>접속 클라이언트</span>

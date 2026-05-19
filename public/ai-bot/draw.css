@@ -1,0 +1,208 @@
+.observatory-panel,
+.draw-panel {
+  min-height: calc(100vh - 187px);
+  padding: 18px;
+  background:
+    linear-gradient(#e5eaf2 1px, transparent 1px),
+    linear-gradient(90deg, #e5eaf2 1px, transparent 1px),
+    #f8fafc;
+  background-size: 64px 64px;
+}
+
+.observatory-head,
+.draw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 14px;
+}
+
+.observatory-head p,
+.observatory-head h2,
+.draw-head p,
+.draw-head h2 {
+  margin: 0;
+}
+
+.observatory-head p,
+.draw-head p {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.observatory-head h2,
+.draw-head h2 {
+  color: #111827;
+  font-size: 24px;
+}
+
+.observatory-head strong,
+.draw-head strong {
+  color: #2563eb;
+  font-size: 13px;
+}
+
+.debug-list-title {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.draw-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.draw-form,
+.draw-preview {
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 14px;
+}
+
+.draw-form {
+  display: grid;
+  gap: 12px;
+  align-self: start;
+}
+
+.draw-form label,
+.draw-picker {
+  display: grid;
+  gap: 6px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.draw-button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.draw-topic-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.draw-form input,
+.draw-form select {
+  height: 38px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  padding: 0 10px;
+}
+
+.draw-form button {
+  min-height: 40px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.draw-form button.is-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
+}
+
+.draw-form button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.draw-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.draw-progress {
+  margin: 0;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+  padding: 8px 10px;
+}
+
+.draw-preview {
+  display: grid;
+  gap: 12px;
+}
+
+.draw-preview-canvas {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.draw-preview canvas {
+  width: min(100%, 520px);
+  height: auto;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.draw-result {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.draw-result div {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 8px 10px;
+}
+
+.draw-result dt {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.draw-result dd {
+  margin: 0;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .draw-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .draw-topic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

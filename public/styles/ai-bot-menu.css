@@ -1,0 +1,59 @@
+.ai-bot-menu {
+  position: absolute;
+  z-index: 7;
+  display: grid;
+  gap: 8px;
+  width: min(230px, calc(100vw - 28px));
+  padding: 10px;
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.ai-bot-menu.hidden {
+  display: none;
+}
+
+.ai-bot-menu header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.ai-bot-menu strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.ai-bot-menu small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.ai-bot-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.ai-bot-menu button {
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.ai-bot-menu button[data-ai-bot-intent] {
+  border-color: #bfdbfe;
+  background: #f8fbff;
+  color: #1d4ed8;
+  font-weight: 750;
+}
+
+.ai-bot-menu .wide {
+  grid-column: 1 / -1;
+}

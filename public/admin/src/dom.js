@@ -3,6 +3,7 @@ export const dom = {
   keyInput: document.querySelector("#keyInput"),
   authMessage: document.querySelector("#authMessage"),
   dashboard: document.querySelector("#dashboard"),
+  securityWarning: document.querySelector("#securityWarning"),
   statusDot: document.querySelector("#statusDot"),
   statusText: document.querySelector("#statusText"),
   clientCount: document.querySelector("#clientCount"),

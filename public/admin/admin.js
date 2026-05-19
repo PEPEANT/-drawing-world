@@ -121,6 +121,7 @@ function startAdmin(key) {
       dom.authMessage.textContent = message || "관리자 연결 실패";
     },
     onState(state) {
+      renderSecurityWarning(state.security);
       renderState(state);
       renderAnalytics(state.analytics);
     },
@@ -140,6 +141,10 @@ function startAdmin(key) {
       dom.analyticsStatus.textContent = message || "통계를 복원하지 못했어.";
     }
   });
+}
+
+function renderSecurityWarning(security) {
+  dom.securityWarning.classList.toggle("hidden", !security?.adminKeyDefault);
 }
 
 function setStatus(text, mode) {

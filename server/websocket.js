@@ -13,13 +13,24 @@ const { countHumanPlayers, getRoom, removeRoomIfEmpty } = require("./rooms");
 const { deleteOwnStrokeIds, isOwnedBy } = require("./strokes");
 const { applyVote, buildRanking, removePlayerVotes } = require("./votes");
 const { buildFeaturedTop } = require("./featured");
+const { wakeAiBotIfSleeping } = require("./ai-bot-brain");
+const { handleAiBotInteraction, releaseAiBotUser } = require("./ai-bot-interaction");
 const {
   broadcastFeaturedRemoval,
   resetRoomIfNeeded,
   syncFeaturedVote,
   startDailyResetSweep
 } = require("./featured-realtime");
-const { normalizeItem, normalizePlayer, normalizeStroke, safeLayerId, safeText, sanitizeRoomName } = require("./validation");
+const {
+  normalizeItem,
+  normalizePlayer,
+  normalizePlayerIdentity,
+  normalizePlayerMovement,
+  normalizeStroke,
+  safeLayerId,
+  safeText,
+  sanitizeRoomName
+} = require("./validation");
 
 function attachGameSocket(server) {
   const wss = new WebSocketServer({ noServer: true });
@@ -89,6 +100,7 @@ function handleClose(ws, room, roomName, id) {
   room.clients.delete(ws);
   room.players.delete(id);
   releaseRadioOwner(room, { playerId: id, clientId: ws.clientId });
+  releaseAiBotUser(room, { playerId: id, clientId: ws.clientId });
   const removedItemIds = removeOwnerItems(room, { playerId: id, clientId: ws.clientId });
   removePlayerVotes(room, id);
   if (removedItemIds.length) {
@@ -113,6 +125,8 @@ function handleMessage(ws, room, raw) {
 
   switch (message.type) {
     case "hello": return handleHello(ws, room, message);
+    case "playerIdentity": return handlePlayerIdentity(ws, room, message);
+    case "playerMove": return handlePlayerMove(ws, room, message);
     case "playerUpdate": return handlePlayerUpdate(ws, room, message);
     case "stroke": return handleStroke(ws, room, message);
     case "clearLayer": return handleClearLayer(ws, room, message);
@@ -122,6 +136,7 @@ function handleMessage(ws, room, raw) {
     case "radioPlay": return handleRadioPlay(ws, room, message);
     case "radioStop": return handleRadioStop(ws, room, message);
     case "vote": return handleVote(ws, room, message);
+    case "aiBotInteract": return handleAiBotInteraction(ws, room, message);
     default: return undefined;
   }
 }
@@ -157,26 +172,59 @@ function handleHello(ws, room, message) {
   broadcast(room, { type: "playerJoin", player }, ws);
   const claimed = claimOwnerStrokes(room, player.clientId, ws.id);
   if (claimed) broadcast(room, { type: "claimStrokes", owner: player.clientId, author: ws.id }, undefined);
+  wakeAiBotIfSleeping(room);
   broadcast(room, { type: "ranking", ranking: buildRanking(room) }, undefined);
   notifyAdminState();
 }
 
 function handlePlayerUpdate(ws, room, message) {
+  return handlePlayerMove(ws, room, message);
+}
+
+function handlePlayerMove(ws, room, message) {
   const existing = room.players.get(ws.id);
   if (!existing) return;
-  const player = normalizePlayer({ ...existing, ...message.player }, ws.id);
+  const player = normalizePlayerMovement(message.player || {}, existing);
   player.clientId = existing.clientId || ws.clientId;
   player.connectedAt = existing.connectedAt || ws.connectedAt;
   player.updatedAt = Date.now();
   room.players.set(ws.id, player);
-  broadcast(room, { type: "playerUpdate", player }, ws);
+  broadcast(room, { type: "playerMove", player: buildMovePayload(player) }, ws);
   notifyAdminState();
+}
+
+function handlePlayerIdentity(ws, room, message) {
+  const existing = room.players.get(ws.id);
+  if (!existing) return;
+  const player = normalizePlayerIdentity(message.player || {}, ws.id, existing);
+  player.clientId = existing.clientId || ws.clientId;
+  player.connectedAt = existing.connectedAt || ws.connectedAt;
+  player.updatedAt = Date.now();
+  room.players.set(ws.id, player);
+  broadcast(room, { type: "playerIdentity", player }, ws);
+  notifyAdminState();
+}
+
+function buildMovePayload(player) {
+  const payload = {
+    id: player.id,
+    x: player.x,
+    y: player.y,
+    facing: player.facing,
+    moving: player.moving
+  };
+  if (player.isBot === true) {
+    payload.isBot = true;
+    if (player.ai) payload.ai = { mode: player.ai.mode, lifecycle: player.ai.lifecycle };
+  }
+  return payload;
 }
 
 function handleVote(ws, room, message) {
   const targetId = typeof message.target === "string" ? message.target : "";
   const result = applyVote(room, {
-    voterId: ws.id,
+    voterId: ws.clientId || ws.id,
+    voterPlayerId: ws.id,
     targetId,
     value: message.value
   });
