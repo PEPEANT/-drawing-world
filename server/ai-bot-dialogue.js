@@ -23,12 +23,33 @@ const proactiveSpeechAt = new Map();
 
 function buildObservationSpeech(target, memory) {
   const label = String(target?.label || "");
+  if (isUserArtTarget(target)) return buildArtPraise(target, memory);
   if (/top|상단|스크린/i.test(label)) return "TOP 쪽을 볼게.";
   if (/그림|선/.test(label)) return "새 그림을 봤어.";
   if (/사람|플레이어/.test(label)) return "가장자리에서 볼게.";
   if (/빈|순찰|관찰로/.test(label)) return "다른 곳도 볼게.";
   const total = Number(memory?.total) || 0;
   return OBSERVE_LINES[total % OBSERVE_LINES.length];
+}
+
+function isUserArtTarget(target) {
+  const text = `${target?.key || ""} ${target?.label || ""} ${target?.intent || ""} ${target?.routeType || ""}`;
+  return /user_recent_art|유저 그림|최근 그림|art/.test(text);
+}
+
+function buildArtPraise(target, memory) {
+  const strokeCount = Number(target?.strokeCount) || 0;
+  const pointCount = Number(target?.pointCount) || 0;
+  const bounds = target?.bounds || {};
+  const width = Math.max(0, Number(bounds.right) - Number(bounds.left));
+  const height = Math.max(0, Number(bounds.bottom) - Number(bounds.top));
+  if (strokeCount <= 2 || pointCount < 25) return "시작이 좋아.";
+  if (pointCount > 550) return "정성이 보여.";
+  if (strokeCount >= 8) return "선이 풍성해.";
+  if (width > 260 || height > 260) return "크게 잡아서 좋아.";
+  const lines = ["선 흐름 좋아.", "그림 느낌 좋아.", "잘 보고 있어."];
+  const index = (Number(memory?.total) || strokeCount) % lines.length;
+  return lines[index];
 }
 
 function replyToAiBotPrompt(room, bot, rawText, options = {}) {
